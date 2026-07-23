@@ -1,0 +1,13 @@
+# Vídeos não usados no site (não referenciados em nenhum HTML deste repositório)
+DPJABA.mp4
+DPTHIAGO.mp4
+
+# Vercel
+.vercel
+
+# Claude Code (config local, não faz parte do site)
+.claude/
+
+# Sistema
+.DS_Store
+Thumbs.db
