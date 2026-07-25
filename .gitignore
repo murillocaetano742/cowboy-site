@@ -12,4 +12,9 @@ DPTHIAGO.mp4
 .DS_Store
 Thumbs.db
 
-.vercel
+# Originais pesados das imagens geradas (usamos as versões .jpg otimizadas)
+imagens/*.png
+!imagens/Cowboy_imagem_1.png
+!imagens/cowboy-bottle.jpg.png
+!imagens/10xMaisPotente.png
+imagens/WhatsApp*
