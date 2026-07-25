@@ -3,6 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ═══════════ RASTREAMENTO / PIXELS ═══════════
+       Substitua os placeholders pelos seus IDs:
+       META_PIXEL_ID  → ID do Meta Pixel (ex: 1234567890123456)
+       G-XXXXXXXXXX   → ID de métricas do GA4 (ou AW-XXXX do Google Ads) -->
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init','META_PIXEL_ID');
+    fbq('track','PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=META_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
+  <!-- /Meta Pixel -->
+
+  <!-- Google (GA4 / Ads) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('js',new Date());
+    gtag('config','G-XXXXXXXXXX');
+  </script>
+  <!-- /Google -->
+  <!-- ═══════════════════════════════════════════ -->
   <title>COWBOY Energia — Comprar Online | 1, 2 ou 4 Frascos · PIX, Boleto ou Cartão 12x</title>
   <meta name="description" content="Compre COWBOY Energia online. Suplemento masculino em gotas para disfunção erétil, ejaculação precoce e libido. Escolha 1, 2 ou 4 frascos. PIX, boleto ou cartão em até 12x. Garantia de 30 dias. Envio para todo o Brasil." />
   <meta name="robots" content="index, follow" />
@@ -641,6 +665,23 @@
       setTimeout(function(){ pop.classList.remove('on'); }, 5000);
     }
     setTimeout(function loop(){ show(); setTimeout(loop, 9000 + Math.random()*9000); }, 4000);
+  })();
+
+  // ── EVENTOS DE CONVERSÃO (Meta Pixel + Google) ──
+  (function(){
+    // ViewContent ao abrir a página de produto
+    if(window.fbq) fbq('track','ViewContent',{content_name:'COWBOY Energia',content_category:'Suplemento masculino',content_type:'product',currency:'BRL'});
+    if(window.gtag) gtag('event','view_item',{currency:'BRL',items:[{item_name:'COWBOY Energia'}]});
+    // InitiateCheckout / begin_checkout ao clicar em comprar (valor por oferta)
+    var preco={'211742450':89.90,'211742746':109.90,'211742749':219.92};
+    var nome={'211742450':'1 Frasco','211742746':'2 Frascos','211742749':'4 Frascos'};
+    document.querySelectorAll('a[href*="mycartpanda.com/checkout"]').forEach(function(a){
+      a.addEventListener('click',function(){
+        var m=a.href.match(/checkout\/(\d+):/); var id=m?m[1]:''; var val=preco[id];
+        if(window.fbq) fbq('track','InitiateCheckout',{value:val,currency:'BRL',content_ids:[id],content_name:nome[id]||'',content_type:'product',num_items:1});
+        if(window.gtag) gtag('event','begin_checkout',{currency:'BRL',value:val,items:[{item_id:id,item_name:nome[id]||'',price:val,quantity:1}]});
+      });
+    });
   })();
 </script>
 
