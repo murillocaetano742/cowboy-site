@@ -687,5 +687,24 @@
   })();
 </script>
 
+<!-- ═══ Proteção contra cópia / salvar imagem (deterrente — não impede print/devtools) ═══ -->
+<script>
+  (function(){
+    var css = 'img,video{-webkit-user-drag:none;-khtml-user-drag:none;-moz-user-drag:none;-o-user-drag:none;user-drag:none;-webkit-touch-callout:none}'
+      + 'body{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}';
+    var s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
+    var stop = function(e){ e.preventDefault(); };
+    document.addEventListener('contextmenu', stop, true);
+    document.addEventListener('dragstart', stop, true);
+    document.addEventListener('selectstart', stop, true);
+    document.addEventListener('copy', stop, true);
+    document.addEventListener('keydown', function(e){
+      var k = (e.key || '').toLowerCase();
+      if (e.key === 'F12') return stop(e);
+      if ((e.ctrlKey || e.metaKey) && (k === 'u' || k === 's' || k === 'p')) return stop(e);
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (k === 'i' || k === 'j' || k === 'c')) return stop(e);
+    }, true);
+  })();
+</script>
 </body>
 </html>
