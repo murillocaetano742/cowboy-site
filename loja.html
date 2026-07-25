@@ -85,7 +85,8 @@
 
     /* OFERTAS — 3 CAIXAS */
     .offers { display:flex; flex-direction:column; gap:12px; margin:16px 0; }
-    .offer { display:grid; grid-template-columns:1fr auto; gap:10px 16px; align-items:center; background:var(--dark3); border:2px solid rgba(201,148,58,0.25); border-radius:12px; padding:16px 18px; position:relative; transition:border-color .2s, transform .15s; }
+    .offer { display:grid; grid-template-columns:auto 1fr auto; gap:10px 14px; align-items:center; background:var(--dark3); border:2px solid rgba(201,148,58,0.25); border-radius:12px; padding:16px 18px; position:relative; transition:border-color .2s, transform .15s; }
+    .offer-img { width:58px; height:58px; object-fit:contain; background:#000; border-radius:8px; }
     .offer:hover { border-color:var(--gold); transform:translateY(-2px); }
     .offer.best { border-color:var(--gold); background:linear-gradient(180deg,rgba(201,148,58,0.10),var(--dark3) 60%); box-shadow:0 12px 40px rgba(201,148,58,0.18); }
     .offer-badge { position:absolute; top:-11px; left:16px; background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light)); color:#000; font-family:'Oswald',sans-serif; font-size:0.66rem; font-weight:700; letter-spacing:0.08em; padding:4px 12px; border-radius:20px; text-transform:uppercase; }
@@ -191,6 +192,11 @@
     .desc-promise p { font-size:1.05rem; color:var(--text); line-height:1.7; margin:0; }
     .desc-block h3 { font-size:1.3rem; color:var(--gold-light); margin:36px 0 12px; }
     .desc-block > p { color:var(--text-muted); line-height:1.75; margin-bottom:14px; }
+    .desc-img { display:block; width:100%; border-radius:14px; border:1px solid rgba(201,148,58,0.2); margin:18px 0; }
+    .desc-img.narrow { max-width:340px; margin-left:auto; margin-right:auto; }
+    .desc-img.mid { max-width:440px; margin-left:auto; margin-right:auto; }
+    .img-cap { text-align:center; font-size:0.78rem; color:var(--text-muted); margin:-6px 0 18px; }
+    .seal-img { width:112px; height:112px; object-fit:contain; border-radius:12px; flex-shrink:0; }
 
     /* WHY DROPS */
     .vs { display:grid; grid-template-columns:1fr 46px 1fr; gap:12px; align-items:stretch; margin:18px 0; }
@@ -265,12 +271,13 @@
       <div>
         <div class="gallery-main">
           <div class="gallery-tag">-40% HOJE</div>
-          <img id="galMain" src="imagens/Cowboy_imagem_1.png" alt="COWBOY Energia — frasco 30ml" />
+          <img id="galMain" src="imagens/kit-4-frascos.jpg" alt="COWBOY Energia — kit de frascos 30ml" />
         </div>
         <div class="gallery-thumbs">
-          <img class="active" src="imagens/Cowboy_imagem_1.png" alt="Frasco" onclick="swapGal(this)" />
-          <img src="imagens/cowboy-bottle.jpg.png" alt="Frasco COWBOY" onclick="swapGal(this)" />
-          <img src="imagens/10xMaisPotente.png" alt="10x mais potente" onclick="swapGal(this)" />
+          <img class="active" src="imagens/kit-4-frascos.jpg" alt="Kit 4 frascos" onclick="swapGal(this)" />
+          <img src="imagens/kit-1-frasco.jpg" alt="1 frasco premium" onclick="swapGal(this)" />
+          <img src="imagens/formula-ingredientes.jpg" alt="Fórmula e ingredientes" onclick="swapGal(this)" />
+          <img src="imagens/modo-de-uso.jpg" alt="Modo de uso" onclick="swapGal(this)" />
         </div>
       </div>
 
@@ -292,6 +299,7 @@
 
           <div class="offer best">
             <div class="offer-badge">★ Mais vendido</div>
+            <img class="offer-img" src="imagens/kit-4-frascos.jpg" alt="Kit 4 frascos COWBOY Energia" />
             <div class="offer-info">
               <div class="qtd">4 Frascos</div>
               <div class="dur">Protocolo completo · ~100 dias de uso</div>
@@ -306,6 +314,7 @@
           </div>
 
           <div class="offer">
+            <img class="offer-img" src="imagens/kit-2-frascos.jpg" alt="Kit 2 frascos COWBOY Energia" />
             <div class="offer-info">
               <div class="qtd">2 Frascos</div>
               <div class="dur">~50 dias de uso</div>
@@ -320,6 +329,7 @@
           </div>
 
           <div class="offer">
+            <img class="offer-img" src="imagens/kit-1-frasco.jpg" alt="1 frasco COWBOY Energia" />
             <div class="offer-info">
               <div class="qtd">1 Frasco</div>
               <div class="dur">~25 dias de uso · experimentar</div>
@@ -362,12 +372,14 @@
 <section class="band">
   <div class="container">
     <div class="guarantee">
-      <div class="seal">🛡️</div>
+      <img class="seal-img" src="imagens/selo-garantia.jpg" alt="Selo de garantia de 30 dias" />
       <div>
         <h3>Garantia de 30 Dias — Risco Zero</h3>
-        <p>Experimente o COWBOY Energia por 30 dias. Se você não sentir diferença, devolvemos 100% do seu dinheiro. Toda a segurança para você começar hoje sem medo.</p>
+        <p>Experimente o COWBOY Energia por 30 dias. Se você não sentir diferença, devolvemos 100% do seu dinheiro. Toda a segurança para você começar hoje sem medo. E fique tranquilo: <strong>a entrega chega discreta na sua casa</strong>, sem nada identificando o produto por fora.</p>
       </div>
     </div>
+    <img class="desc-img" src="imagens/entrega-discreta.jpg" alt="Entrega discreta na sua casa" style="max-width:640px; margin:22px auto 0;" />
+    <p class="img-cap">📦 Embalagem 100% discreta — ninguém precisa saber o que tem dentro.</p>
   </div>
 </section>
 
@@ -444,7 +456,11 @@
         <p><strong>Chega de depender de comprimido que dura 40 minutos, deixa o rosto vermelho e dá dor de cabeça.</strong> O COWBOY Energia não é um "tapa-buraco" da hora H — é um <strong>tratamento que ataca a causa</strong> da disfunção erétil, da ejaculação precoce e da queda de libido. Na maioria dos relatos, em poucas semanas os homens voltam a ter ereções mais firmes, muito mais controle na cama e uma disposição que não sentiam há anos. E o melhor: de forma natural, todo dia, sem depender de "tomar 1 hora antes".</p>
       </div>
 
+      <img class="desc-img narrow" src="imagens/homem-confiante.jpg" alt="Homem maduro confiante" />
+      <p class="img-cap">Milhares de homens 50+ já retomaram a confiança na cama.</p>
+
       <h3>💧 Por Que Em Gotas? (E Não Cápsula)</h3>
+      <img class="desc-img" src="imagens/gotejador-macro.jpg" alt="Gota de COWBOY Energia caindo do gotejador" />
       <p>Pensa na <strong>dipirona em gotas</strong>: ela age mais rápido e mais forte que o comprimido, certo? O motivo é simples — as gotas são absorvidas <strong>direto pela mucosa embaixo da língua</strong>, caindo quase que na hora na corrente sanguínea. A cápsula, não: ela precisa descer, ser digerida no estômago e no fígado, e nesse caminho <strong>boa parte do princípio ativo é destruída</strong> antes de fazer efeito.</p>
       <p>Com o COWBOY é a mesma lógica. Os 6 nutrientes chegam ao seu corpo <strong>de forma mais completa e mais rápida</strong> — por isso o resultado aparece antes.</p>
 
@@ -471,6 +487,7 @@
       </div>
 
       <h3>🕐 Como Usar — 24 Gotas Por Dia</h3>
+      <img class="desc-img" src="imagens/modo-de-uso.jpg" alt="Modo de uso: 12 gotas de manhã e 12 à noite" />
       <div class="usage">
         <div class="usage-step">
           <div class="big">🌅</div>
@@ -486,6 +503,7 @@
       <div class="usage-note">📌 Simples assim: 12 gotas de manhã + 12 à noite, todos os dias. Cada frasco de 30ml rende cerca de 25 dias de tratamento.</div>
 
       <h3>🧬 O Que Tem Dentro — 6 Nutrientes, Uma Só Missão</h3>
+      <img class="desc-img mid" src="imagens/formula-ingredientes.jpg" alt="Fórmula COWBOY Energia com feno-grego, zinco e ervas" />
       <div class="nut">
         <div class="nut-row"><div class="nn">01</div><div><h4>L-Arginina</h4><div class="role">Precursor do Óxido Nítrico</div><p>É o combustível da ereção. Vira óxido nítrico, relaxa e dilata os vasos do pênis e escancara o fluxo de sangue — a base física de uma ereção firme e que dura.</p></div></div>
         <div class="nut-row"><div class="nn">02</div><div><h4>Taurina</h4><div class="role">Controle e Proteção Vascular</div><p>Protege os tecidos eréteis do desgaste e melhora a condução nervosa — peça-chave para <strong>segurar mais na hora H</strong> e não terminar antes do tempo.</p></div></div>
