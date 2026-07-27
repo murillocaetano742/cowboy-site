@@ -9,10 +9,25 @@
        1006075098894986  → ID do Meta Pixel (ex: 1234567890123456)
        G-XXXXXXXXXX   → ID de métricas do GA4 (ou AW-XXXX do Google Ads) -->
 
+  <!-- Advanced Matching (external_id) + captura de fbclid → cookie _fbc (roda ANTES do pixel) -->
+  <script>
+    (function(){
+      try{
+        var eid = localStorage.getItem('cb_external_id');
+        if(!eid){ eid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('cb-' + Date.now() + '-' + Math.random().toString(16).slice(2)); localStorage.setItem('cb_external_id', eid); }
+        window.__cbAM = { external_id: eid };
+        var fbclid = new URLSearchParams(location.search).get('fbclid');
+        if(fbclid && !/(^|;\s*)_fbc=/.test(document.cookie)){
+          document.cookie = '_fbc=fb.1.' + Date.now() + '.' + fbclid + ';max-age=' + (90*24*60*60) + ';path=/;domain=.cowboyenergiamasculina.com.br';
+        }
+      }catch(e){ window.__cbAM = {}; }
+    })();
+  </script>
+
   <!-- Meta Pixel -->
   <script>
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init','1006075098894986');
+    fbq('init','1006075098894986', window.__cbAM || {});
     fbq('track','PageView');
   </script>
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1006075098894986&ev=PageView&noscript=1"/></noscript>
@@ -669,19 +684,39 @@
     setTimeout(function loop(){ show(); setTimeout(loop, 9000 + Math.random()*9000); }, 4000);
   })();
 
-  // ── EVENTOS DE CONVERSÃO (Meta Pixel + Google) ──
+  // ── RASTREAMENTO META (topo de funil é 100% desta página) ──
+  // ViewContent no load (1x) · AddToCart por kit · InitiateCheckout/AddPaymentInfo/Purchase são do checkout Cartpanda.
   (function(){
-    // ViewContent ao abrir a página de produto
-    if(window.fbq) fbq('track','ViewContent',{content_name:'COWBOY Energia',content_category:'Suplemento masculino',content_type:'product',currency:'BRL'});
-    if(window.gtag) gtag('event','view_item',{currency:'BRL',items:[{item_name:'COWBOY Energia'}]});
-    // InitiateCheckout / begin_checkout ao clicar em comprar (valor por oferta)
-    var preco={'211742450':89.90,'211742746':109.90,'211742749':219.92};
-    var nome={'211742450':'1 Frasco','211742746':'2 Frascos','211742749':'4 Frascos'};
+    function eventId(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('e-' + Date.now() + '-' + Math.random().toString(16).slice(2)); }
+
+    // 1) ViewContent — uma única vez por carregamento
+    if(!window.__cbViewContent){
+      window.__cbViewContent = true;
+      if(window.fbq) fbq('track','ViewContent',{
+        content_name:'Cowboy Energia 30ml', content_ids:['cowboy-30ml'], content_type:'product',
+        value:109.90, currency:'BRL'
+      },{ eventID: eventId() });
+      if(window.gtag) gtag('event','view_item',{ currency:'BRL', value:109.90, items:[{item_id:'cowboy-30ml', item_name:'Cowboy Energia 30ml'}] });
+    }
+
+    // 2) AddToCart por kit + passa event_id pra URL do checkout (dedup lado servidor)
+    var KIT = {
+      '211742450': { id:'cowboy-kit-1', v:89.90,  n:'1 Frasco' },
+      '211742746': { id:'cowboy-kit-2', v:109.90, n:'2 Frascos' },
+      '211742749': { id:'cowboy-kit-4', v:219.92, n:'4 Frascos' }
+    };
     document.querySelectorAll('a[href*="mycartpanda.com/checkout"]').forEach(function(a){
-      a.addEventListener('click',function(){
-        var m=a.href.match(/checkout\/(\d+):/); var id=m?m[1]:''; var val=preco[id];
-        if(window.fbq) fbq('track','InitiateCheckout',{value:val,currency:'BRL',content_ids:[id],content_name:nome[id]||'',content_type:'product',num_items:1});
-        if(window.gtag) gtag('event','begin_checkout',{currency:'BRL',value:val,items:[{item_id:id,item_name:nome[id]||'',price:val,quantity:1}]});
+      a.addEventListener('click', function(){
+        var m = a.href.match(/checkout\/(\d+):/); var k = m ? KIT[m[1]] : null; if(!k) return;
+        var eid = eventId();
+        if(window.fbq) fbq('track','AddToCart',{
+          content_name:k.n, content_ids:[k.id], content_type:'product', value:k.v, currency:'BRL'
+        },{ eventID: eid });
+        if(window.gtag) gtag('event','add_to_cart',{ currency:'BRL', value:k.v, items:[{item_id:k.id, item_name:k.n, price:k.v, quantity:1}] });
+        // anexa o event_id à URL do checkout (base guardada 1x pra não duplicar em cliques repetidos)
+        var base = a.getAttribute('data-co') || a.href.split(/[?#]/)[0];
+        a.setAttribute('data-co', base);
+        a.href = base + (base.indexOf('?') > -1 ? '&' : '?') + 'event_id=' + encodeURIComponent(eid);
       });
     });
   })();
