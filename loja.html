@@ -42,6 +42,16 @@
   </script>
   <!-- /Google -->
   <!-- ═══════════════════════════════════════════ -->
+
+  <!-- ►►► URLs DO CHECKOUT (Payt) — ÚNICO lugar pra trocar os links ◄◄◄ -->
+  <script>
+    window.CHECKOUT_URLS = {
+      '1': 'https://payt.site/4pC2amx',   /* 1 frasco  · R$ 89,90  */
+      '2': 'https://payt.site/oMC8akp',   /* 2 frascos · R$ 109,90 */
+      '4': 'https://payt.site/8oClv74'    /* 4 frascos · R$ 219,92 */
+    };
+  </script>
+
   <title>COWBOY Energia — Comprar Online | 1, 2 ou 4 Frascos · PIX, Boleto ou Cartão 12x</title>
   <meta name="description" content="Compre COWBOY Energia online. Suplemento masculino em gotas para disfunção erétil, ejaculação precoce e libido. Escolha 1, 2 ou 4 frascos. PIX, boleto ou cartão em até 12x. Garantia de 30 dias. Envio para todo o Brasil." />
   <meta name="robots" content="index, follow" />
@@ -348,7 +358,7 @@
               <div class="now">R$ 219,92</div>
               <div class="un">+ frete R$ 25</div>
             </div>
-            <div class="offer-cta"><a class="btn" href="https://cowboy-energia.mycartpanda.com/checkout/211742749:1">Comprar 4 Frascos →</a></div>
+            <div class="offer-cta"><a class="btn" href="#" data-kit="4">Comprar 4 Frascos →</a></div>
           </div>
 
           <div class="offer">
@@ -363,7 +373,7 @@
               <div class="now">R$ 109,90</div>
               <div class="un">+ frete R$ 25</div>
             </div>
-            <div class="offer-cta"><a class="btn" href="https://cowboy-energia.mycartpanda.com/checkout/211742746:1">Comprar 2 Frascos →</a></div>
+            <div class="offer-cta"><a class="btn" href="#" data-kit="2">Comprar 2 Frascos →</a></div>
           </div>
 
           <div class="offer">
@@ -377,7 +387,7 @@
               <div class="now">R$ 89,90</div>
               <div class="un">+ frete R$ 25</div>
             </div>
-            <div class="offer-cta"><a class="btn" href="https://cowboy-energia.mycartpanda.com/checkout/211742450:1">Comprar 1 Frasco →</a></div>
+            <div class="offer-cta"><a class="btn" href="#" data-kit="1">Comprar 1 Frasco →</a></div>
           </div>
 
         </div>
@@ -601,7 +611,7 @@
 <!-- STICKY BUY (mobile) -->
 <div class="sticky" id="sticky">
   <div class="info"><b>4 Frascos · R$ 219,92</b><small>Mais vendido · frete R$ 25</small></div>
-  <a class="btn" href="https://cowboy-energia.mycartpanda.com/checkout/211742749:1">Comprar →</a>
+  <a class="btn" href="#" data-kit="4">Comprar →</a>
 </div>
 
 <!-- POPUP VENDAS AO VIVO -->
@@ -699,23 +709,26 @@
       if(window.gtag) gtag('event','view_item',{ currency:'BRL', value:109.90, items:[{item_id:'cowboy-30ml', item_name:'Cowboy Energia 30ml'}] });
     }
 
-    // 2) AddToCart por kit + passa event_id pra URL do checkout (dedup lado servidor)
+    // 2) AddToCart por kit + destino Payt (constante CHECKOUT_URLS no topo) + event_id na URL
     var KIT = {
-      '211742450': { id:'cowboy-kit-1', v:89.90,  n:'1 Frasco' },
-      '211742746': { id:'cowboy-kit-2', v:109.90, n:'2 Frascos' },
-      '211742749': { id:'cowboy-kit-4', v:219.92, n:'4 Frascos' }
+      '1': { id:'cowboy-kit-1', v:89.90,  n:'1 Frasco' },
+      '2': { id:'cowboy-kit-2', v:109.90, n:'2 Frascos' },
+      '4': { id:'cowboy-kit-4', v:219.92, n:'4 Frascos' }
     };
-    document.querySelectorAll('a[href*="mycartpanda.com/checkout"]').forEach(function(a){
+    var URLS = window.CHECKOUT_URLS || {};
+    document.querySelectorAll('a[data-kit]').forEach(function(a){
+      var kitKey = a.getAttribute('data-kit');
+      var k = KIT[kitKey]; var base = URLS[kitKey];
+      if(!k || !base) return;
+      a.setAttribute('data-co', base);   // base do checkout, sem event_id
+      a.href = base;                     // destino já definido no carregamento
       a.addEventListener('click', function(){
-        var m = a.href.match(/checkout\/(\d+):/); var k = m ? KIT[m[1]] : null; if(!k) return;
         var eid = eventId();
         if(window.fbq) fbq('track','AddToCart',{
           content_name:k.n, content_ids:[k.id], content_type:'product', value:k.v, currency:'BRL'
         },{ eventID: eid });
         if(window.gtag) gtag('event','add_to_cart',{ currency:'BRL', value:k.v, items:[{item_id:k.id, item_name:k.n, price:k.v, quantity:1}] });
-        // anexa o event_id à URL do checkout (base guardada 1x pra não duplicar em cliques repetidos)
-        var base = a.getAttribute('data-co') || a.href.split(/[?#]/)[0];
-        a.setAttribute('data-co', base);
+        // mantém o event_id anexado na URL do checkout (fresco a cada clique)
         a.href = base + (base.indexOf('?') > -1 ? '&' : '?') + 'event_id=' + encodeURIComponent(eid);
       });
     });
