@@ -1,10 +1,10 @@
 ﻿# COWBOY Nova — mapa e copy de conversão
 
-08/09/2026 · REBUILD-015 · Direção de implementação delegada pelo proprietário. Mantém preto/dourado, Oswald e composição móvel existente; não é nova identidade. Substitui o rascunho `docs/produto/copy-conversao-nova.md`, que não é fonte de garantias, eficácia ou políticas comerciais.
+08/09/2026 · REBUILD-015 · Alvo isolado: `cowboy-conversao.html`. Direção de implementação delegada pelo proprietário. Mantém preto/dourado, Oswald e composição móvel existente; não é nova identidade. Substitui o rascunho `docs/produto/copy-conversao-nova.md`, que não é fonte de garantias, eficácia ou políticas comerciais.
 
 ## Estrutura e contratos
 
-Hero → dois relatos reais → intimidade e cumplicidade → produto/fórmula → compromisso e valor verificável → FAQ → kits, CEP e pagamento → rodapé. Navegação livre: Relatos / O produto / Sua compra. Compra só no último bloco, disponível sem exigir capítulos vistos, tempo de tela ou reprodução dos vídeos. Retirar notas sobre a mecânica da página, progresso obrigatório, selo de 30 dias, comparações depreciativas, contagem/estoque e métricas de recompra inferidas. Cada seção abaixo tem texto final; os comentários de direção não entram na UI.
+Hero → dois relatos reais → intimidade e cumplicidade → produto/fórmula → compromisso e valor verificável → FAQ → kits, CEP e pagamento → rodapé. Navegação livre: Relatos / O produto / Dúvidas. Nenhum atalho de compra no menu. Compra só no último bloco, disponível sem exigir capítulos vistos, tempo de tela ou reprodução dos vídeos. Retirar notas sobre a mecânica da página, progresso obrigatório, selo de 30 dias, comparações depreciativas, contagem/estoque e métricas de recompra inferidas. Cada seção abaixo tem texto final; os comentários de direção não entram na UI.
 
 ## 1. Hero
 
@@ -13,6 +13,8 @@ Hero → dois relatos reais → intimidade e cumplicidade → produto/fórmula �
 **H1:** Quando a intimidade preocupa, cuidar de você vem primeiro.
 
 **Apoio:** Conheça COWBOY Energia: suplemento alimentar em gotas para o homem que valoriza bem-estar e os momentos a dois. Ouça quem já experimentou e escolha com informação.
+
+**Qualificação legível no hero:** COWBOY não é tratamento para disfunção erétil. Se essa é sua preocupação, procure avaliação médica.
 
 **Linha curta:** 6 componentes · Frasco de 30 mL com conta-gotas
 
@@ -42,9 +44,9 @@ Arquivos `videos/clientes/depoimento-1.mp4` e `depoimento-2.mp4`; manter áudios
 
 **Texto:** Querer viver bons momentos a dois faz parte da vida. Quando esse assunto traz preocupação, você merece atenção, conversa e cuidado — sem ter de provar nada a ninguém.
 
-**Qualificação próxima, legível:** Se a preocupação é disfunção erétil, procure avaliação médica. COWBOY é um suplemento alimentar, não um tratamento para essa condição.
+A qualificação clínica já está próxima à abertura e é respondida na FAQ. Não repetir um bloco de advertências aqui.
 
-Imagem editorial nova: `imagens/nova/casal-cumplicidade.webp` (caminho final a confirmar após a geração). **Alt:** Imagem ilustrativa de um casal adulto maduro, vestido, compartilhando um momento de cumplicidade em um ambiente de luz quente. **Legenda:** Imagem ilustrativa, gerada por IA.
+Imagem editorial nova: `imagens/nova/casal-cumplicidade.webp` (1024 × 1536 px; 84.100 bytes; original PNG preservado ao lado). **Alt:** Imagem ilustrativa de um casal adulto maduro, vestido, compartilhando um momento de cumplicidade em um ambiente de luz quente. **Legenda:** Imagem ilustrativa, gerada por IA.
 
 Manter a fotografia e esse argumento num único bloco curto. Não inferir que a cena representa uso do suplemento, cliente, cura ou resultado esperado. Não usar antes/depois.
 
@@ -160,4 +162,7 @@ A função da B6 é específica do nutriente, sem extrapolação para efeito sex
 
 Limite clínico/editorial confirmado pela coordenação: https://www.gov.br/anvisa/pt-br/assuntos/alimentos/suplementos-alimentares/cuidado-com-a-propaganda-enganosa e https://www.niddk.nih.gov/health-information/urologic-diseases/erectile-dysfunction/treatment . A página não oferece tratamento ou cura; a preocupação com intimidade é contexto humano, não indicação terapêutica.
 
-CRO: prioridade única no hero, prova real cedo, cada bloco avança um argumento e responde uma objeção, oferta comparável. São hipóteses de melhoria de comunicação, não ganho de conversão já medido. Skills copywriting/cro de `coreyhaines31/marketingskills` identificadas por Sol; leitura local e referência final serão registradas quando os arquivos revisados estiverem disponíveis.
+CRO: prioridade única no hero, prova real cedo, cada bloco avança um argumento e responde uma objeção, oferta comparável. São hipóteses de melhoria de comunicação, não ganho de conversão já medido. Skills lidas e aplicadas: `skills/marketingskills-copywriting/SKILL.md` v2.0.2 e `skills/marketingskills-cro/SKILL.md` v2.0.0, upstream `coreyhaines31/marketingskills`, commit `5b2c0007766c6a1cf1d53fd8fc73e979e0821022`, MIT. Não foram transplantadas estatísticas, recomendações de CTA de compra fora do bloco final ou garantias dos exemplos. O usuário delegou a decisão; não é necessário abrir opções alternativas ou nova rodada de perguntas para esta entrega.
+
+
+

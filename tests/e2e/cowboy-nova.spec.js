@@ -45,6 +45,13 @@ test.describe('COWBOY Energia — página nova', () => {
       await expect(video).not.toHaveAttribute('autoplay', /.*/);
     }
     await expect(page.locator('#relatos .badge-video')).toContainText(/segundo frasco/i);
+    await expect(page.locator('#relatos .photo-card')).toHaveCount(6);
+    const order = await page.locator('#relatos .relatos-track > *').evaluateAll((els) => els.map((el) => el.classList.contains('video-card') ? 'v' : 'p').join(''));
+    expect(order).toBe('vvpppppp');
+    await page.locator('#relatos').scrollIntoViewIfNeeded();
+    await page.locator('[data-gallery-next]').click();
+    await page.waitForTimeout(700);
+    await expect(page.locator('[data-gallery-dots] button').nth(1)).toHaveAttribute('aria-current', 'true');
   });
 
   test('mobile: kit selecionado atualiza painel, recapitulação aparece, pill abre e fecha', async ({ page }) => {

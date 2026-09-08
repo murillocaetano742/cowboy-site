@@ -29,6 +29,8 @@
   <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3"/><path d="M7 15h10"/></symbol>
   <symbol id="i-glass" viewBox="0 0 24 24"><path d="M9 3h6v3l1.5 2v11a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2V8L9 6z"/></symbol>
   <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
@@ -90,20 +92,33 @@
           <span class="eyebrow">Clientes reais, com o frasco na mão</span>
           <h2 id="t-relatos" class="h2">Eles pararam <span class="grad">de adiar</span></h2>
           <span class="rule" aria-hidden="true"></span>
-          <p class="lead">Dois clientes gravaram o próprio vídeo. Dê o play e ouça deles.</p>
+          <p class="lead">Dois clientes gravaram o próprio vídeo e outros mandaram a foto com o frasco. Deslize para o lado.</p>
         </div>
-        <div class="videos">
-          <article class="video-card">
-            <video controls playsinline preload="none" poster="videos/clientes/depoimento-1.jpg" aria-label="Vídeo de relato de cliente 1"><source src="videos/clientes/depoimento-1.mp4" type="video/mp4"><track kind="subtitles" srclang="pt-BR" label="Português (legendas automáticas)" src="videos/clientes/depoimento-1.vtt">Seu navegador não suporta a reprodução de vídeo.</video>
-            <figcaption class="video-quote"><blockquote>“Tem duas semanas que eu tô tomando. Tô top demais agora.”</blockquote><cite>Cliente, no vídeo</cite></figcaption>
-          </article>
-          <article class="video-card">
-            <span class="badge badge-video"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg>No segundo frasco</span>
-            <video controls playsinline preload="none" poster="videos/clientes/depoimento-2.jpg" aria-label="Vídeo de relato de cliente 2"><source src="videos/clientes/depoimento-2.mp4" type="video/mp4"><track kind="subtitles" srclang="pt-BR" label="Português (legendas automáticas)" src="videos/clientes/depoimento-2.vtt">Seu navegador não suporta a reprodução de vídeo.</video>
-            <figcaption class="video-quote"><blockquote>“Segundo frasco já que eu estou indo.”</blockquote><cite>Cliente que voltou para o segundo frasco</cite></figcaption>
-          </article>
+        <div class="gallery" data-gallery>
+          <div class="track relatos-track" tabindex="0" aria-label="Relatos de clientes, deslize para ver mais">
+            <article class="slide video-card">
+              <video controls playsinline preload="none" poster="videos/clientes/depoimento-1.jpg" aria-label="Vídeo de relato de cliente 1"><source src="videos/clientes/depoimento-1.mp4" type="video/mp4"><track kind="subtitles" srclang="pt-BR" label="Português (legendas automáticas)" src="videos/clientes/depoimento-1.vtt">Seu navegador não suporta a reprodução de vídeo.</video>
+              <figcaption class="video-quote"><blockquote>“Tem duas semanas que eu tô tomando. Tô top demais agora.”</blockquote><cite>Cliente, no vídeo</cite></figcaption>
+            </article>
+            <article class="slide video-card">
+              <span class="badge badge-video"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg>No segundo frasco</span>
+              <video controls playsinline preload="none" poster="videos/clientes/depoimento-2.jpg" aria-label="Vídeo de relato de cliente 2"><source src="videos/clientes/depoimento-2.mp4" type="video/mp4"><track kind="subtitles" srclang="pt-BR" label="Português (legendas automáticas)" src="videos/clientes/depoimento-2.vtt">Seu navegador não suporta a reprodução de vídeo.</video>
+              <figcaption class="video-quote"><blockquote>“Segundo frasco já que eu estou indo.”</blockquote><cite>Cliente que voltou para o segundo frasco</cite></figcaption>
+            </article>
+            <figure class="slide photo-card"><img src="imagens/clientes/cliente-04.webp" width="1080" height="786" loading="lazy" alt="Casal sorrindo em uma mesa ao ar livre à noite, cada um segurando um frasco COWBOY Energia"><figcaption><b>Casal cliente</b><span>Cada um com o seu frasco, no jantar</span></figcaption></figure>
+            <figure class="slide photo-card"><img src="imagens/clientes/cliente-06.webp" width="810" height="1080" loading="lazy" alt="Casal sorrindo dentro de um avião, a mulher segurando um frasco COWBOY Energia"><figcaption><b>Casal cliente</b><span>A bordo, com o frasco na mala de mão</span></figcaption></figure>
+            <figure class="slide photo-card"><img src="imagens/clientes/cliente-05.webp" width="810" height="1080" loading="lazy" alt="Homem de camisa clara sorrindo em uma praça à noite, segurando um frasco COWBOY Energia"><figcaption><b>Cliente</b><span>Fim de noite na praça</span></figcaption></figure>
+            <figure class="slide photo-card"><img src="imagens/clientes/cliente-02.webp" width="810" height="1080" loading="lazy" alt="Homem de óculos deitado na cama, segurando um frasco COWBOY Energia"><figcaption><b>Cliente</b><span>Antes de dormir, o frasco ao lado da cama</span></figcaption></figure>
+            <figure class="slide photo-card"><img src="imagens/clientes/cliente-01.webp" width="810" height="1080" loading="lazy" alt="Homem de boné e óculos escuros no sofá, segurando um frasco COWBOY Energia"><figcaption><b>Cliente</b><span>Sábado em casa</span></figcaption></figure>
+            <figure class="slide photo-card"><img src="imagens/clientes/cliente-03.webp" width="810" height="1080" loading="lazy" alt="Homem de gorro no sofá, segurando um frasco COWBOY Energia"><figcaption><b>Cliente</b><span>No sofá, frasco na mão</span></figcaption></figure>
+          </div>
+          <div class="relatos-nav">
+            <button class="arrow" type="button" data-gallery-prev aria-label="Relato anterior"><svg class="icon" aria-hidden="true"><use href="#i-chev-l"/></svg></button>
+            <div class="dots" data-gallery-dots role="tablist" aria-label="Relatos"></div>
+            <button class="arrow" type="button" data-gallery-next aria-label="Próximo relato"><svg class="icon" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
+          </div>
         </div>
-        <p class="muted fine-center">Vídeos enviados pelos próprios clientes. Relatos individuais; cada experiência é individual e não representa promessa de resultado.</p>
+        <p class="muted fine-center">Vídeos e fotos enviados pelos próprios clientes. Relatos individuais; cada experiência é individual e não representa promessa de resultado.</p>
       </div>
     </section>
 
@@ -127,7 +142,7 @@
 
     <section class="section" id="virada" data-chapter="virada" data-tone="deep" aria-labelledby="t-virada">
       <div class="wrap two">
-        <figure class="ship-img virada-img"><img src="imagens/homem-confiante.jpg" width="1122" height="1402" loading="lazy" alt="Homem maduro sorrindo, sentado em uma poltrona de couro, em ambiente escuro com luz quente"><figcaption>Imagem ilustrativa</figcaption></figure>
+        <figure class="ship-img virada-img"><img src="imagens/nova/casal-cumplicidade.webp" width="1024" height="1536" loading="lazy" alt="Casal maduro sentado no sofá, sorrindo um para o outro, com as mãos juntas"><figcaption>Imagem ilustrativa</figcaption></figure>
         <div>
           <div class="section-head" data-align="left">
             <span class="eyebrow">A virada</span>

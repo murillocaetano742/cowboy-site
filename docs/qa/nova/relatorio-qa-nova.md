@@ -8,14 +8,14 @@ Data: 08/09/2026. Servidor local `PORT=4180 npm run dev`, rota `http://127.0.0.1
 | --- | --- | --- |
 | Sintaxe JS | `npm run lint` | 28 arquivos, ok |
 | Testes unitários/QA | `npm test` | 22/22 |
-| Build por allowlist | `node scripts/check-build.js` | ok, 56 arquivos em `dist/` (inclui as páginas do Codex) |
+| Build por allowlist | `node scripts/check-build.js` | ok, 68 arquivos em `dist/` (inclui as páginas do Codex) |
 
 ## E2E real no navegador, mobile primeiro (Playwright 1.63 + Chromium, 390 × 844, DPR 2, toque)
 
 `npm run test:e2e` (`tests/e2e/cowboy-nova.spec.js`): **6/6**.
 
 1. Ordem de conversão verificada no HTML (relatos antes da agitação, garantia antes da oferta); nenhum `api/checkout` nem botão de compra antes da seção de kits; um único botão de compra; sem "cura", "resolve de uma vez", "resultado garantido", "22.000", estrelas, "avaliações", "estoque baixo", "24 gotas" ou "aprovado pela Anvisa" (a negação "não promete cura" é permitida); largura de rolagem = 390 px; sem erros de console.
-2. Vídeos no topo com `controls`, sem autoplay, com o selo "No segundo frasco".
+2. Relatos em rolagem lateral logo após o gancho: 2 vídeos com `controls` e sem autoplay primeiro (ordem verificada "vvpppppp"), depois 6 fotos reais de clientes enviadas pelo proprietário (`imagens/clientes/`, redimensionadas a 1080 px, sem metadados EXIF, legendas por perfil e sem nomes inventados); pontos e setas navegam.
 3. Trocar o kit atualiza o painel; recapitulação dos capítulos aparece; pill de capítulos abre a folha e Esc fecha; formulário GET para `/api/checkout` preservado.
 4. axe-core (WCAG 2.1 A/AA): 0 violações.
 5. Captura mobile completa.

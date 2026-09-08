@@ -5,11 +5,13 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT = path.join(ROOT, 'dist');
-const PAGES = ['index.html', 'loja.html', 'cowboy-v3.html', 'cowboy-nova.html', 'cowboy-mobile-preview.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
+const PAGES = ['index.html', 'loja.html', 'cowboy-v3.html', 'cowboy-nova.html', 'cowboy-conversao.html', 'cowboy-mobile-preview.html', 'cowboy-conversao-mobile.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
 const ASSETS = [
   // Página nova (cowboy-nova.html): estilos, scripts, fontes auto-hospedadas e imagens próprias.
   'assets/css/cowboy-nova.css',
   'assets/js/cowboy-nova.js',
+  'assets/css/cowboy-conversao.css',
+  'assets/js/cowboy-conversao.js',
   'assets/fonts/oswald-latin-wght-normal.woff2',
   'assets/fonts/manrope-latin-wght-normal.woff2',
   'assets/fonts/LICENSES.txt',
@@ -20,7 +22,14 @@ const ASSETS = [
   'imagens/kit-4-frascos.jpg',
   'imagens/kit-1-frasco.jpg',
   'imagens/kit-2-frascos.jpg',
+  'imagens/nova/casal-cumplicidade.webp',
   'imagens/homem-confiante.jpg',
+  'imagens/clientes/cliente-01.webp',
+  'imagens/clientes/cliente-02.webp',
+  'imagens/clientes/cliente-03.webp',
+  'imagens/clientes/cliente-04.webp',
+  'imagens/clientes/cliente-05.webp',
+  'imagens/clientes/cliente-06.webp',
   'assets/css/cowboy.css',
   'assets/css/cowboy-v3.css',
   'assets/js/cowboy-store.js',
