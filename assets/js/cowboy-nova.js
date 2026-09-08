@@ -152,6 +152,23 @@
     paint();
   }
 
+  // Kits: hide options whose checkout is not configured yet (keeps at least the default kit visible).
+  fetch('/api/config', { headers: { Accept: 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (config) {
+    if (!config || !Array.isArray(config.variants)) return;
+    var available = {};
+    config.variants.forEach(function (v) { available[v.quantity] = Boolean(v.checkoutAvailable); });
+    var any = Object.keys(available).some(function (k) { return available[k]; });
+    if (!any) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.kit'), function (kit) {
+      var input = kit.querySelector('input[name="quantity"]');
+      if (input && !available[Number(input.value)]) {
+        if (input.checked) { var fallback = document.querySelector('input[name="quantity"][value="2"]'); if (fallback) { fallback.checked = true; fallback.dispatchEvent(new Event('change')); } }
+        kit.setAttribute('data-unavailable', '');
+        if (!kit.querySelector('.soon')) { var soon = document.createElement('span'); soon.className = 'soon'; soon.textContent = 'Disponível em breve'; (kit.querySelector('.kit-body') || kit).appendChild(soon); }
+      }
+    });
+  }).catch(function () {});
+
   // One authored moment: hero product settles into place on load.
   var heroArt = document.querySelector('.hero-art img');
   if (heroArt && !reduceMotion && 'animate' in heroArt) {

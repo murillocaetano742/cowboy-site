@@ -58,6 +58,7 @@ test.describe('COWBOY Energia — página nova', () => {
     await page.goto(URL, { waitUntil: 'networkidle' });
     await page.locator('#kit').scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
+    await expect(page.locator('.kit')).toHaveCount(4);
     await page.getByLabel(/4 frascos/).check();
     await expect(page.locator('[data-selected-kit]')).toHaveText('4 frascos selecionados');
     await expect(page.locator('[data-recap]')).toBeVisible();
@@ -67,7 +68,7 @@ test.describe('COWBOY Energia — página nova', () => {
     await page.keyboard.press('Escape');
     await expect(page.locator('[data-sheet]')).toBeHidden();
     const form = page.locator('[data-checkout-form]');
-    await expect(form).toHaveAttribute('action', '/api/checkout');
+    await expect(form).toHaveAttribute('action', /\/api\/checkout/); // a UTMify pode acrescentar parâmetros ao action
     await expect(form).toHaveAttribute('method', /get/i);
   });
 

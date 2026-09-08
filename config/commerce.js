@@ -20,11 +20,12 @@ const OFFER = Object.freeze({
 
 // Keep the initial page focused while allowing the rule “2+ at R$42,38 each”
 // to be honored if a future Cartpanda kit for 3 is explicitly configured.
-const DISPLAY_VARIANT_QUANTITIES = Object.freeze([1, 2, 4]);
+const DISPLAY_VARIANT_QUANTITIES = Object.freeze([1, 2, 3, 4]);
 
 const CARTPANDA_PUBLIC_CHECKOUT_URLS = Object.freeze({
   1: 'https://cowboy-energia.mycartpanda.com/checkout/211742450:1',
   2: 'https://cowboy-energia.mycartpanda.com/checkout/211742746:1',
+  3: 'https://cowboy-energia.mycartpanda.com/checkout/212751381:1',
   4: 'https://cowboy-energia.mycartpanda.com/checkout/211742749:1',
 });
 

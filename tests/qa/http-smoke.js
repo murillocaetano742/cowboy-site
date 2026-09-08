@@ -31,7 +31,7 @@ async function run() {
       assert.equal(publicConfig.shippingAvailable, false, 'Snapshot solicitado sem fornecedor configurado');
       assert.ok(publicConfig.variants.every(variant => !variant.checkoutAvailable));
     }
-    assert.deepEqual(publicConfig.variants.map(variant => variant.totalPriceCents), [5476, 8476, 16952]);
+    assert.deepEqual(publicConfig.variants.map(variant => variant.totalPriceCents), [5476, 8476, 12714, 16952]);
   } }));
   results.push(await check('/api/frete', 400, { method: 'POST', body: { postalCode: 'texto01001000', quantity: 2 }, checkBody: text => assert.equal(JSON.parse(text).error, 'invalid_postal_code') }));
   if (!publicConfig.shippingAvailable) results.push(await check('/api/frete', 503, { method: 'POST', body: { postalCode: '01001-000', quantity: 2 }, checkBody: text => assert.equal(JSON.parse(text).error, 'shipping_unavailable') }));
