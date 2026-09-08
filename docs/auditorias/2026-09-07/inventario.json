@@ -1,0 +1,562 @@
+{
+  "date": "2026-09-07",
+  "scope": "Arquivos locais; não são medições de rede nem métricas reais de conversão.",
+  "pages": [
+    {
+      "file": "index.html",
+      "bytes": 78842,
+      "body_word_count_approx": 2408,
+      "elements": {
+        "section": 13,
+        "h1": 1,
+        "h2": 10,
+        "img": 3,
+        "video": 0,
+        "script": 4
+      },
+      "local_asset_references": [
+        {
+          "reference": "imagens/Cowboy_imagem_1.png",
+          "line": 972,
+          "exists": true,
+          "bytes": 697733
+        },
+        {
+          "reference": "imagens/cowboy-bottle.jpg.png",
+          "line": 1119,
+          "exists": true,
+          "bytes": 1735648
+        },
+        {
+          "reference": "imagens/10xMaisPotente.png",
+          "line": 1409,
+          "exists": true,
+          "bytes": 7506968
+        }
+      ],
+      "unique_image_bytes": 9940349,
+      "links": [
+        {
+          "href": "#cta",
+          "line": 952
+        },
+        {
+          "href": "#ingredients",
+          "line": 953
+        },
+        {
+          "href": "#whatsapp",
+          "line": 1568
+        },
+        {
+          "href": "https://wa.me/5511970842160?text=Olá!%20Vim%20pelo%20site%20do%20COWBOY%20Energia%20e%20gostaria%20de%20saber%20mais%20sobre%20o%20protocolo%20de%20tratamento.",
+          "line": 1610
+        },
+        {
+          "href": "#",
+          "line": 1759
+        },
+        {
+          "href": "#",
+          "line": 1760
+        },
+        {
+          "href": "#",
+          "line": 1761
+        },
+        {
+          "href": "#",
+          "line": 1762
+        },
+        {
+          "href": "#whatsapp",
+          "line": 1773
+        }
+      ],
+      "empty_anchor_lines": [
+        1759,
+        1760,
+        1761,
+        1762
+      ],
+      "missing_fragment_links": [],
+      "lazy_image_count": 0,
+      "images_with_explicit_dimensions": 0,
+      "has_meta_pixel_source": false,
+      "has_ga4_placeholder": false,
+      "script_syntax": [
+        {
+          "script": 1,
+          "kind": "json_ld",
+          "valid": true
+        },
+        {
+          "script": 2,
+          "kind": "json_ld",
+          "valid": true
+        },
+        {
+          "script": 3,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        },
+        {
+          "script": 4,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "file": "loja.html",
+      "bytes": 48739,
+      "body_word_count_approx": 1311,
+      "elements": {
+        "section": 7,
+        "h1": 1,
+        "h2": 5,
+        "img": 14,
+        "video": 2,
+        "script": 8
+      },
+      "local_asset_references": [
+        {
+          "reference": "imagens/kit-4-frascos.jpg",
+          "line": 323,
+          "exists": true,
+          "bytes": 261839
+        },
+        {
+          "reference": "imagens/kit-4-frascos.jpg",
+          "line": 326,
+          "exists": true,
+          "bytes": 261839
+        },
+        {
+          "reference": "imagens/kit-2-frascos.jpg",
+          "line": 327,
+          "exists": true,
+          "bytes": 203224
+        },
+        {
+          "reference": "imagens/kit-1-frasco.jpg",
+          "line": 328,
+          "exists": true,
+          "bytes": 157046
+        },
+        {
+          "reference": "imagens/kit-4-frascos.jpg",
+          "line": 350,
+          "exists": true,
+          "bytes": 261839
+        },
+        {
+          "reference": "imagens/kit-2-frascos.jpg",
+          "line": 365,
+          "exists": true,
+          "bytes": 203224
+        },
+        {
+          "reference": "imagens/kit-1-frasco.jpg",
+          "line": 380,
+          "exists": true,
+          "bytes": 157046
+        },
+        {
+          "reference": "imagens/selo-garantia.jpg",
+          "line": 423,
+          "exists": true,
+          "bytes": 277958
+        },
+        {
+          "reference": "imagens/entrega-discreta.jpg",
+          "line": 429,
+          "exists": true,
+          "bytes": 134937
+        },
+        {
+          "reference": "videos/depoimento-1.jpg",
+          "line": 444,
+          "exists": true,
+          "bytes": 83075
+        },
+        {
+          "reference": "videos/depoimento-1.mp4",
+          "line": 445,
+          "exists": true,
+          "bytes": 1145423
+        },
+        {
+          "reference": "videos/depoimento-2.jpg",
+          "line": 450,
+          "exists": true,
+          "bytes": 91184
+        },
+        {
+          "reference": "videos/depoimento-2.mp4",
+          "line": 451,
+          "exists": true,
+          "bytes": 1511589
+        },
+        {
+          "reference": "imagens/homem-confiante.jpg",
+          "line": 507,
+          "exists": true,
+          "bytes": 117843
+        },
+        {
+          "reference": "imagens/gotejador-macro.jpg",
+          "line": 511,
+          "exists": true,
+          "bytes": 91219
+        },
+        {
+          "reference": "imagens/modo-de-uso.jpg",
+          "line": 538,
+          "exists": true,
+          "bytes": 182927
+        },
+        {
+          "reference": "imagens/formula-ingredientes.jpg",
+          "line": 554,
+          "exists": true,
+          "bytes": 286426
+        }
+      ],
+      "unique_image_bytes": 1887678,
+      "links": [
+        {
+          "href": "#",
+          "line": 361
+        },
+        {
+          "href": "#",
+          "line": 376
+        },
+        {
+          "href": "#",
+          "line": 390
+        },
+        {
+          "href": "#oferta",
+          "line": 573
+        },
+        {
+          "href": "/",
+          "line": 601
+        },
+        {
+          "href": "#oferta",
+          "line": 602
+        },
+        {
+          "href": "/privacidade",
+          "line": 603
+        },
+        {
+          "href": "/termos",
+          "line": 604
+        },
+        {
+          "href": "https://wa.me/5511970842160",
+          "line": 605
+        },
+        {
+          "href": "#",
+          "line": 614
+        }
+      ],
+      "empty_anchor_lines": [
+        361,
+        376,
+        390,
+        614
+      ],
+      "missing_fragment_links": [],
+      "lazy_image_count": 0,
+      "images_with_explicit_dimensions": 1,
+      "has_meta_pixel_source": true,
+      "has_ga4_placeholder": true,
+      "script_syntax": [
+        {
+          "script": 1,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        },
+        {
+          "script": 2,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        },
+        {
+          "script": 4,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        },
+        {
+          "script": 5,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        },
+        {
+          "script": 6,
+          "kind": "json_ld",
+          "valid": true
+        },
+        {
+          "script": 7,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        },
+        {
+          "script": 8,
+          "kind": "javascript",
+          "valid": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "file": "privacidade.html",
+      "bytes": 6827,
+      "body_word_count_approx": 482,
+      "elements": {
+        "section": 0,
+        "h1": 1,
+        "h2": 10,
+        "img": 0,
+        "video": 0,
+        "script": 0
+      },
+      "local_asset_references": [],
+      "unique_image_bytes": 0,
+      "links": [
+        {
+          "href": "https://www.facebook.com/privacy/policy/",
+          "line": 57
+        },
+        {
+          "href": "https://policies.google.com/privacy",
+          "line": 58
+        },
+        {
+          "href": "https://wa.me/5511970842160",
+          "line": 90
+        },
+        {
+          "href": "/",
+          "line": 94
+        },
+        {
+          "href": "/loja",
+          "line": 94
+        },
+        {
+          "href": "/termos",
+          "line": 94
+        }
+      ],
+      "empty_anchor_lines": [],
+      "missing_fragment_links": [],
+      "lazy_image_count": 0,
+      "images_with_explicit_dimensions": 0,
+      "has_meta_pixel_source": false,
+      "has_ga4_placeholder": false,
+      "script_syntax": []
+    },
+    {
+      "file": "termos.html",
+      "bytes": 4728,
+      "body_word_count_approx": 302,
+      "elements": {
+        "section": 0,
+        "h1": 1,
+        "h2": 7,
+        "img": 0,
+        "video": 0,
+        "script": 0
+      },
+      "local_asset_references": [],
+      "unique_image_bytes": 0,
+      "links": [
+        {
+          "href": "https://wa.me/5511970842160",
+          "line": 62
+        },
+        {
+          "href": "/",
+          "line": 65
+        },
+        {
+          "href": "/loja",
+          "line": 65
+        },
+        {
+          "href": "/privacidade",
+          "line": 65
+        }
+      ],
+      "empty_anchor_lines": [],
+      "missing_fragment_links": [],
+      "lazy_image_count": 0,
+      "images_with_explicit_dimensions": 0,
+      "has_meta_pixel_source": false,
+      "has_ga4_placeholder": false,
+      "script_syntax": []
+    }
+  ],
+  "media": [
+    {
+      "file": "imagens/1 frasco premium — 11.png",
+      "bytes": 1950086
+    },
+    {
+      "file": "imagens/10xMaisPotente.png",
+      "bytes": 7506968
+    },
+    {
+      "file": "imagens/2. Kit 2 frascos — 11.png",
+      "bytes": 2002002
+    },
+    {
+      "file": "imagens/5. Modo de uso (manhãnoite) — 16 9.png",
+      "bytes": 1930026
+    },
+    {
+      "file": "imagens/8. Fórmula  ingredientes naturais — 11.png",
+      "bytes": 1812763
+    },
+    {
+      "file": "imagens/cowboy-bottle.jpg.png",
+      "bytes": 1735648
+    },
+    {
+      "file": "imagens/Cowboy_imagem_1.png",
+      "bytes": 697733
+    },
+    {
+      "file": "imagens/entrega-discreta.jpg",
+      "bytes": 134937
+    },
+    {
+      "file": "imagens/formula-ingredientes.jpg",
+      "bytes": 286426
+    },
+    {
+      "file": "imagens/gotejador-macro.jpg",
+      "bytes": 91219
+    },
+    {
+      "file": "imagens/Homem confiante (estilo de vida, discreto) — 45.png",
+      "bytes": 1740786
+    },
+    {
+      "file": "imagens/homem-confiante.jpg",
+      "bytes": 117843
+    },
+    {
+      "file": "imagens/Kit 4 frascos (card Mais Vendido) — 11.png",
+      "bytes": 2237321
+    },
+    {
+      "file": "imagens/kit-1-frasco.jpg",
+      "bytes": 157046
+    },
+    {
+      "file": "imagens/kit-2-frascos.jpg",
+      "bytes": 203224
+    },
+    {
+      "file": "imagens/kit-4-frascos.jpg",
+      "bytes": 261839
+    },
+    {
+      "file": "imagens/modo-de-uso.jpg",
+      "bytes": 182927
+    },
+    {
+      "file": "imagens/Prompt 4 — REVISADO (macro do gotejador, sóbrio e masculino) — 169.png",
+      "bytes": 1428905
+    },
+    {
+      "file": "imagens/Prompt 9 — REVISADO (sem pessoas) — 169.png",
+      "bytes": 1777352
+    },
+    {
+      "file": "imagens/Selo de garantia 30 dias — 11 (fundo transparente se possível).png",
+      "bytes": 1860920
+    },
+    {
+      "file": "imagens/selo-garantia.jpg",
+      "bytes": 277958
+    },
+    {
+      "file": "imagens/WhatsApp Image 2026-07-17 at 11.50.20.jpeg",
+      "bytes": 54465
+    },
+    {
+      "file": "videos/depoimento-1.jpg",
+      "bytes": 83075
+    },
+    {
+      "file": "videos/depoimento-1.mp4",
+      "bytes": 1145423
+    },
+    {
+      "file": "videos/depoimento-2.jpg",
+      "bytes": 91184
+    },
+    {
+      "file": "videos/depoimento-2.mp4",
+      "bytes": 1511589
+    }
+  ],
+  "offer_math": [
+    {
+      "bottles": 1,
+      "product_brl": "89.90",
+      "shipping_claim_brl": "25.00",
+      "total_brl": "114.90",
+      "per_bottle_without_shipping_brl": "89.90",
+      "per_bottle_with_shipping_brl": "114.90",
+      "claimed_days": 15,
+      "anchor_brl": "149.90",
+      "discount_percent": "40.03"
+    },
+    {
+      "bottles": 2,
+      "product_brl": "109.90",
+      "shipping_claim_brl": "25.00",
+      "total_brl": "134.90",
+      "per_bottle_without_shipping_brl": "54.95",
+      "per_bottle_with_shipping_brl": "67.45",
+      "claimed_days": 30,
+      "anchor_brl": "179.80",
+      "discount_percent": "38.88"
+    },
+    {
+      "bottles": 4,
+      "product_brl": "219.92",
+      "shipping_claim_brl": "25.00",
+      "total_brl": "244.92",
+      "per_bottle_without_shipping_brl": "54.98",
+      "per_bottle_with_shipping_brl": "61.23",
+      "claimed_days": 60,
+      "anchor_brl": "359.90",
+      "discount_percent": "38.89"
+    }
+  ],
+  "yield_math": {
+    "claimed_drops_per_bottle": 600,
+    "claimed_daily_drops": 24,
+    "days_if_both_claims_correct": 25.0,
+    "not_a_dosage_recommendation": true
+  }
+}

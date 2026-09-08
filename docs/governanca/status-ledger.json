@@ -1,0 +1,259 @@
+{
+  "schema_version": "1.0.0",
+  "project": "COWBOY Energia",
+  "company_id": "cowboy-energia",
+  "deadline": "2026-09-08T08:00:00-03:00",
+  "snapshot_at": "2026-09-08T00:20:16.6158401-03:00",
+  "runtime": {
+    "kind": "native_session",
+    "persistent_harness_installed": false,
+    "worker_capacity": 3,
+    "observed_active_workers": 1,
+    "note": "Snapshot da sessão: CEO coordenando e somente devops_contas consolidando a governança. Revisão visual estática e revisão independente de CSS entregues; nenhum agente de contas está operando. Este painel não é live. Servidor local sem daemon ou garantia de persistência."
+  },
+  "owner_mandate": {
+    "status": "active_in_session",
+    "persists_for_authorized_scope_until_revoked_or_complete": true,
+    "routine_business_reconfirmation_required": false,
+    "ceo_role": "coordinate_delegate_review_accept",
+    "worker_only_execution": ["implementation", "commands", "tests", "account_operations", "deployment"],
+    "native_team_fronts": 6,
+    "persistent_daemon_installed": false,
+    "environment_approval_controls_bypassable": false,
+    "account_operations_reauthorized": true,
+    "current_external_blocker": "Guard do runtime interrompe Computer Use antes da captura por não conseguir determinar a URL do Chrome; não é falta de autorização comercial."
+  },
+  "offer": {
+    "currency": "BRL",
+    "tiers": [
+      { "quantity": 1, "total": 54.76, "unit_price": 54.76 },
+      { "quantity": 2, "total": 84.76, "unit_price": 42.38 },
+      { "quantity": 3, "total": 127.14, "unit_price": 42.38 },
+      { "quantity": 4, "total": 169.52, "unit_price": 42.38 }
+    ]
+  },
+  "product_facts": {
+    "label_observed": [
+      "30 ml",
+      "porção de 12 gotas (1 ml)",
+      "30 porções por embalagem",
+      "uso indicado no rótulo: 12 gotas ao dia",
+      "grupo populacional a partir de 19 anos",
+      "declaração: não é medicamento",
+      "após aberto, consumir dentro de 60 dias"
+    ],
+    "reported_unverified": [
+      "O proprietário relata orientação da médica responsável para 24 gotas ao dia."
+    ],
+    "publishing_gate": "Não publicar 24 gotas como recomendação genérica nem calcular duração de kits até haver instrução formal reconciliada com o rótulo."
+  },
+  "external_inputs": {
+    "cartpanda": {
+      "store_slug": "cowboy-energia",
+      "credential_provided_out_of_band": true,
+      "credential_stored_in_ledger": false,
+      "authenticated_products_query_status": 200,
+      "products_found_for_quantities": [1, 2, 4],
+      "official_update_and_readback_verified": true,
+      "product_ids": [29750488, 29750542, 29750543],
+      "configured_totals_brl": { "1": 54.76, "2": 84.76, "4": 169.52 },
+      "variant_ids_preserved": [211742450, 211742746, 211742749],
+      "checkout_urls_configured_private": true,
+      "local_redirect_contract_verified": true,
+      "public_checkout_summary_verified": false,
+      "quantity_change_discount_behavior_verified": false,
+      "latest_readback_at": "2026-09-08T03:03:40.107Z",
+      "quantity_limit_proposal_applied": false,
+      "quantity_flags_observed": { "1": { "max_quantity": 0, "max_quantity_count": 0 }, "2": { "max_quantity": 1, "max_quantity_count": 1 }, "4": { "max_quantity": 1, "max_quantity_count": 1 } },
+      "complete_seller_identity_available": false
+    },
+    "shipping": {
+      "origin_postal_code": "74475239",
+      "packed_kit_up_to_four": { "length_cm": 23, "width_cm": 8, "height_cm": 8, "weight_kg": 0.5 },
+      "individual_bottle_weight_kg": 0.06,
+      "provider_flow_verified": false
+    },
+    "computer_sessions_authorized": true,
+    "vercel": {
+      "linked_project": "cowboy-site",
+      "connector_status": "http_403_scope_not_authorized",
+      "cli_version": "59.11.7",
+      "cli_authentication": "specified_token_invalid",
+      "deployment_status": "not_deployed",
+      "scope": "murillo-digital"
+    },
+    "browser_runtime": {
+      "computer_use": "interrupted_url_not_identified",
+      "browser_instances": 0,
+      "browser_flow_verified": false,
+      "local_http_server": "http://127.0.0.1:4173",
+      "local_http_test_status": "25_of_25_reported_passing",
+      "latest_local_config_status": 200,
+      "latest_local_config_evidence": "docs/integracoes/checkpoint-2026-09-08.md",
+      "vercel_window_located": true,
+      "page_capture_or_login_inspected": false,
+      "runtime_guard": "Computer Use has been stopped for this turn because it could not determine the current browser URL on Windows with enough confidence to enforce policy. Stop your work and send a final message noting why Computer Use ended."
+    },
+    "utmify": { "account_configured_verified": false },
+    "google": { "search_console_verified": false, "indexing_verified": false }
+  },
+  "readiness": {
+    "local_implementation": "Entregue no escopo de página, APIs, assets e build; 21/21 testes após os três ajustes CSS; inspeção visual real pendente.",
+    "real_api": "Cartpanda autenticada e catálogo relido com HTTP 200; resumo público, frete e comportamento de quantidade não homologados.",
+    "account_configuration": "Preços/títulos dos produtos Cartpanda atualizados e relidos; Melhor Envio, UTMify, Google e deploy Vercel pendentes.",
+    "production": "Não publicada; lançamento conditional.",
+    "creative_inventory": "10 criativos não localizados; quatro vídeos antigos inspecionados visualmente contêm claims não sustentados e não são prova social aprovada.",
+    "authentic_social_proof": "Não recebida com origem e consentimento. Análise local já autorizada; transcrição depende de capacidade técnica."
+  },
+  "allowed_states": ["working", "queued", "blocked", "waiting_review", "complete"],
+  "work_items": [
+    {
+      "id": "CEO-001",
+      "title": "Coordenação e aceite delimitado à implementação local",
+      "agent": "/root",
+      "model": "host-model-unverified",
+      "effort": "host-effort-unverified",
+      "state": "working",
+      "session_observed": true,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00",
+      "dependencies": ["GOV-001", "PROD-001", "INT-001", "DEV-001", "QA-001", "DEVOPS-001", "AUTONOMY-001"],
+      "evidence": ["DoD da implementação/testes locais aceito em 2026-09-07T23:52:17.3557493-03:00; não inclui experiência visual real, contas completas ou produção", "CEO aceitou os três ajustes CSS no escopo estático com build/testes e revisão independente entregues; aceite visual real e lançamento permanecem pendentes"],
+      "blockers": []
+    },
+    {
+      "id": "GOV-001",
+      "title": "Governança e harness local",
+      "agent": "/root/governanca_harness",
+      "model": "Sol",
+      "effort": "high",
+      "state": "complete",
+      "session_observed": true,
+      "updated_at": "2026-09-07T23:52:17.3557493-03:00",
+      "dependencies": [],
+      "evidence": ["docs/stories/REBUILD-001-governanca-e-harness.md", "docs/governanca/plano-de-acao.md", "docs/governanca/contratos-de-tarefa.md", "docs/governanca/entrega-local.md", "scripts/harness-status.ps1 validation"],
+      "blockers": []
+    },
+    {
+      "id": "PROD-001",
+      "title": "Fatos, oferta, copy e três famílias de imagens",
+      "agent": "/root/produto_criacao",
+      "model": "Astra",
+      "effort": "high",
+      "state": "complete",
+      "session_observed": false,
+      "updated_at": "2026-09-07T23:36:32.1246146-03:00",
+      "dependencies": [],
+      "evidence": ["docs/produto/product-facts.json", "docs/produto/copy-v2.md", "docs/produto/evidencias-e-pendencias.md", "imagens/v2/cowboy-packshot.png", "imagens/v2/cowboy-packshot.webp", "imagens/v2/cowboy-kit-2.png", "imagens/v2/cowboy-kit-2.webp", "imagens/v2/cowboy-hero.png", "imagens/v2/cowboy-hero.webp", "CEO initial packshot review reported at 2026-09-07T23:11:57.7661098-03:00"],
+      "blockers": []
+    },
+    {
+      "id": "INT-001",
+      "title": "Contratos, configuração e APIs locais de comércio",
+      "agent": "/root/integracoes_comerciais",
+      "model": "Terra",
+      "effort": "high",
+      "state": "complete",
+      "session_observed": false,
+      "updated_at": "2026-09-07T23:52:17.3557493-03:00",
+      "dependencies": [],
+      "evidence": ["docs/integracoes/README.md", "api/frete.js", "api/checkout.js", "api/config.js", "config/commerce.js", "tests/integrations/commerce.test.js", "21 of 21 consolidated tests reported passing after aligned 23x8x8 cm package at 2026-09-07T23:43:24.5373034-03:00"],
+      "blockers": []
+    },
+    {
+      "id": "DEV-001",
+      "title": "Implementação da página",
+      "agent": "/root/frontend_vendas",
+      "model": "Terra",
+      "effort": "high",
+      "state": "complete",
+      "session_observed": false,
+      "updated_at": "2026-09-07T23:36:32.1246146-03:00",
+      "dependencies": ["PROD-001", "INT-001", "worker-slot"],
+      "evidence": ["docs/stories/REBUILD-003-pagina.md", "tests/qa/frontend-flow.test.js", "6 of 6 DOM/HTML frontend tests reported passing in docs/qa/relatorio-v2.md"],
+      "blockers": []
+    },
+    {
+      "id": "QA-001",
+      "title": "QA independente da implementação e HTTP local",
+      "agent": "/root/qa_independente",
+      "model": "Astra",
+      "effort": "high",
+      "state": "complete",
+      "session_observed": false,
+      "updated_at": "2026-09-07T23:52:17.3557493-03:00",
+      "dependencies": ["DEV-001", "worker-slot"],
+      "evidence": ["docs/qa/relatorio-v2.md", "docs/stories/REBUILD-005-qa-independente.md", "21 of 21 consolidated tests passed", "25 of 25 local HTTP tests passed", "3 of 3 local Cartpanda redirects passed without following destinations", "build check passed with 14 public files", "syntax lint passed"],
+      "blockers": []
+    },
+    {
+      "id": "DEVOPS-001",
+      "title": "Build local e atualização comprovada do catálogo Cartpanda",
+      "agent": "/root/devops_contas",
+      "model": "host-model-unverified",
+      "effort": "host-effort-unverified",
+      "state": "complete",
+      "session_observed": false,
+      "updated_at": "2026-09-07T23:52:17.3557493-03:00",
+      "dependencies": ["QA-001", "external-account-access"],
+      "evidence": ["docs/stories/REBUILD-004-operacao-e-publicacao.md", "docs/integracoes/operacao-contas.md", "Cartpanda PUT and GET verified product ids 29750488, 29750542 and 29750543 with preserved variants", "private .env.local contains real checkout URLs and remains ignored", "local server http://127.0.0.1:4173 session 58230"],
+      "blockers": []
+    },
+    {
+      "id": "AUTONOMY-001",
+      "title": "Diagnóstico de autonomia suportada",
+      "agent": "/root/configuracao_autonomia",
+      "model": "Sol",
+      "effort": "high",
+      "state": "complete",
+      "session_observed": false,
+      "updated_at": "2026-09-07T23:57:52.7849407-03:00",
+      "dependencies": [],
+      "evidence": ["docs/governanca/autonomia-e-permissoes.md"],
+      "blockers": [],
+      "scope": "Diagnóstico somente leitura concluído: perfil managed workspace-write/rede; CEO sem ferramenta de autoaprovação; opção desktop/flag CLI não confirmada na extensão VS Code atual."
+    },
+    {
+      "id": "LAUNCH-001",
+      "title": "Homologação das contas, checkout e publicação",
+      "agent": "authorized-platform-operator",
+      "model": "not-routed",
+      "effort": "not-routed",
+      "state": "blocked",
+      "session_observed": false,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00",
+      "dependencies": ["QA-001", "DEVOPS-001", "VISUAL-001", "external-account-access", "CEO-quality-acceptance"],
+      "evidence": ["docs/stories/REBUILD-002-readiness-entrega.md", "docs/integracoes/checkpoint-2026-09-08.md", "docs/integracoes/plano-limite-quantidade.md"],
+      "blockers": ["Computer Use interrompido por guard de confiança da URL antes de captura/login; autorização do proprietário continua válida", "Vercel CLI sem autenticação válida e conector 403 no escopo existente; nenhum deploy", "checkout público Cartpanda retornou desafio JavaScript 403 não contornado", "controle de quantidade e regra de desconto 2+ não homologados; proposta de limite do SKU avulso não aplicada", "Melhor Envio, UTMify e Google não homologados; credenciais/contexto indisponíveis nos canais acessíveis", "identificação completa do vendedor pendente"]
+    },
+    {
+      "id": "CSS-001", "title": "Três ajustes CSS e verificação local", "agent": "/root/revisao_visual", "model": "host-model-unverified", "effort": "host-effort-unverified", "state": "complete", "session_observed": true,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00", "dependencies": ["DEV-001"],
+      "evidence": ["docs/stories/REBUILD-006-revisao-visual.md", "docs/qa/visual-v2.md", "Margin reset das figuras, estado disabled e quebra dos links mailto; build 14 arquivos e suíte 21/21 registrados após os ajustes"], "blockers": []
+    },
+    {
+      "id": "QA-002", "title": "Revisão independente de CSS, escopo estático", "agent": "/root/criativos_e_prova", "model": "host-model-unverified", "effort": "host-effort-unverified", "state": "complete", "session_observed": true,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00", "dependencies": ["CSS-001"],
+      "evidence": ["docs/qa/revisao-css-independente-2026-09-08.md", "Nenhuma regressão objetiva no escopo estático; source/dist SHA-256 17A201603B2E914C1F8D0265C7FAA935DD2B95250D2FBDC798BAD422C13763C2 idêntico; não rerodou testes nem GUI", "Aceite CEO somente das correções estáticas; parecer conditional para visual real"], "blockers": []
+    },
+    {
+      "id": "VISUAL-001", "title": "Aceite visual real da página", "agent": "authorized-browser-reviewer", "model": "not-routed", "effort": "not-routed", "state": "blocked", "session_observed": false,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00", "dependencies": ["QA-002"],
+      "evidence": ["docs/qa/visual-v2.md", "docs/qa/revisao-css-independente-2026-09-08.md"], "blockers": ["No browser is available; Computer Use interrompido antes de captura", "Viewport, teclado, zoom/reflow e estados indisponíveis ainda exigem inspeção renderizada"]
+    },
+    {
+      "id": "MEDIA-001", "title": "Inventário local e inspeção dos quatro vídeos antigos", "agent": "/root/criativos_e_prova", "model": "host-model-unverified", "effort": "host-effort-unverified", "state": "complete", "session_observed": true,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00", "dependencies": [],
+      "evidence": ["docs/stories/REBUILD-007-criativos-e-prova.md", "docs/criacao/analise-criativos-2026-09-08.md", "docs/criacao/matriz-criativos-cowboy-2026-09-08.csv", "Quatro MP4 antigos contêm claims visuais sem sustentação; não publicados na nova página"], "blockers": []
+    },
+    {
+      "id": "CREATIVES-001", "title": "Auditoria integral dos dez criativos e prova autêntica", "agent": "owner-material-dependent", "model": "not-routed", "effort": "not-routed", "state": "blocked", "session_observed": false,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00", "dependencies": ["MEDIA-001"],
+      "evidence": ["docs/criacao/analise-criativos-2026-09-08.md", "docs/criacao/matriz-criativos-cowboy-2026-09-08.csv"], "blockers": ["C01 a C10 não localizados como conjunto de criativos fornecido", "Prova social autêntica, origem e consentimento para publicação não recebidos", "Transcrição local já autorizada, mas sem capacidade técnica disponível; não é pendência de autorização"]
+    },
+    {
+      "id": "GOV-002", "title": "Consolidação da retomada e painel de evidências", "agent": "/root/devops_contas", "model": "host-model-unverified", "effort": "host-effort-unverified", "state": "working", "session_observed": true,
+      "updated_at": "2026-09-08T00:20:16.6158401-03:00", "dependencies": ["QA-002", "MEDIA-001"],
+      "evidence": ["docs/governanca/status-ledger.json", "docs/governanca/entrega-local.md", "docs/governanca/plano-de-acao.md"], "blockers": []
+    }
+  ]
+}

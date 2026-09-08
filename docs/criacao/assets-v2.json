@@ -1,0 +1,21 @@
+{
+  "client": "COWBOY Energia",
+  "date": "2026-09-07",
+  "generator": "image_gen built-in; no external API or model fallback",
+  "source": "Cinco fotografias reais fornecidas pelo usuário, usadas como referências de identidade; packshot derivado usado nas composições seguintes",
+  "rights": "Referências fornecidas pelo usuário para esta tarefa; cadeia de titularidade não verificada independentemente. Assets derivados gerados com IA. Não incluem pessoas, voz, marcas adicionais ou depoimentos.",
+  "publicDisclosureSuggested": "Imagem ilustrativa produzida com apoio de IA a partir de fotos do produto.",
+  "assets": [
+    {"path": "imagens/v2/cowboy-packshot.png", "width": 1254, "height": 1254, "bytes": 1303660, "alpha": false, "status": "ready_for_layout_qa", "role": "catálogo / galeria / kit avulso", "alt": "Frasco COWBOY Energia de 30 mL com conta-gotas preto e rótulo preto e dourado", "notes": "Fundo marfim; preservar imagem inteira, não usar como fonte de microtexto regulatório"},
+    {"path": "imagens/v2/cowboy-hero.png", "width": 1254, "height": 1254, "bytes": 1699824, "alpha": false, "status": "ready_for_layout_qa", "role": "primeira dobra / fotografia editorial", "alt": "COWBOY Energia de 30 mL sobre bancada de madeira escura", "notes": "Cenário editorial gerado; embalagem frontal revisada visualmente"},
+    {"path": "imagens/v2/cowboy-kit-2.png", "width": 1254, "height": 1254, "bytes": 1675655, "alpha": false, "status": "ready_for_layout_qa", "role": "kit de dois frascos / oferta principal", "alt": "Kit com dois frascos COWBOY Energia de 30 mL cada", "notes": "Exatamente dois frascos; compor preço em HTML, não embutido na imagem"}
+  ],
+  "webVariants": [
+    {"path": "imagens/v2/cowboy-packshot.webp", "source": "imagens/v2/cowboy-packshot.png", "width": 1254, "height": 1254, "bytes": 55192, "quality": 88},
+    {"path": "imagens/v2/cowboy-hero.webp", "source": "imagens/v2/cowboy-hero.png", "width": 1254, "height": 1254, "bytes": 92294, "quality": 88},
+    {"path": "imagens/v2/cowboy-kit-2.webp", "source": "imagens/v2/cowboy-kit-2.png", "width": 1254, "height": 1254, "bytes": 95642, "quality": 88}
+  ],
+  "encoding": "Sharp já instalado no runtime; conversão de formato WebP quality88 effort6, sem edição visual, sem resize, PNGs preservados; execução reproduzível em docs/criacao/encode-webp.cjs",
+  "rejected": [{"path": "imagens/v2/cowboy-packshot-draft-checkerboard.png", "reason": "Pedido de alpha produziu checkerboard incorporado em RGB; não usar no site"}],
+  "validation": ["Arquivos copiados ao workspace", "Dimensões reais e pixel format conferidos por System.Drawing", "Revisão visual: tampa preta, marca, apresentação 30 mL e quantidade do kit", "Nenhuma promessa clínica, selo ou depoimento adicionado", "Sem garantia de réplica pixel a pixel; arte final de rótulo deve vir do fabricante", "JPEG/WebP e tamanhos responsivos ficam a cargo da implementação para reduzir transferência"]
+}

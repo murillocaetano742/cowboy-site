@@ -4,6 +4,12 @@ DPTHIAGO.mp4
 
 # Vercel
 .vercel
+.env
+.env.*
+!.env.example
+dist/
+.local/
+node_modules/
 
 # Claude Code (config local, não faz parte do site)
 .claude/
@@ -18,3 +24,10 @@ imagens/*.png
 !imagens/cowboy-bottle.jpg.png
 !imagens/10xMaisPotente.png
 imagens/WhatsApp*
+
+# Relatorios de scanner (podem conter trechos de segredo) e artefatos Playwright
+docs/qa/360/gitleaks*.json
+test-results/
+playwright-report/
+docs/qa/360/lighthouse-*.json
+docs/qa/360/pagina-*.png

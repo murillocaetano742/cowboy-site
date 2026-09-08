@@ -1,0 +1,25 @@
+{
+  "name": "cowboy-energia-site",
+  "private": true,
+  "version": "1.0.0",
+  "imports": {
+    "#commerce": "./config/commerce.js",
+    "#logistics": "./config/logistics.js",
+    "#api/*": "./api/*.js"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env.local scripts/serve-site.js",
+    "build": "node scripts/build-site.js",
+    "check:build": "node scripts/check-build.js",
+    "lint": "node scripts/check-syntax.js",
+    "test": "node --test tests/integrations/*.test.js tests/qa/*.test.js",
+    "test:e2e": "playwright test tests/e2e",
+    "test:integrations": "node --test tests/integrations/*.test.js",
+    "check:commerce": "node --env-file-if-exists=.env.local scripts/check-commerce-config.js"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "lighthouse": "^13.4.1"
+  }
+}
