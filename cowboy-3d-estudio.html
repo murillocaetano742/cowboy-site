@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>COWBOY Energia | Estudo 3D de produto</title>
+  <link rel="stylesheet" href="/assets/css/cowboy-3d-estudio.css">
+</head>
+<body>
+  <main class="studio" aria-labelledby="studio-title">
+    <header class="studio-copy">
+      <p>Estudo de material e forma</p>
+      <h1 id="studio-title">COWBOY Energia</h1>
+      <p class="studio-intro">Reconstrução 3D a partir de imagens reais do produto. Arraste para observar a embalagem.</p>
+    </header>
+    <section class="studio-model" data-studio-model aria-label="Visualizador de estudo do frasco COWBOY Energia">
+      <div class="studio-stage">
+        <img data-studio-poster src="/imagens/v3/referencias-reais/IMG_1410.jpeg" width="1152" height="1536" alt="Foto original do frasco COWBOY Energia">
+        <canvas hidden tabindex="0" aria-describedby="studio-status"></canvas>
+      </div>
+      <div class="studio-controls" aria-label="Controles do modelo">
+        <button type="button" data-studio-left aria-label="Girar o frasco à esquerda">←</button>
+        <button type="button" data-studio-reset>Voltar à frente</button>
+        <button type="button" data-studio-right aria-label="Girar o frasco à direita">→</button>
+      </div>
+      <p id="studio-status" data-studio-status aria-live="polite">Carregando estudo 3D.</p>
+      <p class="studio-note">Materiais e proporções são uma reconstrução visual baseada em foto e vídeo reais; não é escaneamento 3D.</p>
+      <a href="/imagens/v3/referencias-reais/IMG_1410.jpeg" target="_blank" rel="noopener">Ver foto original</a>
+    </section>
+  </main>
+  <script type="module" src="/assets/js/cowboy-3d-estudio.js"></script>
+</body>
+</html>

@@ -12,7 +12,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/loja", "destination": "/loja.html" },
-    { "source": "/360", "destination": "/cowboy-360.html" }
+    { "source": "/nova", "destination": "/cowboy-nova.html" }
   ],
   "headers": [
     {

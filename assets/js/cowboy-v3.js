@@ -1,5 +1,3 @@
-import { startBottle3D } from '/assets/js/cowboy-v3-3d.js';
-
 const PRICES = Object.freeze({ 1: 5476, 2: 8476, 4: 16952 });
 const ATTRIBUTION_KEYS = Object.freeze(['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'src', 'sck', 'cid', 'gclid', 'fbclid']);
 
@@ -7,24 +5,23 @@ function formatBRL(cents) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 }
 
-function initializeModel() {
-  const root = document.querySelector('[data-v3-model]');
-  if (!root) return;
-  let initialized = false;
-  const initialize = async () => {
-    if (initialized) return;
-    initialized = true;
-    const model = await startBottle3D(root);
-    root.querySelector('[data-v3-3d-left]')?.addEventListener('click', model.rotateLeft || (() => {}));
-    root.querySelector('[data-v3-3d-right]')?.addEventListener('click', model.rotateRight || (() => {}));
-  };
-  if (!('IntersectionObserver' in window)) { initialize(); return; }
-  const observer = new IntersectionObserver((entries) => {
-    if (!entries.some((entry) => entry.isIntersecting)) return;
-    observer.disconnect();
-    initialize();
-  }, { rootMargin: '250px 0px' });
-  observer.observe(root);
+function initializeGallery() {
+  const mainImage = document.querySelector('[data-v3-gallery-main]');
+  const buttons = [...document.querySelectorAll('[data-v3-gallery]')];
+  if (!mainImage || !buttons.length) return;
+
+  buttons.forEach((button) => button.addEventListener('click', () => {
+    const source = button.dataset.v3GallerySource;
+    const alt = button.dataset.v3GalleryAlt;
+    if (!source || !alt || source === mainImage.getAttribute('src')) return;
+    const candidate = new Image();
+    candidate.onload = () => {
+      mainImage.src = source;
+      mainImage.alt = alt;
+      buttons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+    };
+    candidate.src = source;
+  }));
 }
 
 function initializeCheckout() {
@@ -60,6 +57,7 @@ function initializeCheckout() {
     shippingRequest?.abort();
     shippingRequest = null;
     selectedFreightCents = null;
+    if (freightButton) freightButton.disabled = !shippingAvailable;
     freightResults?.replaceChildren();
     if (freightStatus) freightStatus.textContent = status;
     renderOrderSummary();
@@ -182,5 +180,5 @@ function initializeCheckout() {
   loadConfiguration();
 }
 
-initializeModel();
+initializeGallery();
 initializeCheckout();

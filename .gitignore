@@ -26,8 +26,8 @@ imagens/*.png
 imagens/WhatsApp*
 
 # Relatorios de scanner (podem conter trechos de segredo) e artefatos Playwright
-docs/qa/360/gitleaks*.json
+docs/qa/nova/gitleaks*.json
 test-results/
 playwright-report/
-docs/qa/360/lighthouse-*.json
-docs/qa/360/pagina-*.png
+docs/qa/nova/lighthouse-*.json
+docs/qa/nova/pagina-*.png

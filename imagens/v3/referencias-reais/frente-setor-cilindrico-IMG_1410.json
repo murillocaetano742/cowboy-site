@@ -1,0 +1,14 @@
+{
+  "source": "IMG_1410.jpeg",
+  "outputWidth": 360,
+  "outputHeight": 488,
+  "sourceCylinderCenterX": 637,
+  "sourceRadiusPixels": 187,
+  "angleStartDegrees": -60,
+  "angleEndDegrees": 50,
+  "arcDegrees": 110,
+  "labelTopSource": "858-(x-450)*0.0467",
+  "labelBottomSource": "1341-(x-450)*0.02",
+  "method": "piecewise cylindrical inverse projection,2px strips,bicubic",
+  "limitations": "Approximate single-perspective photograph; source reflections retained; no hidden-side reconstruction or text synthesis. Display on a110degree cylinder sector only; remaining circumference neutral pending real photographs."
+}

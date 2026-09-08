@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>COWBOY Energia | Visualizador fotográfico 360</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/css/cowboy-360-real.css">
+</head>
+<body>
+  <main class="photo360" aria-labelledby="photo360-title">
+    <header class="photo360-heading">
+      <p>Produto fotografado em 360°</p>
+      <h1 id="photo360-title">COWBOY Energia</h1>
+    </header>
+    <section class="photo360-viewer" data-photo-360 data-manifest="/imagens/v3/360-real/manifest.json" data-photo-fallback="/imagens/v3/referencias-reais/IMG_1410.jpeg" aria-label="Visualizador fotográfico do frasco COWBOY Energia">
+      <div class="photo360-stage">
+        <img data-photo-frame src="/imagens/v3/360-real/frame-000.webp" width="480" height="900" alt="Foto real frontal do frasco COWBOY Energia" decoding="async" draggable="false">
+      </div>
+      <div class="photo360-controls" aria-label="Controles do visualizador">
+        <button type="button" data-photo-left aria-label="Mostrar foto anterior">←</button>
+        <button type="button" data-photo-reset>Voltar à frente</button>
+        <button type="button" data-photo-right aria-label="Mostrar próxima foto">→</button>
+      </div>
+      <p class="photo360-status" data-photo-status aria-live="polite">Carregando a sequência de fotos reais.</p>
+      <p class="photo360-note">As imagens vêm do vídeo original do produto. Quando a mão ou um reflexo aparece, o quadro é preservado como foi filmado.</p>
+      <a href="/imagens/v3/referencias-reais/IMG_1410.jpeg" target="_blank" rel="noopener">Ver foto original</a>
+    </section>
+  </main>
+  <script type="module" src="/assets/js/cowboy-360-real.js"></script>
+</body>
+</html>

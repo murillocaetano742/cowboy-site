@@ -176,3 +176,9 @@ Sem compra duplicada fora da seção final, simulações de vendas, contagem reg
 
 Fatos: `docs/produto/product-facts.json` (fotografias do rótulo; não laudo). Áudio: `.local/revisao-depoimentos/revisao-audio.md`. Vídeos: `videos/clientes/`; originais preservados em `videos/`. O proprietário confirmou os relatos reais e autorizou sua inclusão. Arquivos finais de arte e frames serão informados em `direcao-de-arte-e-assets.md` e ao frontend assim que concluídos.
 
+
+## Complemento factual de copy — vitamina B6
+
+Acrescentar junto da composição: **A vitamina B6 auxilia no metabolismo energético.** A frase descreve a função do nutriente, sem prometer efeito imediato, desempenho sexual, cura ou aprovação do produto.
+
+Fonte primária conferida em 08/09/2026: [Anvisa, Nota Técnica 43/2025, página 11](https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/alimentos/manuais-guias-e-orientacoes/alegacoes_plenamente_reconhecidas_nota_tecnica_43.pdf/@@display-file/file), linha da vitamina B6. A tabela contém essa formulação reconhecida e referência mínima de 0,195 mg por porção para alimentos; o documento remete às regras específicas de suplementos. O registro local `docs/produto/product-facts.json` declara 3 mg por porção de 12 gotas/1 mL. Esta referência sustenta a função nutricional citada, não constitui certificação, laudo ou auditoria de regularização do COWBOY.

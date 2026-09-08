@@ -15,3 +15,13 @@ Google Inc.
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
 http://scripts.sil.org/OFL
+
+Oswald — SIL OFL 1.1
+Copyright 2016 The Oswald Project Authors (https://github.com/googlefonts/OswaldFont)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+
+Manrope — SIL OFL 1.1
+Copyright 2019 The Manrope Project Authors (https://github.com/sharanda/manrope)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.

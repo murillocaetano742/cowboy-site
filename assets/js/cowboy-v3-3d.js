@@ -1,89 +1,70 @@
 const THREE_MODULE = '/assets/vendor/three-0.185.1/three.module.min.js';
 const FRONT_ANGLE = -0.35;
+const REAL_LABEL_ATLAS = Object.freeze({
+  path: '/imagens/v3/referencias-reais/rotulo-360-video.webp',
+  frontCenterU: 238 / 1537,
+});
 
-function drawLabelPanel(context, centerX, title, lines, reverse) {
-  const panelWidth = 910;
-  const left = centerX - (panelWidth / 2);
-  context.fillStyle = reverse ? '#d8cda9' : '#17130e';
-  context.fillRect(left, 44, panelWidth, 936);
-  context.strokeStyle = '#c9943a';
-  context.lineWidth = 18;
-  context.strokeRect(left + 24, 68, panelWidth - 48, 888);
-  context.fillStyle = reverse ? '#201911' : '#e8bf6a';
-  context.textAlign = 'center';
-  context.font = '700 86px Georgia, serif';
-  context.fillText(title, centerX, 188);
-  context.font = '600 34px Arial, sans-serif';
-  lines.forEach((line, index) => context.fillText(line, centerX, 320 + (index * 74)));
+async function loadRealLabelAtlas(THREE) {
+  const loader = new THREE.TextureLoader();
+  return new Promise((resolve) => {
+    loader.load(REAL_LABEL_ATLAS.path, (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = 4;
+      resolve(texture);
+    }, undefined, () => resolve(null));
+  });
 }
 
-function createWrapLabelTexture(THREE) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 2048;
-  canvas.height = 1024;
-  const context = canvas.getContext('2d');
-  context.fillStyle = '#21180f';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = '#5f421f';
-  context.lineWidth = 5;
-  for (let x = 0; x < canvas.width; x += 116) {
-    context.beginPath();
-    context.moveTo(x, 0);
-    context.lineTo(x + 110, canvas.height);
-    context.stroke();
-  }
-  drawLabelPanel(context, 512, 'COWBOY', ['ENERGIA', 'SUPLEMENTO ALIMENTAR', 'EM GOTAS', '30 mL'], false);
-  drawLabelPanel(context, 1536, 'COMPOSIÇÃO', [
-    'PORÇÃO: 12 GOTAS (1 mL)', 'FENO-GREGO 300 mg', 'TAURINA 50 mg · ARGININA 50 mg',
-    'VITAMINA B6 3 mg', 'ZINCO 1,7 mg · BORO 1,1 mg',
-  ], true);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
-  return texture;
-}
-
-function createBottle(THREE) {
+function createBottle(THREE, labelTexture) {
   const bottle = new THREE.Group();
   const dark = new THREE.MeshStandardMaterial({ color: '#11100e', roughness: 0.32, metalness: 0.18 });
-  const amber = new THREE.MeshPhysicalMaterial({ color: '#4c250b', roughness: 0.2, metalness: 0.03, transmission: 0.06, transparent: true, opacity: 0.96 });
+  const amber = new THREE.MeshPhysicalMaterial({ color: '#15120e', roughness: 0.25, metalness: 0.02, transmission: 0.02, transparent: true, opacity: 1 });
   const profile = [
-    new THREE.Vector2(0.54, -1.34), new THREE.Vector2(0.77, -1.25), new THREE.Vector2(0.84, -0.98),
-    new THREE.Vector2(0.84, 0.64), new THREE.Vector2(0.79, 0.91), new THREE.Vector2(0.57, 1.15),
-    new THREE.Vector2(0.44, 1.34), new THREE.Vector2(0.42, 1.49),
+    new THREE.Vector2(0.53, -1.34), new THREE.Vector2(0.64, -1.32), new THREE.Vector2(0.73, -1.25),
+    new THREE.Vector2(0.78, -1.12), new THREE.Vector2(0.79, -0.98), new THREE.Vector2(0.79, 0.58),
+    new THREE.Vector2(0.79, 0.72), new THREE.Vector2(0.79, 0.86), new THREE.Vector2(0.79, 0.91),
+    new THREE.Vector2(0.77, 1), new THREE.Vector2(0.73, 1.1), new THREE.Vector2(0.67, 1.2),
+    new THREE.Vector2(0.59, 1.29), new THREE.Vector2(0.51, 1.38), new THREE.Vector2(0.45, 1.46),
+    new THREE.Vector2(0.42, 1.49),
   ];
   const glass = new THREE.Mesh(new THREE.LatheGeometry(profile, 64), amber);
   glass.castShadow = true;
   glass.receiveShadow = true;
   bottle.add(glass);
 
+  const frontLocalAngle = -FRONT_ANGLE;
+  const atlasStartAngle = frontLocalAngle - (REAL_LABEL_ATLAS.frontCenterU * Math.PI * 2);
   const label = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.852, 0.852, 1.59, 96, 1, true, -Math.PI / 2, Math.PI * 2),
-    new THREE.MeshStandardMaterial({ map: createWrapLabelTexture(THREE), roughness: 0.48, metalness: 0.02 }),
+    new THREE.CylinderGeometry(0.802, 0.802, 2.08, 128, 1, true, atlasStartAngle, Math.PI * 2),
+    new THREE.MeshStandardMaterial({ map: labelTexture, roughness: 0.55, metalness: 0.01 }),
   );
-  label.position.y = -0.1;
+  label.position.y = -0.13;
   bottle.add(label);
 
-  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.51, 0.51, 0.27, 48), dark);
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.61, 0.61, 0.27, 48), dark);
   collar.position.y = 1.53;
   bottle.add(collar);
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.48, 0.66, 48), dark);
-  cap.position.y = 1.94;
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.57, 0.66, 48), dark);
+  cap.position.y = 1.96;
   bottle.add(cap);
   const ribMaterial = new THREE.MeshStandardMaterial({ color: '#24201a', roughness: 0.28, metalness: 0.24 });
-  for (let index = 0; index < 28; index += 1) {
-    const angle = (index / 28) * Math.PI * 2;
-    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.58, 0.045), ribMaterial);
-    rib.position.set(Math.sin(angle) * 0.47, 1.94, Math.cos(angle) * 0.47);
-    rib.rotation.y = -angle;
+  for (let index = 0; index < 64; index += 1) {
+    const angle = (index / 64) * Math.PI * 2;
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.59, 0.028), ribMaterial);
+    rib.position.set(Math.sin(angle) * 0.56, 1.96, Math.cos(angle) * 0.56);
+    rib.rotation.y = angle;
     bottle.add(rib);
   }
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.34, 0.34, 40), dark);
-  neck.position.y = 2.42;
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.35, 0.28, 40), dark);
+  neck.position.y = 2.43;
   bottle.add(neck);
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.43, 48, 28), dark);
-  bulb.scale.set(0.92, 1.36, 0.92);
-  bulb.position.y = 2.94;
+  const bulbProfile = [
+    new THREE.Vector2(0.23, 2.53), new THREE.Vector2(0.29, 2.58), new THREE.Vector2(0.31, 2.68),
+    new THREE.Vector2(0.31, 3.2), new THREE.Vector2(0.28, 3.36), new THREE.Vector2(0.2, 3.48),
+    new THREE.Vector2(0.1, 3.55), new THREE.Vector2(0, 3.58),
+  ];
+  const bulb = new THREE.Mesh(new THREE.LatheGeometry(bulbProfile, 48), dark);
   bottle.add(bulb);
   return bottle;
 }
@@ -122,7 +103,13 @@ export async function startBottle3D(root) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-  const bottle = createBottle(THREE);
+  const labelTexture = await loadRealLabelAtlas(THREE);
+  if (!labelTexture) {
+    renderer.dispose();
+    if (status) status.textContent = 'A visualização 3D não pôde carregar a textura real do vídeo 360. A foto original do frasco permanece disponível.';
+    return { destroy() {} };
+  }
+  const bottle = createBottle(THREE, labelTexture);
   const bounds = new THREE.Box3().setFromObject(bottle);
   const center = bounds.getCenter(new THREE.Vector3());
   const size = bounds.getSize(new THREE.Vector3());
@@ -131,10 +118,10 @@ export async function startBottle3D(root) {
   bottle.rotation.y = rotation;
   scene.add(bottle);
   scene.add(new THREE.HemisphereLight('#f8d391', '#211309', 2.15));
-  const key = new THREE.DirectionalLight('#f7b853', 3.4);
+  const key = new THREE.DirectionalLight('#fff1d2', 2.3);
   key.position.set(4, 5, 4);
   scene.add(key);
-  const rim = new THREE.PointLight('#bf641f', 2.4, 18);
+  const rim = new THREE.PointLight('#bf641f', 1.15, 18);
   rim.position.set(-3, 1.2, -3);
   scene.add(rim);
   const base = new THREE.Mesh(new THREE.CircleGeometry(2.5, 64), new THREE.MeshBasicMaterial({ color: '#261507', transparent: true, opacity: 0.45 }));

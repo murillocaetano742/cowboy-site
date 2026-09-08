@@ -88,3 +88,15 @@ Use the same COWBOY ENERGIA packaging appearance reference. Create a portrait co
 
 Frontend recebeu os dois WebP e dois JPG, o mapa/copy e a orientação de 3D representativo. Próxima etapa desta frente: revisão visual da página implementada em desktop e celular, depois que o preview estiver disponível. Não foi alterado HTML, CSS, JS, pacote, API ou conta por este agente.
 
+
+## Textura frontal do modelo 3D — refinamento final
+
+Arquivos `imagens/v3/cowboy-rotulo-frontal.png` (1.222.070 bytes) e `.webp` (170.944 bytes), 682 × 1024 px. Gerada em uma única chamada de imagegen a partir do hero V3 inspecionado. Original preservado: `C:/Users/User/.codex/generated_images/01a080fc-5179-7570-9904-b369440a1eca/exec-50209a35-5b4f-4247-a8d5-31b5f737c292.png`. Redimensionamento e WebP feitos por FFmpeg, qualidade 88.
+
+Inspeção: frente preta/dourada, COWBOY ENERGIA, emblema de bíceps, suplemento alimentar em gotas e 30 mL legíveis; sem certificados, promessas ou números adicionais. A textura é arte representativa para o modelo, não digitalização documental do rótulo. O verso continua gerado com dados factuais conhecidos. Frontend deve preservar fallback textual se a imagem não carregar.
+
+Prompt executado:
+
+```text
+Create a flat 2D FRONT LABEL TEXTURE for the COWBOY ENERGIA bottle shown in the reference image. This is a representative visual texture for an interactive 3D model, not a documentary label. Output a single vertical rectangular artwork, ideally 2:3 portrait, perfectly flat and front-facing, edge-to-edge dark charcoal/black label background. NO bottle, NO cap, NO glass, NO environment, NO perspective, NO bevels, NO drop shadows outside artwork. Carefully preserve the visual branding from the bottle reference: large gold western slab lettering COWBOY, smaller gold ENERGIA below; centered orange-red flaming flexed-biceps emblem; below emblem gold condensed text SUPLEMENTO ALIMENTAR then EM GOTAS then clear 30 mL. Use subtle black paper grain, fine restrained gold top/bottom rules, warm burnished gold ink, balanced clear hierarchy. The emblem is a graphic printed on the flat label, not a real arm. Text must be crisp, correctly spelled and readable. Do not invent seals, certificates, efficacy promises, Anvisa approval, lot numbers, nutrition table, dates or additional quantities. Omit the tiny manufacturer wordmark and tiny fine print rather than fabricate it. Use only the four main text groups specified. Fill the entire rectangular canvas with this label art; no margins outside the label. High quality packaging texture, consistent with the supplied black/gold COWBOY product identity.
+```
