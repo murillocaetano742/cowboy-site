@@ -381,3 +381,6 @@ p + p { margin-top: .9em; }
 @media (min-width: 900px) {
   .relatos-track > * { flex-basis: 20rem; }
 }
+.photo-card[data-fit='contain'] img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(22px) brightness(.55) saturate(1.1); transform: scale(1.25); }
+.photo-card[data-fit='contain'] img:not(.bg) { position: relative; object-fit: contain; }
+.photo-card figcaption b { font-size: 1.05rem; }
