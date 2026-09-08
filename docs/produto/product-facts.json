@@ -1,0 +1,38 @@
+{
+  "version": "2026-09-07-v2",
+  "client": "COWBOY Energia",
+  "source": "Cinco fotografias do produto enviadas pelo usuário em 07/09/2026; transcrição visual, não laudo laboratorial",
+  "name": "COWBOY Energia",
+  "category": "Suplemento alimentar em gotas",
+  "volumeMl": 30,
+  "labelServing": {"drops": 12, "volumeMl": 1, "servingsPerBottle": 30},
+  "nutritionPerLabelServing": [
+    {"name": "Taurina", "amountMg": 50, "dailyValuePercent": null},
+    {"name": "Arginina", "amountMg": 50, "dailyValuePercent": null},
+    {"name": "Feno-grego", "amountMg": 300, "dailyValuePercent": null},
+    {"name": "Vitamina B6", "amountMg": 3, "dailyValuePercent": 231},
+    {"name": "Zinco", "amountMg": 1.7, "dailyValuePercent": 15},
+    {"name": "Boro", "amountMg": 1.1, "dailyValuePercent": null}
+  ],
+  "minimumLabelAge": 19,
+  "labelStatements": ["Não contém glúten", "Colorido artificialmente", "Este produto não é um medicamento", "Após aberto, consumir dentro de 60 dias"],
+  "labelWarnings": ["Não exceder a recomendação diária de consumo indicada na embalagem", "Mantenha fora do alcance de crianças", "Este produto não deve ser consumido por gestantes, lactantes e crianças"],
+  "doseDecision": {"status": "pending_reconciliation", "userReportedDailyDrops": 24, "labelDailyDrops": 12, "publishDailyDose": false, "publishKitDuration": false, "reason": "Orientação de 24 gotas relatada pelo usuário diverge da indicação e advertência do rótulo; aguarda manifestação escrita da responsável técnica e reconciliação aplicável", "publicCopy": "Siga as orientações do rótulo. Se recebeu uma orientação individual diferente, confirme o uso com o profissional que acompanha você."},
+  "manufacturer": {"labelName": "BNT Farma", "labelCnpj": "21.027.384/0001-06", "independentlyVerified": false},
+  "distributor": {"labelCnpj": "63.266.289/0001-05", "legalName": null, "independentlyVerified": false},
+  "labelSac": "contato@cowboyenergiamasculina.com.br",
+  "regulatory": {"labelProcessNumber": "25351014547202508", "currentStatus": "not_confirmed", "publicApprovalBadge": false, "note": "Busca encontrou correspondência histórica do processo e CNPJ em resposta oficial hospedada na Câmara; não comprova situação atual ou correspondência comercial da marca"},
+  "offers": [
+    {"quantity": 1, "unitPriceCents": 5476, "totalPriceCents": 5476, "savingsVsSinglesCents": 0},
+    {"quantity": 2, "unitPriceCents": 4238, "totalPriceCents": 8476, "savingsVsSinglesCents": 2476},
+    {"quantity": 3, "unitPriceCents": 4238, "totalPriceCents": 12714, "savingsVsSinglesCents": 3714},
+    {"quantity": 4, "unitPriceCents": 4238, "totalPriceCents": 16952, "savingsVsSinglesCents": 4952}
+  ],
+  "quantityRule": "Qualquer pedido com 2 ou mais frascos tem preço unitário de R$ 42,38, conforme orientação comercial do usuário",
+  "shipping": {"providerPlanned": "Melhor Envio", "freeShippingClaim": false, "copy": "Frete calculado pelo CEP. Confira o valor total antes de pagar."},
+  "checkoutPlanned": "Cartpanda",
+  "trackingPlanned": "Utmify",
+  "verifiedTestimonials": [],
+  "commercialGuaranteeDays": null,
+  "disallowedUnsubstantiatedClaims": ["cura disfunção erétil", "resolve ejaculação precoce", "100% natural", "10x mais potente", "resultado garantido", "aprovado pela Anvisa", "efeito em X dias", "compra verificada sem pedido auditável", "melhor economia unitária para 4 vs 2 frascos"]
+}

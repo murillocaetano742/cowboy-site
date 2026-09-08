@@ -1,0 +1,373 @@
+{
+  "version": 1,
+  "type": "photographic-360",
+  "width": 480,
+  "height": 900,
+  "homeIndex": 0,
+  "poster": "/imagens/v3/360-real/frame-000.webp",
+  "fallback": "/imagens/v3/referencias-reais/IMG_1410.jpeg",
+  "frameCount": 60,
+  "description": "Giro fotografico real do produto; angulos aproximados. Mao e fundo pertencem a gravacao.",
+  "frames": [
+    {
+      "index": 0,
+      "src": "/imagens/v3/360-real/frame-000.webp",
+      "timeSeconds": 1.0,
+      "angleDegreesApprox": 0
+    },
+    {
+      "index": 1,
+      "src": "/imagens/v3/360-real/frame-001.webp",
+      "timeSeconds": 3.2,
+      "angleDegreesApprox": 6
+    },
+    {
+      "index": 2,
+      "src": "/imagens/v3/360-real/frame-002.webp",
+      "timeSeconds": 3.466666666666667,
+      "angleDegreesApprox": 12
+    },
+    {
+      "index": 3,
+      "src": "/imagens/v3/360-real/frame-003.webp",
+      "timeSeconds": 3.7,
+      "angleDegreesApprox": 18
+    },
+    {
+      "index": 4,
+      "src": "/imagens/v3/360-real/frame-004.webp",
+      "timeSeconds": 3.966666666666667,
+      "angleDegreesApprox": 24
+    },
+    {
+      "index": 5,
+      "src": "/imagens/v3/360-real/frame-005.webp",
+      "timeSeconds": 4.133333333333334,
+      "angleDegreesApprox": 30
+    },
+    {
+      "index": 6,
+      "src": "/imagens/v3/360-real/frame-006.webp",
+      "timeSeconds": 4.3,
+      "angleDegreesApprox": 36
+    },
+    {
+      "index": 7,
+      "src": "/imagens/v3/360-real/frame-007.webp",
+      "timeSeconds": 4.5,
+      "angleDegreesApprox": 42
+    },
+    {
+      "index": 8,
+      "src": "/imagens/v3/360-real/frame-008.webp",
+      "timeSeconds": 4.666666666666667,
+      "angleDegreesApprox": 48
+    },
+    {
+      "index": 9,
+      "src": "/imagens/v3/360-real/frame-009.webp",
+      "timeSeconds": 4.833333333333333,
+      "angleDegreesApprox": 54
+    },
+    {
+      "index": 10,
+      "src": "/imagens/v3/360-real/frame-010.webp",
+      "timeSeconds": 5.0,
+      "angleDegreesApprox": 60
+    },
+    {
+      "index": 11,
+      "src": "/imagens/v3/360-real/frame-011.webp",
+      "timeSeconds": 5.233333333333333,
+      "angleDegreesApprox": 66
+    },
+    {
+      "index": 12,
+      "src": "/imagens/v3/360-real/frame-012.webp",
+      "timeSeconds": 5.466666666666667,
+      "angleDegreesApprox": 72
+    },
+    {
+      "index": 13,
+      "src": "/imagens/v3/360-real/frame-013.webp",
+      "timeSeconds": 5.733333333333333,
+      "angleDegreesApprox": 78
+    },
+    {
+      "index": 14,
+      "src": "/imagens/v3/360-real/frame-014.webp",
+      "timeSeconds": 5.966666666666667,
+      "angleDegreesApprox": 84
+    },
+    {
+      "index": 15,
+      "src": "/imagens/v3/360-real/frame-015.webp",
+      "timeSeconds": 6.666666666666667,
+      "angleDegreesApprox": 90
+    },
+    {
+      "index": 16,
+      "src": "/imagens/v3/360-real/frame-016.webp",
+      "timeSeconds": 7.466666666666667,
+      "angleDegreesApprox": 96
+    },
+    {
+      "index": 17,
+      "src": "/imagens/v3/360-real/frame-017.webp",
+      "timeSeconds": 8.4,
+      "angleDegreesApprox": 102
+    },
+    {
+      "index": 18,
+      "src": "/imagens/v3/360-real/frame-018.webp",
+      "timeSeconds": 9.6,
+      "angleDegreesApprox": 108
+    },
+    {
+      "index": 19,
+      "src": "/imagens/v3/360-real/frame-019.webp",
+      "timeSeconds": 10.4,
+      "angleDegreesApprox": 114
+    },
+    {
+      "index": 20,
+      "src": "/imagens/v3/360-real/frame-020.webp",
+      "timeSeconds": 11.0,
+      "angleDegreesApprox": 120
+    },
+    {
+      "index": 21,
+      "src": "/imagens/v3/360-real/frame-021.webp",
+      "timeSeconds": 11.233333333333333,
+      "angleDegreesApprox": 126
+    },
+    {
+      "index": 22,
+      "src": "/imagens/v3/360-real/frame-022.webp",
+      "timeSeconds": 11.466666666666667,
+      "angleDegreesApprox": 132
+    },
+    {
+      "index": 23,
+      "src": "/imagens/v3/360-real/frame-023.webp",
+      "timeSeconds": 11.733333333333333,
+      "angleDegreesApprox": 138
+    },
+    {
+      "index": 24,
+      "src": "/imagens/v3/360-real/frame-024.webp",
+      "timeSeconds": 11.966666666666667,
+      "angleDegreesApprox": 144
+    },
+    {
+      "index": 25,
+      "src": "/imagens/v3/360-real/frame-025.webp",
+      "timeSeconds": 12.333333333333334,
+      "angleDegreesApprox": 150
+    },
+    {
+      "index": 26,
+      "src": "/imagens/v3/360-real/frame-026.webp",
+      "timeSeconds": 12.733333333333333,
+      "angleDegreesApprox": 156
+    },
+    {
+      "index": 27,
+      "src": "/imagens/v3/360-real/frame-027.webp",
+      "timeSeconds": 13.1,
+      "angleDegreesApprox": 162
+    },
+    {
+      "index": 28,
+      "src": "/imagens/v3/360-real/frame-028.webp",
+      "timeSeconds": 13.433333333333334,
+      "angleDegreesApprox": 168
+    },
+    {
+      "index": 29,
+      "src": "/imagens/v3/360-real/frame-029.webp",
+      "timeSeconds": 13.766666666666667,
+      "angleDegreesApprox": 174
+    },
+    {
+      "index": 30,
+      "src": "/imagens/v3/360-real/frame-030.webp",
+      "timeSeconds": 14.233333333333333,
+      "angleDegreesApprox": 180
+    },
+    {
+      "index": 31,
+      "src": "/imagens/v3/360-real/frame-031.webp",
+      "timeSeconds": 14.933333333333334,
+      "angleDegreesApprox": 186
+    },
+    {
+      "index": 32,
+      "src": "/imagens/v3/360-real/frame-032.webp",
+      "timeSeconds": 15.633333333333333,
+      "angleDegreesApprox": 192
+    },
+    {
+      "index": 33,
+      "src": "/imagens/v3/360-real/frame-033.webp",
+      "timeSeconds": 16.166666666666668,
+      "angleDegreesApprox": 198
+    },
+    {
+      "index": 34,
+      "src": "/imagens/v3/360-real/frame-034.webp",
+      "timeSeconds": 16.5,
+      "angleDegreesApprox": 204
+    },
+    {
+      "index": 35,
+      "src": "/imagens/v3/360-real/frame-035.webp",
+      "timeSeconds": 16.833333333333332,
+      "angleDegreesApprox": 210
+    },
+    {
+      "index": 36,
+      "src": "/imagens/v3/360-real/frame-036.webp",
+      "timeSeconds": 17.233333333333334,
+      "angleDegreesApprox": 216
+    },
+    {
+      "index": 37,
+      "src": "/imagens/v3/360-real/frame-037.webp",
+      "timeSeconds": 17.666666666666668,
+      "angleDegreesApprox": 222
+    },
+    {
+      "index": 38,
+      "src": "/imagens/v3/360-real/frame-038.webp",
+      "timeSeconds": 18.1,
+      "angleDegreesApprox": 228
+    },
+    {
+      "index": 39,
+      "src": "/imagens/v3/360-real/frame-039.webp",
+      "timeSeconds": 18.566666666666666,
+      "angleDegreesApprox": 234
+    },
+    {
+      "index": 40,
+      "src": "/imagens/v3/360-real/frame-040.webp",
+      "timeSeconds": 19.0,
+      "angleDegreesApprox": 240
+    },
+    {
+      "index": 41,
+      "src": "/imagens/v3/360-real/frame-041.webp",
+      "timeSeconds": 19.6,
+      "angleDegreesApprox": 246
+    },
+    {
+      "index": 42,
+      "src": "/imagens/v3/360-real/frame-042.webp",
+      "timeSeconds": 20.2,
+      "angleDegreesApprox": 252
+    },
+    {
+      "index": 43,
+      "src": "/imagens/v3/360-real/frame-043.webp",
+      "timeSeconds": 20.8,
+      "angleDegreesApprox": 258
+    },
+    {
+      "index": 44,
+      "src": "/imagens/v3/360-real/frame-044.webp",
+      "timeSeconds": 21.266666666666666,
+      "angleDegreesApprox": 264
+    },
+    {
+      "index": 45,
+      "src": "/imagens/v3/360-real/frame-045.webp",
+      "timeSeconds": 21.666666666666668,
+      "angleDegreesApprox": 270
+    },
+    {
+      "index": 46,
+      "src": "/imagens/v3/360-real/frame-046.webp",
+      "timeSeconds": 22.066666666666666,
+      "angleDegreesApprox": 276
+    },
+    {
+      "index": 47,
+      "src": "/imagens/v3/360-real/frame-047.webp",
+      "timeSeconds": 22.466666666666665,
+      "angleDegreesApprox": 282
+    },
+    {
+      "index": 48,
+      "src": "/imagens/v3/360-real/frame-048.webp",
+      "timeSeconds": 22.866666666666667,
+      "angleDegreesApprox": 288
+    },
+    {
+      "index": 49,
+      "src": "/imagens/v3/360-real/frame-049.webp",
+      "timeSeconds": 23.2,
+      "angleDegreesApprox": 294
+    },
+    {
+      "index": 50,
+      "src": "/imagens/v3/360-real/frame-050.webp",
+      "timeSeconds": 23.533333333333335,
+      "angleDegreesApprox": 300
+    },
+    {
+      "index": 51,
+      "src": "/imagens/v3/360-real/frame-051.webp",
+      "timeSeconds": 23.833333333333332,
+      "angleDegreesApprox": 306
+    },
+    {
+      "index": 52,
+      "src": "/imagens/v3/360-real/frame-052.webp",
+      "timeSeconds": 24.166666666666668,
+      "angleDegreesApprox": 312
+    },
+    {
+      "index": 53,
+      "src": "/imagens/v3/360-real/frame-053.webp",
+      "timeSeconds": 24.466666666666665,
+      "angleDegreesApprox": 318
+    },
+    {
+      "index": 54,
+      "src": "/imagens/v3/360-real/frame-054.webp",
+      "timeSeconds": 24.8,
+      "angleDegreesApprox": 324
+    },
+    {
+      "index": 55,
+      "src": "/imagens/v3/360-real/frame-055.webp",
+      "timeSeconds": 25.1,
+      "angleDegreesApprox": 330
+    },
+    {
+      "index": 56,
+      "src": "/imagens/v3/360-real/frame-056.webp",
+      "timeSeconds": 25.433333333333334,
+      "angleDegreesApprox": 336
+    },
+    {
+      "index": 57,
+      "src": "/imagens/v3/360-real/frame-057.webp",
+      "timeSeconds": 25.766666666666666,
+      "angleDegreesApprox": 342
+    },
+    {
+      "index": 58,
+      "src": "/imagens/v3/360-real/frame-058.webp",
+      "timeSeconds": 26.133333333333333,
+      "angleDegreesApprox": 348
+    },
+    {
+      "index": 59,
+      "src": "/imagens/v3/360-real/frame-059.webp",
+      "timeSeconds": 26.566666666666666,
+      "angleDegreesApprox": 354
+    }
+  ]
+}

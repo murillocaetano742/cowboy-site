@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "type": "photographic-360",
+  "source": "Video real enviado pelo proprietario; imagens fotograficas, sem malha 3D",
+  "sourceSha256": "c3d1d0c181267230d04f720ae5842954c89ea18c17f15eec7075362f7bcf279e",
+  "width": 480,
+  "height": 900,
+  "homeIndex": 0,
+  "poster": "/imagens/v3/360-real/frame-000.webp",
+  "fallback": "/imagens/v3/referencias-reais/IMG_1410.jpeg",
+  "frameCount": 8,
+  "angleAccuracy": "estimated from label landmarks; not measured rotation",
+  "processing": "Uniform scaling and translation only; real hand/background retained; solid dark margins outside source, no invented image pixels",
+  "frames": [
+    {
+      "index": 0,
+      "src": "/imagens/v3/360-real/frame-000.webp",
+      "timeSeconds": 1.0,
+      "angleDegreesApprox": 0,
+      "bytes": 40248,
+      "sourceFrameSha256": "b55174839182d43196389169df975f9aa5e3f8eb954668cffd3a01a485a0e388",
+      "transform": {
+        "uniformScale": 0.8387942332896462,
+        "translateX": -80.83879423328966,
+        "translateY": -102.87024901703808,
+        "detectedBase": 1136.0,
+        "detectedAxisX": 382.5
+      }
+    },
+    {
+      "index": 8,
+      "src": "/imagens/v3/360-real/frame-008.webp",
+      "timeSeconds": 4.666666666666667,
+      "angleDegreesApprox": 48,
+      "bytes": 39890,
+      "sourceFrameSha256": "01dfc2aee5ead2b8e19694ec045aa0081fec24e8a3591c9c78fce38d6157cd3e",
+      "transform": {
+        "uniformScale": 0.8679927667269439,
+        "translateX": -59.8915009041591,
+        "translateY": -120.41591320072325,
+        "detectedBase": 1118.0,
+        "detectedAxisX": 345.5
+      }
+    },
+    {
+      "index": 15,
+      "src": "/imagens/v3/360-real/frame-015.webp",
+      "timeSeconds": 6.666666666666667,
+      "angleDegreesApprox": 90,
+      "bytes": 41826,
+      "sourceFrameSha256": "017a150bf551eb97b28f3b0577b5a9cb5aeb9690caa517d14176b8b437a2d786",
+      "transform": {
+        "uniformScale": 0.8398031711317661,
+        "translateX": -79.12520503007113,
+        "translateY": -71.26407873154733,
+        "detectedBase": 1097.0,
+        "detectedAxisX": 380.0
+      }
+    },
+    {
+      "index": 23,
+      "src": "/imagens/v3/360-real/frame-023.webp",
+      "timeSeconds": 11.733333333333333,
+      "angleDegreesApprox": 138,
+      "bytes": 38504,
+      "sourceFrameSha256": "bd6ed5df7ad85b10a4f7a357c1fcc6b5a482b124a30e9aed2899d9c584af60e4",
+      "transform": {
+        "uniformScale": 0.7965978632921896,
+        "translateX": -83.41873249662899,
+        "translateY": 19.14842858624627,
+        "detectedBase": 1043.0,
+        "detectedAxisX": 406.0
+      }
+    },
+    {
+      "index": 30,
+      "src": "/imagens/v3/360-real/frame-030.webp",
+      "timeSeconds": 14.233333333333333,
+      "angleDegreesApprox": 180,
+      "bytes": 41824,
+      "sourceFrameSha256": "a5935069502944fbae6fceae8141b13cf1fb92215ff6d607324f1d3ffc99b0bd",
+      "transform": {
+        "uniformScale": 0.7909914858555341,
+        "translateX": -51.480362537764336,
+        "translateY": 24.204888766822364,
+        "detectedBase": 1044.0,
+        "detectedAxisX": 368.5
+      }
+    },
+    {
+      "index": 38,
+      "src": "/imagens/v3/360-real/frame-038.webp",
+      "timeSeconds": 18.1,
+      "angleDegreesApprox": 228,
+      "bytes": 40832,
+      "sourceFrameSha256": "71f79aa34f638184359300d07a28a255388c76d64c434e5b99736c41c2deb721",
+      "transform": {
+        "uniformScale": 0.778588807785888,
+        "translateX": -52.36009732360094,
+        "translateY": 40.26763990267648,
+        "detectedBase": 1040.0,
+        "detectedAxisX": 375.5
+      }
+    },
+    {
+      "index": 45,
+      "src": "/imagens/v3/360-real/frame-045.webp",
+      "timeSeconds": 21.666666666666668,
+      "angleDegreesApprox": 270,
+      "bytes": 37120,
+      "sourceFrameSha256": "5a17c4a2fdfcafd13e0f5770175d8c27a62437d51714d16c22c6b27300a68423",
+      "transform": {
+        "uniformScale": 0.7726358148893361,
+        "translateX": -61.71428571428572,
+        "translateY": 60.36619718309851,
+        "detectedBase": 1022.0,
+        "detectedAxisX": 390.5
+      }
+    },
+    {
+      "index": 53,
+      "src": "/imagens/v3/360-real/frame-053.webp",
+      "timeSeconds": 24.466666666666665,
+      "angleDegreesApprox": 318,
+      "bytes": 35746,
+      "sourceFrameSha256": "cf9100bad25283038ae5d085e6df50ee1db9aace2a9a401679267bd2dbd97a22",
+      "transform": {
+        "uniformScale": 0.7676929228308678,
+        "translateX": -75.9056377449021,
+        "translateY": 73.09476209516185,
+        "detectedBase": 1012.0,
+        "detectedAxisX": 411.5
+      }
+    }
+  ]
+}

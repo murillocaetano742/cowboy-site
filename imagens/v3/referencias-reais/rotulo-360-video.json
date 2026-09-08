@@ -1,0 +1,64 @@
+{
+  "width": 1537,
+  "height": 512,
+  "regions": [
+    {
+      "region": "front",
+      "sourceUnwrapped": "front.png",
+      "crop": [
+        50,
+        0,
+        526,
+        512
+      ],
+      "xStart": 0,
+      "xEnd": 476,
+      "uStart": 0.0,
+      "uEnd": 0.3096942094990241
+    },
+    {
+      "region": "nutrition",
+      "sourceUnwrapped": "nutri.png",
+      "crop": [
+        64,
+        0,
+        493,
+        512
+      ],
+      "xStart": 476,
+      "xEnd": 905,
+      "uStart": 0.3096942094990241,
+      "uEnd": 0.5888093689004554
+    },
+    {
+      "region": "nutrition-back-gap",
+      "sourceUnwrapped": "nutri-back.png",
+      "crop": [
+        245,
+        0,
+        327,
+        512
+      ],
+      "xStart": 905,
+      "xEnd": 987,
+      "uStart": 0.5888093689004554,
+      "uEnd": 0.6421600520494469
+    },
+    {
+      "region": "back",
+      "sourceUnwrapped": "back.png",
+      "crop": [
+        28,
+        0,
+        578,
+        512
+      ],
+      "xStart": 987,
+      "xEnd": 1537,
+      "uStart": 0.6421600520494469,
+      "uEnd": 1.0
+    }
+  ],
+  "allSources": "video original.mp4 frames only; no IMG_1410 or generated artwork",
+  "method": "Cylindrical inverse projection, photographic panel crop assembly, seams positioned outside printed words."
+}
