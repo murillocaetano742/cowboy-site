@@ -15,6 +15,7 @@
   var shippingRequest = null;
   var shippingRequestId = 0;
   var checkoutParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'src', 'sck', 'cid', 'gclid', 'fbclid'];
+  var attributionStorageKey = 'cowboy_attribution';
   var productTotals = { 1: 5476, 2: 8476, 4: 16952 };
 
   function selectedQuantity() {
@@ -54,13 +55,20 @@
   function preserveAttribution() {
     if (!checkoutForm) return;
     var source = new URLSearchParams(window.location.search);
+    var stored = {};
+    try { stored = JSON.parse(window.sessionStorage.getItem(attributionStorageKey) || '{}'); } catch (_) { stored = {}; }
+    if (!stored || typeof stored !== 'object' || Array.isArray(stored)) stored = {};
+    var accepted = {};
     checkoutParams.forEach(function (name) {
-      var value = source.get(name);
-      if (!value || value.length > 256) return;
+      var directValue = source.get(name);
+      var value = directValue === null ? stored[name] : directValue;
+      if (typeof value !== 'string' || value.length < 1 || value.length > 256) return;
       var input = document.createElement('input');
       input.type = 'hidden'; input.name = name; input.value = value;
       checkoutForm.appendChild(input);
+      accepted[name] = value;
     });
+    try { window.sessionStorage.setItem(attributionStorageKey, JSON.stringify(accepted)); } catch (_) { /* storage can be unavailable */ }
   }
 
   preserveAttribution();

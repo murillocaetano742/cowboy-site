@@ -17,7 +17,7 @@ class Element {
   fire(type) { const event = { prevented: false, preventDefault() { this.prevented = true; } }; this.listeners[type]?.(event); return event; }
 }
 
-function fixture({ search = '', config = { shippingAvailable: true, variants: [1, 2, 4].map(quantity => ({ quantity, checkoutAvailable: true })) } } = {}) {
+function fixture({ search = '', storageData = {}, config = { shippingAvailable: true, variants: [1, 2, 4].map(quantity => ({ quantity, checkoutAvailable: true })) } } = {}) {
   const elements = Object.fromEntries(['shipping-form', 'shipping-status', 'shipping-results', 'checkout-form', 'checkout-button', 'checkout-status', 'support-link', 'selected-kit'].map(key => [key, new Element()]));
   const postalCode = new Element(); postalCode.value = '01001-000';
   const shippingButton = new Element();
@@ -30,7 +30,13 @@ function fixture({ search = '', config = { shippingAvailable: true, variants: [1
       querySelectorAll: () => offers,
       createElement: () => new Element(),
     },
-    window: { location: { search } }, URLSearchParams, AbortController,
+    window: {
+      location: { search },
+      sessionStorage: {
+        getItem: key => Object.hasOwn(storageData, key) ? storageData[key] : null,
+        setItem: (key, value) => { storageData[key] = String(value); },
+      },
+    }, URLSearchParams, AbortController,
     fetch: (url, options) => url === '/api/config' ? Promise.resolve({ ok: true, json: async () => config }) : new Promise((resolve, reject) => pending.push({ url, options, resolve, reject })),
   };
   vm.runInNewContext(fs.readFileSync(path.resolve('assets/js/cowboy-store.js'), 'utf8'), context);
@@ -49,6 +55,25 @@ test('QA: atribuição do anúncio chega ao formulário sem parâmetros arbitrá
   await settle();
   const fields = Object.fromEntries(f.elements['checkout-form'].children.map(child => [child.name, child.value]));
   assert.deepEqual(fields, { utm_source: 'meta', utm_content: 'C03', fbclid: 'click' });
+});
+
+test('QA: atribuição permitida sobrevive à navegação interna na mesma sessão', async () => {
+  const storageData = {};
+  fixture({ search: '?utm_source=meta&utm_content=C03&email=private', storageData });
+  await settle();
+  const returned = fixture({ storageData });
+  await settle();
+  const fields = Object.fromEntries(returned.elements['checkout-form'].children.map(child => [child.name, child.value]));
+  assert.deepEqual(fields, { utm_source: 'meta', utm_content: 'C03' });
+});
+
+test('QA: armazenamento inválido não quebra compra nem injeta atribuição arbitrária', async () => {
+  for (const serialized of ['null', '{"utm_source":{"private":true}}', '{"utm_campaign":"' + 'x'.repeat(257) + '"}']) {
+    const f = fixture({ storageData: { cowboy_attribution: serialized } });
+    await settle();
+    assert.deepEqual(f.elements['checkout-form'].children, []);
+    assert.equal(f.elements['checkout-button'].disabled, false);
+  }
 });
 
 test('QA: indisponibilidade conserva mensagem, impede submit e oferece SAC', async () => {

@@ -41,7 +41,8 @@ Publicar a versão aprovada pelo proprietário, correspondente a `cowboy-nova.ht
 - `npm.cmd run build`: passou, com 37 arquivos públicos na allowlist.
 - `npm.cmd run lint`: passou, com sintaxe JavaScript verificada.
 - `npm.cmd run check:build`: passou, incluindo isolamento do output e referências locais.
-- `npm.cmd test`: passou, 24 testes de integração e QA; cobre kits, frete falhando fechado, checkout/UTM, páginas de entrada e vídeos.
+- `npm.cmd test`: passou, 26 testes de integração e QA; cobre kits, frete falhando fechado, checkout/UTM, armazenamento inválido, páginas de entrada e vídeos.
+- `npm.cmd run check:commerce`: confirmou checkout público configurado para kits 1/2/4; o frete permanece indisponível de forma explícita enquanto faltam credenciais do Melhor Envio.
 - Verificação adicional confirmou `index.html` no output e texto público em UTF-8, sem caracteres de substituição.
 
 ## File List do patch técnico
