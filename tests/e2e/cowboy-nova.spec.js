@@ -1,6 +1,6 @@
 'use strict';
 
-// QA da página nova: renderização real (mobile primeiro), acessibilidade (axe-core), galeria e fluxo de kit.
+// QA da página nova (conversão, mobile primeiro): ordem dos blocos, compra só no fim, acessibilidade, fluxo de kit.
 // Requer servidor local: PORT=4180 npm run dev (ou E2E_BASE).
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
@@ -15,33 +15,39 @@ fs.mkdirSync(OUT, { recursive: true });
 test.describe('COWBOY Energia — página nova', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
 
-  test('mobile: sem erros de console, compra só no fim, sem rolagem horizontal', async ({ page }) => {
+  test('mobile: ordem de conversão, compra só no fim, sem claims proibidos, sem rolagem horizontal', async ({ page }) => {
     const errors = [];
     page.on('pageerror', (error) => errors.push(String(error)));
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
     await page.goto(URL, { waitUntil: 'networkidle' });
     await expect(page).toHaveTitle(/COWBOY Energia/);
     const html = await page.content();
-    const before = html.slice(0, html.indexOf('id="kit"'));
-    expect(before).not.toMatch(/api\/checkout|Continuar para o pagamento/i);
+    const at = (id) => html.indexOf(`id="${id}"`);
+    expect(at('relatos')).toBeGreaterThan(at('topo'));
+    expect(at('relatos')).toBeLessThan(at('reconhece'));
+    expect(at('garantia')).toBeLessThan(at('kit'));
+    const before = html.slice(0, at('kit'));
+    expect(before).not.toMatch(/api\/checkout|data-checkout-button/i);
     expect(html.match(/data-checkout-button/g)).toHaveLength(1);
-    expect(html).not.toMatch(/22\.000|anvisa aprov|★|avaliações|estoque baixo|24 gotas/i);
+    const claims = html.replace(/n[aã]o promete(?:mos)? cura/gi, '');
+    expect(claims).not.toMatch(/\bcura\b|curar|resolve de uma vez|resultado garantido|22\.000|★|avaliações|estoque baixo|24 gotas|aprovado pela anvisa/i);
     const width = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(width).toBeLessThanOrEqual(390);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('mobile: galeria navega por pontos e setas', async ({ page }) => {
+  test('mobile: vídeos no topo com controles, sem autoplay', async ({ page }) => {
     await page.goto(URL, { waitUntil: 'networkidle' });
-    await page.locator('#frasco').scrollIntoViewIfNeeded();
-    const dots = page.locator('[data-gallery-dots] button');
-    await expect(dots).toHaveCount(5);
-    await page.locator('[data-gallery-next]').click();
-    await page.waitForTimeout(700);
-    await expect(dots.nth(1)).toHaveAttribute('aria-current', 'true');
+    const videos = page.locator('#relatos video');
+    await expect(videos).toHaveCount(2);
+    for (const video of await videos.all()) {
+      await expect(video).toHaveAttribute('controls', '');
+      await expect(video).not.toHaveAttribute('autoplay', /.*/);
+    }
+    await expect(page.locator('#relatos .badge-video')).toContainText(/segundo frasco/i);
   });
 
-  test('mobile: kit selecionado atualiza painel, recapitulação aparece, pill de capítulos abre', async ({ page }) => {
+  test('mobile: kit selecionado atualiza painel, recapitulação aparece, pill abre e fecha', async ({ page }) => {
     await page.goto(URL, { waitUntil: 'networkidle' });
     await page.locator('#kit').scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);

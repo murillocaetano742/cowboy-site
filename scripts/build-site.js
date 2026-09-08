@@ -20,6 +20,7 @@ const ASSETS = [
   'imagens/kit-4-frascos.jpg',
   'imagens/kit-1-frasco.jpg',
   'imagens/kit-2-frascos.jpg',
+  'imagens/homem-confiante.jpg',
   'assets/css/cowboy.css',
   'assets/css/cowboy-v3.css',
   'assets/js/cowboy-store.js',

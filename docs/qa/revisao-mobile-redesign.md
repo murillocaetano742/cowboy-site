@@ -6,11 +6,15 @@ Data: 08/09/2026. Responsabilidade desta frente: preservar o baseline, fixar o c
 
 - Baseline móvel anterior ao redesign: **capturado**.
 - Contrato comercial: **documentado abaixo**.
-- Roteiro pós-implementação: **pronto**.
+- Roteiro pós-implementação: **executado na versão final baseada na referência histórica**.
 - Primeira montagem do redesign: **rejeitada pelo proprietário antes da rodada em lote**.
-- Rodada final 320/390/430 + smoke desktop: **não executada para a direção rejeitada; aguarda nova referência visual**.
+- Rodada final 320/390/430 + smoke desktop: **aprovada para a versão refinada**.
 
-Uma automação de rodada foi preparada em `.local/qa-mobile-redesign.cjs`, mas não foi executada após a rejeição. Nenhum resultado desse script deve ser tratado como evidência.
+A montagem rejeitada não foi submetida à rodada em lote. Após a adoção da referência histórica, `.local/qa-mobile-redesign.cjs` foi executado contra a versão final e gerou `.local/revisao-mobile-redesign/round-1/results.json` e capturas full page em 320, 390, 430 e 1440 px.
+
+A rodada confirmou largura exata do documento, ausência de elementos fora da viewport, sobreposição na fórmula, imagens deformadas ou descarregadas, violações axe, erros de console/página e respostas locais com erro. Inter e Oswald locais carregaram; a galeria alternou corretamente suas três imagens; os dois vídeos reproduziram; havia um único formulário e um único CTA de checkout no bloco final; kits 1/2/4, totais, máscara de CEP, frete indisponível e allowlist de atribuição passaram. A V3 não solicitou recursos 360 ou Three.js. O navegador solicitou os endpoints dos vídeos com `preload="metadata"`; a rodada comprovou reprodução, mas não mediu volume transferido na carga inicial.
+
+O primeiro passe encontrou links com área interativa inferior a 44 px. Após a correção concentrada, `.local/qa-mobile-targets-retest.cjs` gerou `.local/revisao-mobile-redesign/round-1/targets-retest.json`: todos os alvos medidos na V3 e na prévia ficaram com pelo menos 44 px, sem regressão de largura em 320/390/430, sem elementos fora da tela e com foco visível de 3 px. Os alertas automáticos de `clippedText` foram descartados como falsos positivos de métrica de linha: os retângulos permaneciam dentro da viewport e a inspeção visual independente não encontrou corte.
 
 ## Baseline preservado
 

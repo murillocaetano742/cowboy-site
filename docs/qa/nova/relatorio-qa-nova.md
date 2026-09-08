@@ -1,6 +1,6 @@
-# QA — página COWBOY Energia nova (`cowboy-nova.html`, mobile first)
+# QA — página COWBOY Energia nova (`cowboy-nova.html`, conversão, mobile first)
 
-Data: 08/09/2026. Servidor local `PORT=4180 npm run dev`, rota `http://127.0.0.1:4180/cowboy-nova` (na Vercel: `/nova`). Nenhum teste tocou Cartpanda ou Melhor Envio reais. Esta versão substitui a página 360: o modelo 3D foi retirado a pedido do proprietário e o visual foi refeito a partir da versão publicada (preto, dourado em degradê, Oswald, cards com borda fina).
+Data: 08/09/2026. Servidor local `PORT=4180 npm run dev`, rota `http://127.0.0.1:4180/cowboy-nova` (na Vercel: `/nova`). Nenhum teste tocou Cartpanda ou Melhor Envio reais. Versão de conversão (08/09, tarde): gancho na dor, depoimentos no topo, agitação, virada, mecanismo, garantia de 30 dias com anti-garantia, oferta com preço por porção e pilha de valor, compra só no fim. Copy em `docs/produto/copy-conversao-nova.md`; briefing de imagens para o Codex em `docs/criacao/briefing-imagens-conversao.md`.
 
 ## Gates locais existentes
 
@@ -14,8 +14,8 @@ Data: 08/09/2026. Servidor local `PORT=4180 npm run dev`, rota `http://127.0.0.1
 
 `npm run test:e2e` (`tests/e2e/cowboy-nova.spec.js`): **6/6**.
 
-1. Sem erros de console; nenhum `api/checkout` ou "Continuar para o pagamento" antes do capítulo 9; um único botão de compra; sem "22.000", estrelas, "avaliações", "estoque baixo" ou "24 gotas"; largura de rolagem = 390 px.
-2. Galeria: 5 imagens, pontos e setas navegam e marcam a imagem atual.
+1. Ordem de conversão verificada no HTML (relatos antes da agitação, garantia antes da oferta); nenhum `api/checkout` nem botão de compra antes da seção de kits; um único botão de compra; sem "cura", "resolve de uma vez", "resultado garantido", "22.000", estrelas, "avaliações", "estoque baixo", "24 gotas" ou "aprovado pela Anvisa" (a negação "não promete cura" é permitida); largura de rolagem = 390 px; sem erros de console.
+2. Vídeos no topo com `controls`, sem autoplay, com o selo "No segundo frasco".
 3. Trocar o kit atualiza o painel; recapitulação dos capítulos aparece; pill de capítulos abre a folha e Esc fecha; formulário GET para `/api/checkout` preservado.
 4. axe-core (WCAG 2.1 A/AA): 0 violações.
 5. Captura mobile completa.
