@@ -173,8 +173,10 @@ test('configuração pública expõe oferta inicial e disponibilidade sem segred
   const response = mockResponse();
   configHandler({ method: 'GET' }, response);
   assert.equal(response.result.statusCode, 200);
-  assert.deepEqual(response.result.body.variants.map((variant) => variant.quantity), [1, 2, 4]);
+  assert.deepEqual(response.result.body.variants.map((variant) => variant.quantity), [1, 2, 3, 4]);
   assert.equal(response.result.body.variants.find((variant) => variant.quantity === 2).checkoutAvailable, true);
+  // Kit de 3 é exposto para a página, mas fica indisponível até CARTPANDA_CHECKOUT_3_URL existir.
+  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).checkoutAvailable, false);
   assert.equal(response.result.body.shippingAvailable, true);
   assert.equal(JSON.stringify(response.result.body).includes('server-only-token'), false);
   for (const [key, previous] of Object.entries(retained)) {

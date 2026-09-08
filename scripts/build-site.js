@@ -23,6 +23,7 @@ const ASSETS = [
   'imagens/kit-4-frascos.jpg',
   'imagens/kit-1-frasco.jpg',
   'imagens/kit-2-frascos.jpg',
+  'imagens/kit-3-frascos.jpg',
   'imagens/v4/hero-varanda.webp',
   'imagens/v4/mesa-de-cabeceira.webp',
   'imagens/v4/casal-cozinha.webp',

@@ -16,7 +16,7 @@
   var shippingRequestId = 0;
   var checkoutParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'src', 'sck', 'cid', 'gclid', 'fbclid'];
   var attributionStorageKey = 'cowboy_attribution';
-  var productTotals = { 1: 5476, 2: 8476, 4: 16952 };
+  var productTotals = { 1: 5476, 2: 8476, 3: 12714, 4: 16952 };
 
   function selectedQuantity() {
     var checked = document.querySelector('[name="quantity"]:checked');
