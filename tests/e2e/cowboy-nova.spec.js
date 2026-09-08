@@ -68,7 +68,7 @@ test.describe('COWBOY Energia — página nova', () => {
     await page.keyboard.press('Escape');
     await expect(page.locator('[data-sheet]')).toBeHidden();
     const form = page.locator('[data-checkout-form]');
-    await expect(form).toHaveAttribute('action', '/api/checkout');
+    await expect(form).toHaveAttribute('action', /\/api\/checkout/); // a UTMify pode acrescentar parâmetros ao action
     await expect(form).toHaveAttribute('method', /get/i);
   });
 
