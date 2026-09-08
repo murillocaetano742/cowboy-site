@@ -392,3 +392,15 @@ p + p { margin-top: .9em; }
   .hero-copy > .tag { max-width: 100%; white-space: normal; line-height: 1.35; }
 }
 @media (min-width: 900px) { .agit-img { max-width: 52rem; margin: 0 auto 1.6rem; } }
+
+/* REBUILD-016: preserve mobile gallery arrow targets. */
+.relatos-nav .arrow { flex: 0 0 2.75rem; }
+.relatos-nav .dots { gap: .25rem; }
+@media (max-width: 389px) {
+  .relatos-nav .dots {
+    display: grid;
+    grid-template-columns: repeat(4, 1.6rem);
+    gap: .4rem;
+    justify-content: center;
+  }
+}

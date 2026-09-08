@@ -1,6 +1,6 @@
 # REBUILD-016 — Publicação aprovada de Cowboy Nova
 
-Status: Correções restritas validadas; aguardando atualização da PR e novo preview antes de merge/deploy.
+Status: Publicado; correção pontual de alvo de toque validada e pronta para deploy.
 
 ## Objetivo
 
@@ -9,11 +9,11 @@ Publicar a versão aprovada pelo proprietário, correspondente a `cowboy-nova.ht
 ## Critérios
 
 - [x] Confirmar a origem e o commit da PR #1 em relação à prévia aprovada e ao workspace.
-- [ ] Confirmar projeto, domínio, runtime e integrações configuradas no Vercel sem expor segredos.
+- [x] Confirmar projeto, domínio, runtime e integrações configuradas no Vercel sem expor segredos.
 - [x] Preparar artefato isolado a partir da versão aprovada, preservando trabalho concorrente local.
 - [x] Executar checks de build, sintaxe e integrações aplicáveis ao artefato aprovado.
 - [x] Reportar a comparação e o plano de deploy à coordenação antes de merge ou deploy.
-- [ ] Publicar somente após a comparação interna registrada e verificar a URL resultante.
+- [x] Publicar somente após a comparação interna registrada e verificar a URL resultante.
 
 ## File List
 
@@ -21,12 +21,12 @@ Publicar a versão aprovada pelo proprietário, correspondente a `cowboy-nova.ht
 
 ## Registro inicial
 
-- A PR #1 está aberta, é mergeable e parte de `d4c726d`; o head aprovado é `89adad3d08167231d190890f43c6738241795b35` em `feat/pagina-nova`.
+- A PR #1 foi integrada em `main` no commit `b2ae6ee7606bd2c32591a54c1e025ea318fbc984` após a validação do head `f056f49`.
 - A comparação normalizada de quebras de linha confirmou que `cowboy-nova.html`, CSS, JS, build, ignore, Vercel, termos, robots e sitemap de `89adad3` correspondem ao workspace/previsão local aprovada. O checkout isolado está em `.local/rebuild-016-pr1`.
 - Repositório local em `main`, no commit `d4c726d`, contém alterações concorrentes não versionadas; ele não será usado como origem de publicação.
 - `vercel.json` define build estático com funções `api/*.js` e rewrite `/nova` para `cowboy-nova.html`.
-- O check Vercel atual da PR falhou; a exclusão de ativos necessários em `.vercelignore` é uma hipótese técnica a ser revalidada no novo check, não uma causa confirmada.
-- Produção atual: `https://cowboyenergiamasculina.com.br/` respondeu 200 em 8 de setembro de 2026 e permanece como referência de rollback até a promoção.
+- O Vercel aprovou o preview e a produção do merge. O check inicial que falhou não teve log disponível; o ajuste de allowlist foi validado pelo novo build.
+- Produção: `https://cowboyenergiamasculina.com.br/` respondeu 200 em 8 de setembro de 2026, com o HTML correspondente ao `dist/index.html` aprovado após normalização de quebras de linha.
 
 ## Ajustes restritos preparados
 
@@ -59,3 +59,14 @@ Publicar a versão aprovada pelo proprietário, correspondente a `cowboy-nova.ht
 - `termos.html`
 - `tests/integrations/commerce.test.js`
 - `vercel.json`
+
+## Verificação de produção
+
+- `/api/config`: 200, com checkout disponível e frete explicitamente indisponível sem as credenciais do Melhor Envio.
+- `/api/checkout?quantity=1|2|4`: 302 para os links públicos Cartpanda correspondentes, preservando parâmetros de atribuição permitidos.
+- `/api/frete`: 503 controlado com `shipping_unavailable`; não há erro 500 nem cotação inventada.
+- `/`, `/termos` e `/loja?utm_source=qa` responderam 200; `/loja` redirecionou para a raiz preservando a query.
+
+## Correção pós-publicação
+
+- `assets/css/cowboy-nova.css`: setas da galeria passam a ter 44 px de alvo de toque; em 320 px os indicadores ficam em grade de quatro colunas. O ajuste preserva a composição aprovada e passou em build, lint, check de output e 26 testes.
