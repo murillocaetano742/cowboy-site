@@ -91,7 +91,7 @@ A boa notícia: **a promessa que converte não precisa ser a promessa de cura.**
 ### 8. Oferta, preço percebido e urgência real
 
 - Título: **SEU SEGUNDO FRASCO POR R$ 30 A MAIS.**
-- Kits: 1 frasco R$ 54,76 · **2 frascos R$ 84,76** (em destaque, `R$ 42,38 cada, economize R$ 24,76`) · 3 frascos R$ 127,14 (`90 porções, economize R$ 37,14`) · 4 frascos R$ 169,52 (`economize R$ 49,52`). O kit de 3 só aparece na página quando `CARTPANDA_CHECKOUT_3_URL` estiver configurado (link de checkout criado no Cartpanda); o script esconde kits sem checkout.
+- Kits: 1 frasco R$ 54,76 · **2 frascos R$ 84,76** (em destaque, `R$ 42,38 cada, economize R$ 24,76`) · 3 frascos R$ 127,14 (`90 porções, economize R$ 37,14`) · 4 frascos R$ 169,52 (`economize R$ 49,52`). O kit de 3 aparece sempre; enquanto não houver link de checkout (produto criado no Cartpanda e `CARTPANDA_CHECKOUT_3_URL` ou a URL pública em `config/commerce.js`), o card mostra a etiqueta "Disponível em breve" e o botão fica desabilitado com a mensagem de indisponibilidade. Script para criar o produto: `scripts/cartpanda-create-kit3.js`.
 - Argumento de decisão: `Quem começa, começa com dois: um para a primeira rotina e outro para não interromper. Por isso o segundo sai por R$ 30.`
 - **Preço percebido (ancoragem honesta, com aritmética real):**
   - `Kit de 2: R$ 84,76 por 60 porções declaradas. Dá R$ 1,41 por porção. Menos que um café.` (não converter em "por dia" nem em duração do kit enquanto a dose de 12 versus 24 gotas não estiver reconciliada)
