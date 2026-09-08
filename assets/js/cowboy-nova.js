@@ -164,7 +164,7 @@
       if (input && !available[Number(input.value)]) {
         if (input.checked) { var fallback = document.querySelector('input[name="quantity"][value="2"]'); if (fallback) { fallback.checked = true; fallback.dispatchEvent(new Event('change')); } }
         kit.setAttribute('data-unavailable', '');
-        if (!kit.querySelector('.soon')) { var soon = document.createElement('span'); soon.className = 'soon'; soon.textContent = 'Disponível em breve'; kit.appendChild(soon); }
+        if (!kit.querySelector('.soon')) { var soon = document.createElement('span'); soon.className = 'soon'; soon.textContent = 'Disponível em breve'; (kit.querySelector('.kit-body') || kit).appendChild(soon); }
       }
     });
   }).catch(function () {});
