@@ -31,6 +31,12 @@ imagens/v2/*
 !imagens/kit-1-frasco.jpg
 !imagens/kit-2-frascos.jpg
 !imagens/kit-4-frascos.jpg
+!imagens/kits/
+imagens/kits/*
+!imagens/kits/kit-1.jpg
+!imagens/kits/kit-2.jpg
+!imagens/kits/kit-3.jpg
+!imagens/kits/kit-4.jpg
 !imagens/homem-confiante.jpg
 !imagens/v4/
 imagens/v4/*

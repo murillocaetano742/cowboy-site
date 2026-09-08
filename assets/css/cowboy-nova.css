@@ -396,3 +396,15 @@ p + p { margin-top: .9em; }
 
 .kit[data-unavailable] { opacity: .78; }
 .kit .soon { display: inline-flex; width: max-content; margin-top: .3rem; padding: .3rem .55rem; border-radius: 999px; border: 1px solid var(--line-strong); font: 500 .62rem/1 var(--head); letter-spacing: .1em; text-transform: uppercase; color: var(--gold-2); }
+
+/* REBUILD-016: preserve mobile gallery arrow targets. */
+.relatos-nav .arrow { flex: 0 0 2.75rem; }
+.relatos-nav .dots { gap: .25rem; }
+@media (max-width: 389px) {
+  .relatos-nav .dots {
+    display: grid;
+    grid-template-columns: repeat(4, 1.6rem);
+    gap: .4rem;
+    justify-content: center;
+  }
+}

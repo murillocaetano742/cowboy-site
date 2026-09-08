@@ -10,7 +10,7 @@ Data: 8 de setembro de 2026.
 | UTMify | O script público recomendado pela UTMify para Cartpanda foi incluído. A página também mantém, durante a sessão, somente `utm_*`, `src`, `sck`, `cid`, `gclid` e `fbclid`, limitados a 256 caracteres, e os envia ao endpoint de checkout. A política de privacidade descreve esse armazenamento. | Isto comprova encaminhamento de atribuição até o checkout, não evento de venda. `initial_sale`/upsell e um teste de conexão dependem da configuração S2S na conta UTMify/Cartpanda. O endpoint `latest.js` é mantido pelo fornecedor e não tem versão fixa no URL oficial. |
 | Melhor Envio | Contrato server-side, CEP 74475239, caixa 23×8×8 cm, 0,5 kg e valores segurados têm testes automatizados. A ausência de configuração falha fechado. | Não existem `MELHOR_ENVIO_ENV`, `MELHOR_ENVIO_TOKEN` e `MELHOR_ENVIO_USER_AGENT` no ambiente do checkout isolado. O indicador Cartpanda `default_shipping_created: 1` não comprova Melhor Envio. Faltam OAuth na conta, origem/tarifa e uma cotação real sem compra. |
 | Google | A produção pública e o DNS consultados não revelaram `G-`, `GTM-`, `gtag`, `google-site-verification` ou TXT de verificação reutilizável. | Não há Measurement ID, container GTM ou propriedade Search Console comprovados. Nenhum identificador foi inventado e Google não foi declarado ativo. |
-| Vercel | O check do novo head `8bb78a8` passou no deployment `E31pgCQxH2MXdUxjApYoyj17qx7F`. | A falha anterior foi superada por esse head. A causa do deployment antigo não foi obtida e não foi atribuída por hipótese. |
+| Vercel | O preview do head `f056f49` e a produção do merge `b2ae6ee` passaram. O domínio principal respondeu 200 com o HTML aprovado, meta `index,follow` e script UTMify. | A falha anterior foi superada; sua causa não foi obtida e não foi atribuída por hipótese. Os logs e variáveis do projeto continuam restritos ao escopo oficial. |
 
 ## Verificação local
 
@@ -18,6 +18,7 @@ Data: 8 de setembro de 2026.
 - `npm run lint`: passou em 29 arquivos JavaScript.
 - `git diff --check`: passou.
 - `npm run check:commerce`: checkout 1/2/4 disponível; saída 1 somente porque os três itens de configuração do Melhor Envio estão ausentes.
+- Produção: `/api/config` respondeu 200; checkout 1/2/4 respondeu 302 para os links Cartpanda configurados com atribuição permitida; `/api/frete` respondeu 503 controlado sem credenciais, sem erro interno.
 - Nenhum token foi copiado para HTML, documentação ou configuração pública.
 
 ## Acessos técnicos restantes
