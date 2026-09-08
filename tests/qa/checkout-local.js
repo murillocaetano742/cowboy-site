@@ -2,7 +2,7 @@
 
 // Verifica somente o redirecionamento do servidor local. Não acessa Cartpanda.
 const assert = require('node:assert/strict');
-const expected = [[1, '211742450'], [2, '211742746'], [4, '211742749']];
+const expected = [[1, '211742450'], [2, '211742746'], [3, '212751381'], [4, '211742749']];
 
 async function run() {
   const results = [];

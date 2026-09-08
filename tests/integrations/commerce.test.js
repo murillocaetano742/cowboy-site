@@ -122,10 +122,15 @@ test('checkout preserva somente atribuição permitida e não tem URL inventada'
   if (previousHosts === undefined) delete process.env.CARTPANDA_CHECKOUT_ALLOWED_HOSTS;
   else process.env.CARTPANDA_CHECKOUT_ALLOWED_HOSTS = previousHosts;
 
+  // Indisponibilidade simulada: override inválido (http) para o kit 3 anula o link público.
+  const previous3 = process.env.CARTPANDA_CHECKOUT_3_URL;
+  process.env.CARTPANDA_CHECKOUT_3_URL = 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1';
   const unavailable = mockResponse();
   checkoutHandler({ method: 'GET', query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailable);
   assert.equal(unavailable.result.statusCode, 503);
   assert.equal(unavailable.result.body.error, 'checkout_unavailable');
+  if (previous3 === undefined) delete process.env.CARTPANDA_CHECKOUT_3_URL;
+  else process.env.CARTPANDA_CHECKOUT_3_URL = previous3;
 });
 
 test('checkout exige HTTPS e host Cartpanda ou domínio customizado explicitamente permitido', () => {
@@ -140,11 +145,12 @@ test('checkout exige HTTPS e host Cartpanda ou domínio customizado explicitamen
 });
 
 test('checkout usa somente os links públicos Cartpanda confirmados quando não há override', () => {
-  assert.deepEqual(Object.keys(commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS), ['1', '2', '4']);
+  assert.deepEqual(Object.keys(commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS), ['1', '2', '3', '4']);
+  assert.equal(commerce.checkoutUrlFor(3, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/212751381:1');
   assert.equal(commerce.checkoutUrlFor(1, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742450:1');
   assert.equal(commerce.checkoutUrlFor(2, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742746:1');
   assert.equal(commerce.checkoutUrlFor(4, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742749:1');
-  assert.equal(commerce.checkoutUrlFor(3, {}), null);
+  assert.equal(commerce.checkoutUrlFor(3, { CARTPANDA_CHECKOUT_3_URL: 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1' }), null);
   assert.equal(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'https://example.com/checkout/1' }), null);
 });
 
@@ -175,8 +181,8 @@ test('configuração pública expõe oferta inicial e disponibilidade sem segred
   assert.equal(response.result.statusCode, 200);
   assert.deepEqual(response.result.body.variants.map((variant) => variant.quantity), [1, 2, 3, 4]);
   assert.equal(response.result.body.variants.find((variant) => variant.quantity === 2).checkoutAvailable, true);
-  // Kit de 3 é exposto para a página, mas fica indisponível até CARTPANDA_CHECKOUT_3_URL existir.
-  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).checkoutAvailable, false);
+  // Kit de 3 criado no Cartpanda em 08/09/2026 (produto 29892228, variante 212751381).
+  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).checkoutAvailable, true);
   assert.equal(response.result.body.shippingAvailable, true);
   assert.equal(JSON.stringify(response.result.body).includes('server-only-token'), false);
   for (const [key, previous] of Object.entries(retained)) {
@@ -267,14 +273,21 @@ test('checkout apresenta erro amigável em navegação HTML e mantém JSON para 
   assert.match(invalidHtml.result.body, /contato@cowboyenergiamasculina\.com\.br/);
   assert.doesNotMatch(invalidHtml.result.body, /alert\(1\)/);
 
+  const previous3 = process.env.CARTPANDA_CHECKOUT_3_URL;
+  process.env.CARTPANDA_CHECKOUT_3_URL = 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1';
   const unavailableHtml = mockResponse();
   checkoutHandler({ method: 'GET', headers: { accept: 'text/html' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailableHtml);
+  if (previous3 === undefined) delete process.env.CARTPANDA_CHECKOUT_3_URL;
+  else process.env.CARTPANDA_CHECKOUT_3_URL = previous3;
   assert.equal(unavailableHtml.result.statusCode, 503);
   assert.match(unavailableHtml.result.body, /Pagamento indisponível agora/);
   assert.doesNotMatch(unavailableHtml.result.body, /configurado/);
 
+  process.env.CARTPANDA_CHECKOUT_3_URL = 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1';
   const apiError = mockResponse();
   checkoutHandler({ method: 'GET', headers: { accept: 'application/json' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, apiError);
+  if (previous3 === undefined) delete process.env.CARTPANDA_CHECKOUT_3_URL;
+  else process.env.CARTPANDA_CHECKOUT_3_URL = previous3;
   assert.equal(apiError.result.statusCode, 503);
   assert.deepEqual(apiError.result.body, { error: 'checkout_unavailable' });
 });
