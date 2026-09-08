@@ -5,8 +5,8 @@ const { LOGISTICS } = require('#logistics');
 /**
  * Commercial facts deliberately kept separate from page copy. Values are in
  * centavos so that price calculations never depend on floating point values.
- * Checkout URLs are server-only environment variables because they are not
- * known until Cartpanda links have been created by the merchant.
+ * Confirmed Cartpanda checkout links are public routing data. Environment
+ * variables may override them without exposing the Cartpanda API token.
  */
 const OFFER = Object.freeze({
   currency: 'BRL',
@@ -21,6 +21,12 @@ const OFFER = Object.freeze({
 // Keep the initial page focused while allowing the rule “2+ at R$42,38 each”
 // to be honored if a future Cartpanda kit for 3 is explicitly configured.
 const DISPLAY_VARIANT_QUANTITIES = Object.freeze([1, 2, 4]);
+
+const CARTPANDA_PUBLIC_CHECKOUT_URLS = Object.freeze({
+  1: 'https://cowboy-energia.mycartpanda.com/checkout/211742450:1',
+  2: 'https://cowboy-energia.mycartpanda.com/checkout/211742746:1',
+  4: 'https://cowboy-energia.mycartpanda.com/checkout/211742749:1',
+});
 
 const UTM_ALLOWLIST = Object.freeze([
   'utm_source',
@@ -61,7 +67,8 @@ function isPositiveNumber(value) {
 function checkoutUrlFor(quantity, env = process.env) {
   const variant = OFFER.variants[quantity];
   if (!variant) return null;
-  const candidate = env[variant.checkoutEnv];
+  const configuredCandidate = String(env[variant.checkoutEnv] || '').trim();
+  const candidate = configuredCandidate || CARTPANDA_PUBLIC_CHECKOUT_URLS[quantity];
   if (!candidate) return null;
 
   try {
@@ -116,6 +123,7 @@ function getShippingBaseUrl(env = process.env) {
 
 module.exports = {
   OFFER,
+  CARTPANDA_PUBLIC_CHECKOUT_URLS,
   DISPLAY_VARIANT_QUANTITIES,
   UTM_ALLOWLIST,
   checkoutUrlFor,

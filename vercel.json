@@ -10,8 +10,11 @@
     }
   },
   "cleanUrls": true,
+  "redirects": [
+    { "source": "/loja", "destination": "/", "permanent": true },
+    { "source": "/loja.html", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
-    { "source": "/loja", "destination": "/loja.html" },
     { "source": "/nova", "destination": "/cowboy-nova.html" }
   ],
   "headers": [

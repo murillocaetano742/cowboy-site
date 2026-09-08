@@ -5,13 +5,14 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT = path.join(ROOT, 'dist');
-const PAGES = ['index.html', 'loja.html', 'cowboy-v3.html', 'cowboy-nova.html', 'cowboy-conversao.html', 'cowboy-mobile-preview.html', 'cowboy-conversao-mobile.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
+// Production serves the approved COWBOY Nova experience at the root. The
+// named file remains as the /nova alias; prior variants are not built.
+const PAGES = ['cowboy-nova.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
+const OUTPUT_ALIASES = [{ source: 'cowboy-nova.html', destination: 'index.html' }];
 const ASSETS = [
   // Página nova (cowboy-nova.html): estilos, scripts, fontes auto-hospedadas e imagens próprias.
   'assets/css/cowboy-nova.css',
   'assets/js/cowboy-nova.js',
-  'assets/css/cowboy-conversao.css',
-  'assets/js/cowboy-conversao.js',
   'assets/fonts/oswald-latin-wght-normal.woff2',
   'assets/fonts/manrope-latin-wght-normal.woff2',
   'assets/fonts/LICENSES.txt',
@@ -22,7 +23,6 @@ const ASSETS = [
   'imagens/kit-4-frascos.jpg',
   'imagens/kit-1-frasco.jpg',
   'imagens/kit-2-frascos.jpg',
-  'imagens/nova/casal-cumplicidade.webp',
   'imagens/v4/hero-varanda.webp',
   'imagens/v4/mesa-de-cabeceira.webp',
   'imagens/v4/casal-cozinha.webp',
@@ -35,34 +35,7 @@ const ASSETS = [
   'imagens/clientes/cliente-05.webp',
   'imagens/clientes/cliente-06.webp',
   'assets/css/cowboy.css',
-  'assets/css/cowboy-v3.css',
   'assets/js/cowboy-store.js',
-  'assets/js/cowboy-v3.js',
-  'assets/js/cowboy-mobile-preview.js',
-  'assets/fonts/v3/rye-regular.ttf',
-  'assets/fonts/v3/barlow-regular.ttf',
-  'assets/fonts/v3/barlow-semibold.ttf',
-  'assets/fonts/v3/barlow-bold.ttf',
-  'assets/fonts/v3/barlow-condensed-semibold.ttf',
-  'assets/fonts/v3/barlow-condensed-bold.ttf',
-  'assets/fonts/v3/inter-latin-wght-normal.woff2',
-  'assets/fonts/v3/OFL-Rye.txt',
-  'assets/fonts/v3/OFL-Barlow.txt',
-  'assets/fonts/v3/OFL-Inter.txt',
-  'imagens/v2/cowboy-hero.webp',
-  'imagens/v2/cowboy-hero.png',
-  'imagens/v2/cowboy-packshot.webp',
-  'imagens/v2/cowboy-packshot.png',
-  'imagens/v2/cowboy-kit-2.webp',
-  'imagens/v2/cowboy-kit-2.png',
-  'imagens/v3/cowboy-hero-western.webp',
-  'imagens/v3/cowboy-hero-western.png',
-  'imagens/v3/cowboy-detalhe-couro.webp',
-  'imagens/v3/cowboy-detalhe-couro.png',
-  'imagens/v3/cliente-relato-1.jpg',
-  'imagens/v3/cliente-relato-2.jpg',
-  'imagens/mobile/cowboy-estudio-foto-real.webp',
-  'imagens/v3/referencias-reais/IMG_1410.jpeg',
   'videos/clientes/depoimento-1.mp4',
   'videos/clientes/depoimento-1.jpg',
   'videos/clientes/depoimento-1.vtt',
@@ -76,7 +49,7 @@ function buildSite() {
   if (path.dirname(OUTPUT) !== ROOT || path.basename(OUTPUT) !== 'dist') {
     throw new Error('Unsafe build output path');
   }
-  for (const relative of [...PAGES, ...ASSETS]) {
+  for (const relative of [...PAGES, ...ASSETS, ...OUTPUT_ALIASES.map(({ source }) => source)]) {
     const source = path.join(ROOT, relative);
     if (!fs.statSync(source).isFile() || fs.lstatSync(source).isSymbolicLink()) {
       throw new Error(`Invalid public file: ${relative}`);
@@ -92,8 +65,11 @@ function buildSite() {
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(ROOT, relative), destination);
   }
-  console.log(`Public build: ${PAGES.length + ASSETS.length} files in dist/`);
+  for (const { source, destination } of OUTPUT_ALIASES) {
+    fs.copyFileSync(path.join(ROOT, source), path.join(OUTPUT, destination));
+  }
+  console.log(`Public build: ${PAGES.length + ASSETS.length + OUTPUT_ALIASES.length} files in dist/`);
 }
 
 if (require.main === module) buildSite();
-module.exports = { buildSite, ROOT, OUTPUT, PAGES, ASSETS };
+module.exports = { buildSite, ROOT, OUTPUT, PAGES, ASSETS, OUTPUT_ALIASES };

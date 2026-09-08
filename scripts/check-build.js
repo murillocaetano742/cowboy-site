@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
-const { buildSite, OUTPUT, PAGES, ASSETS } = require(path.join(ROOT, 'scripts', 'build-site.js'));
+const { buildSite, OUTPUT, PAGES, ASSETS, OUTPUT_ALIASES } = require(path.join(ROOT, 'scripts', 'build-site.js'));
 
 buildSite();
 function listFiles(directory) {
@@ -15,7 +15,7 @@ function listFiles(directory) {
     return entry.isDirectory() ? listFiles(absolute) : [path.relative(OUTPUT, absolute).replaceAll(path.sep, '/')];
   });
 }
-const expected = [...PAGES, ...ASSETS].sort();
+const expected = [...PAGES, ...ASSETS, ...OUTPUT_ALIASES.map(({ destination }) => destination)].sort();
 const actual = listFiles(OUTPUT).sort();
 assert.deepEqual(actual, expected, 'Public output must match the explicit allowlist');
 assert.ok(actual.every((name) => !/^(?:docs|api|config|tests|scripts|node_modules|\.)\//.test(name)));

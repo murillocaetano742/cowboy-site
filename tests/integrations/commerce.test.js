@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const test = require('node:test');
 
 const commerce = require('#commerce');
@@ -122,7 +123,7 @@ test('checkout preserva somente atribuição permitida e não tem URL inventada'
   else process.env.CARTPANDA_CHECKOUT_ALLOWED_HOSTS = previousHosts;
 
   const unavailable = mockResponse();
-  checkoutHandler({ method: 'GET', query: { quantity: '4' }, url: '/api/checkout?quantity=4' }, unavailable);
+  checkoutHandler({ method: 'GET', query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailable);
   assert.equal(unavailable.result.statusCode, 503);
   assert.equal(unavailable.result.body.error, 'checkout_unavailable');
 });
@@ -136,6 +137,29 @@ test('checkout exige HTTPS e host Cartpanda ou domínio customizado explicitamen
     CARTPANDA_CHECKOUT_1_URL: 'https://checkout.sualoja.com/1',
     CARTPANDA_CHECKOUT_ALLOWED_HOSTS: 'checkout.sualoja.com',
   }));
+});
+
+test('checkout usa somente os links públicos Cartpanda confirmados quando não há override', () => {
+  assert.deepEqual(Object.keys(commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS), ['1', '2', '4']);
+  assert.equal(commerce.checkoutUrlFor(1, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742450:1');
+  assert.equal(commerce.checkoutUrlFor(2, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742746:1');
+  assert.equal(commerce.checkoutUrlFor(4, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742749:1');
+  assert.equal(commerce.checkoutUrlFor(3, {}), null);
+  assert.equal(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'https://example.com/checkout/1' }), null);
+});
+
+test('pagina aprovada carrega o encaminhamento UTMify para Cartpanda sem segredo embutido', () => {
+  const html = fs.readFileSync('cowboy-nova.html', 'utf8');
+  assert.match(html, /src="https:\/\/cdn\.utmify\.com\.br\/scripts\/utms\/latest\.js"/);
+  for (const attribute of [
+    'data-utmify-prevent-xcod-sck',
+    'data-utmify-prevent-subids',
+    'data-utmify-ignore-iframe',
+    'data-utmify-is-cartpanda',
+    'async',
+    'defer',
+  ]) assert.match(html, new RegExp(`\\b${attribute}\\b`));
+  assert.doesNotMatch(html, /CARTPANDA_API_TOKEN|MELHOR_ENVIO_TOKEN/);
 });
 
 test('configuração pública expõe oferta inicial e disponibilidade sem segredos', () => {
@@ -242,13 +266,13 @@ test('checkout apresenta erro amigável em navegação HTML e mantém JSON para 
   assert.doesNotMatch(invalidHtml.result.body, /alert\(1\)/);
 
   const unavailableHtml = mockResponse();
-  checkoutHandler({ method: 'GET', headers: { accept: 'text/html' }, query: { quantity: '4' }, url: '/api/checkout?quantity=4' }, unavailableHtml);
+  checkoutHandler({ method: 'GET', headers: { accept: 'text/html' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailableHtml);
   assert.equal(unavailableHtml.result.statusCode, 503);
   assert.match(unavailableHtml.result.body, /Pagamento indisponível agora/);
   assert.doesNotMatch(unavailableHtml.result.body, /configurado/);
 
   const apiError = mockResponse();
-  checkoutHandler({ method: 'GET', headers: { accept: 'application/json' }, query: { quantity: '4' }, url: '/api/checkout?quantity=4' }, apiError);
+  checkoutHandler({ method: 'GET', headers: { accept: 'application/json' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, apiError);
   assert.equal(apiError.result.statusCode, 503);
   assert.deepEqual(apiError.result.body, { error: 'checkout_unavailable' });
 });

@@ -17,7 +17,7 @@ function acceptsHtml(request) {
 }
 
 function checkoutErrorPage(statusCode, title, message) {
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} | COWBOY Energia</title><meta name="robots" content="noindex"><style>body{margin:0;background:#f7f2e9;color:#20150d;font:16px/1.5 Arial,sans-serif}.card{max-width:560px;margin:10vh auto;padding:32px;background:#fff;border-radius:12px;box-shadow:0 8px 28px #0002}a{color:#5d351b;font-weight:700}</style></head><body><main class="card"><p>COWBOY Energia</p><h1>${title}</h1><p>${message}</p><p><a href="/#ofertas">Voltar aos kits</a></p><p>Precisa de ajuda? <a href="mailto:contato@cowboyenergiamasculina.com.br">Falar com o SAC</a>.</p></main></body></html>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} | COWBOY Energia</title><meta name="robots" content="noindex"><style>body{margin:0;background:#f7f2e9;color:#20150d;font:16px/1.5 Arial,sans-serif}.card{max-width:560px;margin:10vh auto;padding:32px;background:#fff;border-radius:12px;box-shadow:0 8px 28px #0002}a{color:#5d351b;font-weight:700}</style></head><body><main class="card"><p>COWBOY Energia</p><h1>${title}</h1><p>${message}</p><p><a href="/#kit">Voltar aos kits</a></p><p>Precisa de ajuda? <a href="mailto:contato@cowboyenergiamasculina.com.br">Falar com o SAC</a>.</p></main></body></html>`;
 }
 
 function checkoutError(request, response, statusCode, error) {

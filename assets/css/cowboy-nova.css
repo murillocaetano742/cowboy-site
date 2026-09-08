@@ -387,4 +387,8 @@ p + p { margin-top: .9em; }
 .agit-img { margin: 0 0 1.2rem; }
 .agit-img img { aspect-ratio: 16 / 10; object-position: center 55%; }
 .hero-hook .hero-art img { object-position: center 30%; }
+@media (max-width: 359px) {
+  .hero-copy { min-width: 0; }
+  .hero-copy > .tag { max-width: 100%; white-space: normal; line-height: 1.35; }
+}
 @media (min-width: 900px) { .agit-img { max-width: 52rem; margin: 0 auto 1.6rem; } }
