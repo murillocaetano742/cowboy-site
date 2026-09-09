@@ -15,7 +15,7 @@
     { "source": "/loja.html", "destination": "/", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/nova", "destination": "/cowboy-nova.html" }
+    { "source": "/nova", "destination": "/cowboy-nova" }
   ],
   "headers": [
     {
