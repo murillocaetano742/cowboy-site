@@ -1,0 +1,21 @@
+/* Version 1.2: preserve the page design and show one floating control at a time. */
+.floating-checkout {
+  position: fixed;
+  z-index: 69;
+  inset: auto 1rem calc(1rem + env(safe-area-inset-bottom));
+  width: calc(100% - 2rem);
+  max-width: 34rem;
+  margin-inline: auto;
+  pointer-events: none;
+}
+.floating-checkout[hidden] { display: none !important; }
+.floating-checkout .btn {
+  width: 100%;
+  min-height: 3.7rem;
+  padding-inline: 1rem;
+  font-size: 1rem;
+  letter-spacing: .05em;
+  pointer-events: auto;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .5);
+}
+body[data-floating-checkout-visible] [data-pill] { display: none !important; }
