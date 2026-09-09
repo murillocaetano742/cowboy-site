@@ -18,6 +18,21 @@
   var attributionStorageKey = 'cowboy_attribution';
   var productTotals = { 1: 5476, 2: 8476, 3: 12714, 4: 16952 };
 
+  // Google deliberately skips linker decoration for same-host forms. Keep
+  // the validated API checkout flow, using our other production hostname as
+  // the first hop. Vercel's www -> apex redirect preserves the full query.
+  // Leave local development, previews and nonstandard form actions alone.
+  var productionHosts = ['cowboyenergiamasculina.com.br', 'www.cowboyenergiamasculina.com.br'];
+  var hostIndex = productionHosts.indexOf(window.location.hostname);
+  if (checkoutForm && hostIndex !== -1) {
+    var checkoutAction = new URL(checkoutForm.action, window.location.href);
+    if (checkoutAction.hostname === window.location.hostname && checkoutAction.pathname === '/api/checkout') {
+      checkoutAction.protocol = 'https:';
+      checkoutAction.hostname = productionHosts[1 - hostIndex];
+      checkoutForm.action = checkoutAction.toString();
+    }
+  }
+
   function selectedQuantity() {
     var checked = document.querySelector('[name="quantity"]:checked');
     return checked ? Number(checked.value) : 2;

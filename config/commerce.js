@@ -46,6 +46,7 @@ const UTM_ALLOWLIST = Object.freeze([
 ]);
 
 const MAX_QUERY_VALUE_LENGTH = 256;
+const MAX_LINKER_VALUE_LENGTH = 2048;
 const MAX_CART_QUANTITY = 4;
 
 function parseBrazilianPostalCode(value) {
@@ -100,6 +101,12 @@ function safeAttribution(searchParams) {
   for (const name of UTM_ALLOWLIST) {
     const value = searchParams.get(name);
     if (value && value.length <= MAX_QUERY_VALUE_LENGTH) attribution.set(name, value);
+  }
+  // Forward Google's opaque, short-lived cross-domain linker unchanged. It
+  // contains multiple encoded identifiers and can exceed a normal UTM value.
+  const linker = searchParams.get('_gl');
+  if (linker && linker.length <= MAX_LINKER_VALUE_LENGTH && !/[\u0000-\u0020\u007f]/.test(linker)) {
+    attribution.set('_gl', linker);
   }
   return attribution;
 }
