@@ -1,5 +1,5 @@
 const PRICES = Object.freeze({ 1: 5476, 2: 8476, 4: 16952 });
-const ATTRIBUTION_KEYS = Object.freeze(['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'src', 'sck', 'cid', 'gclid', 'fbclid']);
+const ATTRIBUTION_KEYS = Object.freeze(['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'src', 'sck', 'cid', 'gclid', 'fbclid', 'keyword', 'device', 'network']);
 
 function formatBRL(cents) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
