@@ -14,6 +14,7 @@ const ASSETS = [
   'assets/css/cowboy-nova.css',
   'assets/js/cowboy-nova.js',
   'assets/js/cowboy-pixel.js',
+  'assets/js/cowboy-google.js',
   'assets/fonts/oswald-latin-wght-normal.woff2',
   'assets/fonts/manrope-latin-wght-normal.woff2',
   'assets/fonts/LICENSES.txt',
