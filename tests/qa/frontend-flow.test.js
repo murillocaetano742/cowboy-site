@@ -18,8 +18,9 @@ class Element {
   fire(type) { const event = { prevented: false, preventDefault() { this.prevented = true; } }; this.listeners[type]?.(event); return event; }
 }
 
-function fixture({ search = '', storageData = {}, config = { shippingAvailable: true, variants: [1, 2, 4].map(quantity => ({ quantity, checkoutAvailable: true })) } } = {}) {
+function fixture({ search = '', hostname = 'localhost', action = '/api/checkout', storageData = {}, config = { shippingAvailable: true, variants: [1, 2, 4].map(quantity => ({ quantity, checkoutAvailable: true })) } } = {}) {
   const elements = Object.fromEntries(['shipping-form', 'shipping-status', 'shipping-results', 'checkout-form', 'checkout-button', 'checkout-status', 'support-link', 'selected-kit'].map(key => [key, new Element()]));
+  elements['checkout-form'].action = action;
   const postalCode = new Element(); postalCode.value = '01001-000';
   const shippingButton = new Element();
   elements['shipping-form'].querySelector = selector => selector === 'button' ? shippingButton : postalCode;
@@ -32,12 +33,12 @@ function fixture({ search = '', storageData = {}, config = { shippingAvailable: 
       createElement: () => new Element(),
     },
     window: {
-      location: { search },
+      location: { search, hostname, href: 'https://' + hostname + '/' + search },
       sessionStorage: {
         getItem: key => Object.hasOwn(storageData, key) ? storageData[key] : null,
         setItem: (key, value) => { storageData[key] = String(value); },
       },
-    }, URLSearchParams, AbortController,
+    }, URL, URLSearchParams, AbortController,
     fetch: (url, options) => url === '/api/config' ? Promise.resolve({ ok: true, json: async () => config }) : new Promise((resolve, reject) => pending.push({ url, options, resolve, reject })),
   };
   vm.runInNewContext(fs.readFileSync(path.resolve('assets/js/cowboy-store.js'), 'utf8'), context);
@@ -50,6 +51,27 @@ function fixture({ search = '', storageData = {}, config = { shippingAvailable: 
 
 const settle = async () => { await new Promise(resolve => setImmediate(resolve)); await new Promise(resolve => setImmediate(resolve)); };
 const quote = (pending, price = 10) => pending.resolve({ ok: true, json: async () => ({ available: true, quotes: [{ company: 'Transportadora de teste', service: 'Serviço de teste', price, deliveryDays: 3 }] }) });
+
+test('QA: formulário de produção usa outro hostname próprio sem perder parâmetros da action', () => {
+  for (const [hostname, destination] of [
+    ['cowboyenergiamasculina.com.br', 'www.cowboyenergiamasculina.com.br'],
+    ['www.cowboyenergiamasculina.com.br', 'cowboyenergiamasculina.com.br']
+  ]) {
+    const f = fixture({ hostname, action: '/api/checkout?cid=existing' });
+    assert.equal(f.elements['checkout-form'].action, 'https://' + destination + '/api/checkout?cid=existing');
+  }
+  const preview = fixture({ hostname: 'cowboy-preview.vercel.app' });
+  assert.equal(preview.elements['checkout-form'].action, '/api/checkout');
+  const other = fixture({ hostname: 'cowboyenergiamasculina.com.br', action: 'https://cowboy-energia.mycartpanda.com/checkout/example' });
+  assert.equal(other.elements['checkout-form'].action, 'https://cowboy-energia.mycartpanda.com/checkout/example');
+});
+
+test('QA: linker recebido não é reutilizado como UTM nem salvo na sessão', () => {
+  const storageData = {};
+  const f = fixture({ search: '?_gl=expired-linker&utm_source=organic', storageData });
+  assert.equal(f.elements['checkout-form'].children.some(child => child.name === '_gl'), false);
+  assert.equal(storageData.cowboy_attribution.includes('_gl'), false);
+});
 
 test('QA: atribuição do anúncio chega ao formulário sem parâmetros arbitrários', async () => {
   const f = fixture({ search: '?utm_source=meta&utm_content=C03&email=private&diagnostico=private&fbclid=click' });

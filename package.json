@@ -1,7 +1,7 @@
 {
   "name": "cowboy-energia-site",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "imports": {
     "#commerce": "./config/commerce.js",
     "#logistics": "./config/logistics.js",
