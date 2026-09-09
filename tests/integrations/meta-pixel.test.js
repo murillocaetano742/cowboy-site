@@ -12,31 +12,33 @@ function harness({ existingPixel = false, privacyControl = false } = {}) {
   const scripts = [];
   const window = { navigator: { globalPrivacyControl: privacyControl } };
   if (existingPixel) window.fbq = (...args) => calls.push(args);
-  const context = vm.createContext({ window, document: { createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } });
+  const context = vm.createContext({ window, atob, document: { createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } });
   return { window, calls, scripts, run: () => vm.runInContext(source, context) };
 }
 
-test('Pixel preserva eventos de navegação sem criar compra e não duplica em carregamento repetido', () => {
+test('Pixel carrega o código UTMify fornecido uma vez, com o identificador correto', () => {
   const page = harness();
   page.run();
   page.run();
   assert.equal(page.scripts.length, 1);
-  assert.equal(page.scripts[0].src, 'https://connect.facebook.net/en_US/fbevents.js');
-  const queued = Array.from(page.window.fbq.queue, args => Array.from(args));
-  assert.equal(queued.length, 3);
-  assert.equal(queued[0][0], 'init');
-  assert.equal(queued[0][1], '1006075098894986');
-  assert.deepEqual(queued.slice(1).map(args => args[2]), ['PageView', 'ViewContent']);
-  assert.ok(queued.slice(1).every(args => args[0] === 'trackSingle' && args[1] === '1006075098894986'));
+  assert.equal(page.scripts[0].src, 'https://cdn.utmify.com.br/scripts/pixel/pixel.js');
+  assert.equal(page.scripts[0].async, true);
+  assert.equal(page.scripts[0].defer, true);
+  assert.equal(page.window.pixelId, '6aa16d0bee215350c09b5b31');
+  // The vendor SDK owns events. This loader must not send another Meta event.
+  assert.equal(page.window.fbq, undefined);
 });
 
-test('Pixel reutiliza o SDK existente e respeita Global Privacy Control', () => {
+test('Pixel preserva o SDK Meta existente sem disparos diretos e respeita Global Privacy Control', () => {
   const existing = harness({ existingPixel: true });
+  const originalFbq = existing.window.fbq;
   existing.run();
-  assert.equal(existing.scripts.length, 0);
-  assert.equal(existing.calls.length, 3);
+  assert.equal(existing.scripts.length, 1);
+  assert.equal(existing.window.fbq, originalFbq);
+  assert.equal(existing.calls.length, 0);
   const privatePage = harness({ privacyControl: true });
   privatePage.run();
   assert.equal(privatePage.scripts.length, 0);
   assert.equal(privatePage.window.fbq, undefined);
+  assert.equal(privatePage.window.pixelId, undefined);
 });
