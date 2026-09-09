@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const vm = require('node:vm');
+const checkoutHandler = require('#api/checkout');
 
 class Element {
   constructor() { this.listeners = {}; this.dataset = {}; this.children = []; this.textContent = ''; this.disabled = false; this.value = ''; }
@@ -65,6 +66,32 @@ test('QA: atribuição permitida sobrevive à navegação interna na mesma sess�
   await settle();
   const fields = Object.fromEntries(returned.elements['checkout-form'].children.map(child => [child.name, child.value]));
   assert.deepEqual(fields, { utm_source: 'meta', utm_content: 'C03' });
+});
+
+test('QA: modelo Google chega do formulário à Cartpanda após navegação interna', async () => {
+  const expected = {
+    utm_source: 'google', utm_campaign: 'teste_campaign', utm_medium: 'teste_group',
+    utm_content: 'teste_ad', utm_term: 'teste_placement::palavra com espaço',
+    keyword: 'palavra com espaço', device: 'm', network: 'g', cid: '74579222594',
+  };
+  const storageData = {};
+  fixture({ search: '?' + new URLSearchParams({ ...expected, email: 'private', diagnostico: 'private' }), storageData });
+  await settle();
+  const returned = fixture({ storageData });
+  await settle();
+  const formFields = Object.fromEntries(returned.elements['checkout-form'].children.map(child => [child.name, child.value]));
+  assert.deepEqual(formFields, expected);
+
+  // Exercise the actual redirect handler, including its separate allowlist.
+  const response = { setHeader() {}, redirect(status, url) { this.status = status; this.url = url; } };
+  checkoutHandler({
+    method: 'GET', query: { quantity: '2' },
+    url: '/api/checkout?' + new URLSearchParams({ quantity: '2', ...formFields, email: 'private' }),
+  }, response);
+  assert.equal(response.status, 302);
+  const destination = new URL(response.url);
+  assert.equal(destination.hostname, 'cowboy-energia.mycartpanda.com');
+  assert.deepEqual(Object.fromEntries(destination.searchParams), expected);
 });
 
 test('QA: armazenamento inválido não quebra compra nem injeta atribuição arbitrária', async () => {

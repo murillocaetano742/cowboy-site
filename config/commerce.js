@@ -40,6 +40,9 @@ const UTM_ALLOWLIST = Object.freeze([
   'cid',
   'gclid',
   'fbclid',
+  'keyword',
+  'device',
+  'network',
 ]);
 
 const MAX_QUERY_VALUE_LENGTH = 256;
