@@ -5,14 +5,19 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT = path.join(ROOT, 'dist');
-// Production serves the approved COWBOY Nova experience at the root. The
-// named file remains as the /nova alias; prior variants are not built.
-const PAGES = ['cowboy-nova.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
-const OUTPUT_ALIASES = [{ source: 'cowboy-nova.html', destination: 'index.html' }];
+// Version 1.1 is current; preserve the approved prior page and its assets.
+const PAGES = ['cowboy-nova.html', 'cowboy-v1-1.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
+const OUTPUT_ALIASES = [
+  { source: 'cowboy-v1-1.html', destination: 'index.html' },
+  { source: 'cowboy-nova.html', destination: 'v1-0.html' },
+  { source: 'cowboy-v1-1.html', destination: 'v1-1.html' },
+];
 const ASSETS = [
   // Página nova (cowboy-nova.html): estilos, scripts, fontes auto-hospedadas e imagens próprias.
   'assets/css/cowboy-nova.css',
   'assets/js/cowboy-nova.js',
+  'assets/css/cowboy-floating-checkout.css',
+  'assets/js/cowboy-floating-checkout.js',
   'assets/js/cowboy-pixel.js',
   'assets/js/cowboy-google.js',
   'assets/fonts/oswald-latin-wght-normal.woff2',
