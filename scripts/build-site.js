@@ -13,6 +13,7 @@ const ASSETS = [
   // Página nova (cowboy-nova.html): estilos, scripts, fontes auto-hospedadas e imagens próprias.
   'assets/css/cowboy-nova.css',
   'assets/js/cowboy-nova.js',
+  'assets/js/cowboy-pixel.js',
   'assets/fonts/oswald-latin-wght-normal.woff2',
   'assets/fonts/manrope-latin-wght-normal.woff2',
   'assets/fonts/LICENSES.txt',
