@@ -134,3 +134,13 @@ Regra: nenhuma imagem com pessoa apresentada como cliente ou médico. Pessoas s�
 4. **Embalagem discreta e rastreio:** confirma que é assim que a operação funciona hoje?
 
 Com essas quatro respostas, monto a página nova no mesmo visual (preto e dourado, mobile primeiro) com essa copy, e ela fica pronta para testar contra a versão publicada.
+
+## Promessa aplicada na página em 10/09/2026 (versão dura, dentro do que pode ir ao ar)
+
+- **Hero:** `TESTE POR 30 DIAS. SE NÃO FIZER SENTIDO, O DINHEIRO VOLTA.` + `Você usa o COWBOY Energia por 30 dias. Se em 10 dias quiser desistir, manda uma mensagem e o valor dos produtos volta, sem justificativa. O risco é nosso. A decisão é sua.` Selos: `Desistiu em 10 dias? Devolvemos na hora` · `Rótulo aberto` · `Fabricante identificado`. Frete de R$ 25 declarado já no hero (era a surpresa do checkout).
+- **Garantia:** `Você não compra um suplemento. Você faz um teste de 30 dias.` Saída em 10 dias sem justificativa. Anti-garantia termina com `Qual é a sua desculpa?`.
+- **Oferta:** `Seu teste de 30 dias começa com 2 frascos` · `Segundo frasco por R$ 30 a mais` · kit de 2 com selo `Teste completo` · pilha de valor com frete de R$ 25 declarado · `Cada mês adiando custa mais caro do que isso.` Botão: `Quero meu teste de 30 dias`.
+- **Botão flutuante** `Quero meu teste de 30 dias` aparece depois que o visitante passa pela garantia e some enquanto a seção de kits está na tela (compra continua só no fim; o botão só encurta o caminho de volta).
+- **Fechamento:** `Ou você começa hoje, ou daqui a um mês está aqui de novo, de madrugada, lendo isso.`
+- **Fora, em qualquer versão:** alegação de tratar disfunção erétil ou ejaculação precoce, percentuais ou minutos de efeito, "comprimido não funciona", médico garantindo resultado, spray/maca (o produto é gotas e a fórmula tem boro).
+- **Pendente do proprietário:** condições da garantia nos Termos (30 dias, saída em 10, o que é devolvido, frasco aberto) e decisão de embutir o frete no preço.

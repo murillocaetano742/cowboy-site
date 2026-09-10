@@ -169,6 +169,18 @@
     });
   }).catch(function () {});
 
+  // Sticky CTA: shows after the visitor reads the guarantee, hides while the kit section is on screen.
+  var sticky = document.querySelector('[data-sticky-cta]');
+  var guaranteeSection = document.getElementById('garantia');
+  var kitSection = document.getElementById('kit');
+  if (sticky && guaranteeSection && kitSection) {
+    var passedGuarantee = false;
+    var kitVisible = false;
+    function paintSticky() { var show = passedGuarantee && !kitVisible; sticky.hidden = !show; if (show) document.body.setAttribute('data-sticky', ''); else document.body.removeAttribute('data-sticky'); }
+    window.addEventListener('scroll', function () { if (!passedGuarantee && guaranteeSection.getBoundingClientRect().bottom < window.innerHeight * 0.6) { passedGuarantee = true; paintSticky(); } }, { passive: true });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { kitVisible = entries.some(function (e) { return e.isIntersecting; }); paintSticky(); }, { threshold: 0.05 }).observe(kitSection);
+  }
+
   // One authored moment: hero product settles into place on load.
   var heroArt = document.querySelector('.hero-art img');
   if (heroArt && !reduceMotion && 'animate' in heroArt) {

@@ -251,6 +251,14 @@ p + p { margin-top: .9em; }
 .footer nav { display: flex; flex-wrap: wrap; gap: 1rem; }
 .footer a { color: var(--text); overflow-wrap: anywhere; }
 
+/* Sticky CTA (appears after the guarantee) */
+.sticky-cta { position: fixed; z-index: 68; left: .75rem; right: .75rem; bottom: calc(.75rem + env(safe-area-inset-bottom)); display: grid; gap: .1rem; justify-items: center; padding: .7rem 1rem; border-radius: 12px; background: var(--grad); color: #0a0a0a; text-decoration: none; box-shadow: 0 14px 34px rgba(201, 148, 58, .45); text-align: center; }
+.sticky-cta span { font: 600 .68rem/1.2 var(--head); letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+.sticky-cta b { font: 700 1.05rem/1.1 var(--head); letter-spacing: .06em; text-transform: uppercase; }
+.sticky-cta[hidden] { display: none; }
+body[data-sticky] .pill { bottom: calc(4.9rem + env(safe-area-inset-bottom)); }
+@media (min-width: 900px) { .sticky-cta { left: auto; right: 1.5rem; bottom: 1.5rem; min-width: 22rem; } }
+
 /* Mobile pill + sheet */
 .pill { position: fixed; z-index: 70; left: 50%; bottom: calc(.9rem + env(safe-area-inset-bottom)); transform: translateX(-50%); display: inline-flex; align-items: center; gap: .6rem; padding: .5rem .55rem .5rem .95rem; background: rgba(12, 12, 12, .92); border: 1px solid var(--line-strong); border-radius: 999px; backdrop-filter: blur(10px); box-shadow: 0 14px 34px rgba(0, 0, 0, .6); font: 500 .8rem/1 var(--head); letter-spacing: .06em; text-transform: uppercase; max-width: calc(100vw - 2rem); }
 .pill .n { color: var(--gold-2); font-weight: 700; }
