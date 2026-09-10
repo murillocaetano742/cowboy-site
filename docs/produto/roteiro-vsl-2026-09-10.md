@@ -1,111 +1,103 @@
-# COWBOY Energia — roteiro da VSL (versão dura)
+# COWBOY Energia — roteiro da VSL do Dr. Durval (versão dura)
 
-Data: 10/09/2026. Duração alvo: 3 a 4 minutos, vertical 9:16, legendas queimadas.
+Data: 10/09/2026. 3 a 4 minutos, vertical 9:16, legendas queimadas. O médico fala do começo ao fim.
 
-**Formato:** 3 a 4 minutos, vertical 9:16, legendas queimadas (a maioria assiste sem som). Eixo: Teste de 30 dias com o risco por nossa conta, apresentado como desafio.
+**Formato:** VSL de 3 a 4 minutos, vertical 9:16, legendas queimadas (a maioria assiste sem som). O Dr. Durval fala do começo ao fim; os depoimentos e as imagens entram como edições dentro da fala dele.
 
-**Registro:** Direto, masculino, confrontador. O apresentador fala como quem já passou por isso e está cansado de ver homem adiando. Sem 'talvez', sem 'pode ajudar', sem tom de bula. Cada bloco termina em um soco curto.
+**Registro:** Médico que já cansou de ver homem adiar. Direto, firme, sem tom de bula e sem passar a mão na cabeça. Cada bloco termina em uma frase curta.
 
 **Espaços seus:** Em cada bloco há um parêntese marcado como ESPAÇO SEU. Ali você escreve o que decidir. Deixei em branco de propósito: o que entrar nesses espaços é decisão e responsabilidade sua.
 
+**Aviso único:** Médico apresentando produto comercial é um ponto de atenção do CFM (Resolução 2.336/2023) para o CRM dele. O roteiro mantém as afirmações dele factuais e a garantia como compromisso da COWBOY. Confirmar com o advogado dele antes de gravar.
+
 ## Roteiro
 
-### 0:00 a 0:12 — Gancho
+### 0:00 a 0:20 — Abertura
 
-*Apresentador, close, olhando na câmera.*
+*Dr. Durval no consultório, sentado, olhando na câmera. Plano fechado. Sem música.*
 
-**[FALA]** Você já pesquisou isso de madrugada. Já fechou a aba. Já inventou cansaço, já dormiu antes dela. Quantos meses faz? Seis? Um ano? Presta atenção, porque eu vou falar uma vez só.
+**[DR. DURVAL]** Eu sou o doutor Durval. Eu atendo homens todos os dias no meu consultório. E tem uma coisa que eu escuto tanto que já sei antes de o paciente abrir a boca. Ele senta aí, nessa cadeira, olha para o chão e diz: 'doutor, eu achei que ia passar'. Não passou. Se você está assistindo isso de madrugada, escondido, com o celular no mudo, eu estou falando com você.
 
-*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Eu deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
+*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
 
-**[TELA]** Quantos meses você já perdeu?
+**[EDIÇÃO]** Corte para close nas mãos do médico, depois volta ao rosto. Legenda queimada: 'Eu achei que ia passar.'
 
-**[B-ROLL]** Mesa de cabeceira à noite, celular virado, um lado da cama vazio.
+### 0:20 a 0:55 — O que eu vejo todo dia
 
-### 0:12 a 0:40 — O soco
+*Dr. Durval, mesmo enquadramento. Ritmo firme.*
 
-*Apresentador.*
+**[DR. DURVAL]** O homem que chega aqui não chega por causa do que acontece na cama. Ele chega por causa do que acontece depois. A mulher que parou de perguntar. O silêncio no carro. A desculpa do cansaço que ele mesmo já não acredita. Ele chega quando cansou de fingir. E eu vou te dizer o que eu digo a cada um deles: você não é o homem que falhou. Você é o homem que finalmente parou de fugir. E disfunção erétil frequente é um sinal do corpo. Sinal a gente investiga, não esconde.
 
-**[FALA]** O problema não é só na cama. É o que ele faz com você. É a conversa que ela parou de puxar. É você desviando o olhar no espelho. É o cara confiante que você era virando um cara que inventa desculpa. E o pior: ninguém sabe. Você carrega isso sozinho e calado, e cada semana calado pesa mais. Eu não vou te passar a mão na cabeça. Adiar não resolve nada. Nunca resolveu.
+*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
 
-*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Eu deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
+**[EDIÇÃO]** B-roll: mesa de cabeceira à noite, celular virado, um lado da cama vazio (imagens/v4/mesa-de-cabeceira). Legendas: 'Ela parou de perguntar.' / 'Você parou de fugir.'
 
-**[TELA]** Ninguém sabe. Você carrega sozinho. / Adiar não resolve. Nunca resolveu.
+### 0:55 a 1:30 — Por que eu criei o COWBOY
 
-### 0:40 a 1:05 — O médico
+*Dr. Durval. Tom de quem conta a própria história. Confirmar que cada fato é verdadeiro antes de gravar.*
 
-*Dr. Durval, consultório. Ele fala do problema, não do produto. Nome e CRM na tela só com liberação do advogado dele.*
+**[DR. DURVAL]** Foi vendo esses homens, ano após ano, gastando dinheiro em promessa de milagre, que eu decidi fazer diferente. Passei quatro anos estudando fórmulas até chegar em um suplemento honesto, com o rótulo aberto: seis componentes que o homem conhece pelo nome, taurina, arginina, feno-grego, vitamina B6, zinco e boro, numa porção só, em gotas. Sem cápsula. Sem receita. Sem letra miúda. Eu não vou te prometer milagre em sete dias. Quem promete isso está te vendendo foto de banco de imagem. Eu te mostro o que tem dentro.
 
-**[FALA (Dr. Durval)]** Eu atendo homens todos os dias com essa história. Todos chegam tarde. Todos dizem a mesma coisa: 'achei que ia passar'. Não passa sozinho. Disfunção erétil frequente é um sinal do corpo, e sinal a gente investiga. O homem que chega no meu consultório não é o que falhou. É o que finalmente parou de fugir.
+*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
 
-*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Eu deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
+**[EDIÇÃO]** B-roll: frasco na rotina da manhã (imagens/v4/rotina-manha), macro da gota, tabela de composição animada com as seis quantidades. Legenda: '6 componentes. 12 gotas. Rótulo aberto.'
 
-**[TELA]** Não passa sozinho. / Parou de fugir.
+**[NOTA]** 'Quatro anos' e 'eu criei' só ficam se forem fatos. Se a fórmula for da BNT Farma com participação dele, trocar por 'participei da formulação'.
 
-### 1:05 a 1:50 — Quem parou de fugir
+### 1:30 a 2:15 — Quem já parou de fugir
 
-*Depoimentos reais, sem narração por cima dos vídeos.*
+*Transição para os depoimentos. O médico apresenta e sai de cena; os vídeos rodam inteiros, sem narração por cima.*
 
-**[B-ROLL]** Vídeo do cliente 1 inteiro, legenda literal. Corte seco. Vídeo do cliente 2 inteiro, selo 'No segundo frasco'. Depois as seis fotos, uma por segundo, com os nomes já usados na página.
+**[DR. DURVAL]** Mas não acredita em mim. Acredita neles.
 
-**[FALA (sobre as fotos)]** Esses aqui não ficaram esperando passar. Mandaram a foto com o frasco na mão. Um deles já está no segundo. Nenhum deles é ator. Nenhum foi pago.
+**[EDIÇÃO]** Corte seco. Vídeo do cliente 1 inteiro, legenda literal ('Tem duas semanas que eu tô tomando. Tô top demais agora.'). Corte seco. Vídeo do cliente 2 inteiro, selo 'No segundo frasco'. Depois as seis fotos dos clientes, uma por segundo, com os nomes já usados na página. Legenda fixa: 'Clientes reais. Sem ator. Sem cachê. Nomes alterados para preservar a privacidade.'
 
-**[TELA]** Clientes reais. Sem ator. Sem cachê. / Nomes alterados para preservar a privacidade.
+**[DR. DURVAL (voltando à câmera)]** Nenhum desses homens é ator. Nenhum recebeu um centavo. Um deles já está no segundo frasco. Eles fizeram a única coisa que separa quem resolve de quem adia: começaram.
 
-### 1:50 a 2:30 — O que é, e por que é diferente
+*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
 
-*Apresentador, ritmo rápido.*
+### 2:15 a 2:55 — O meu desafio
 
-**[FALA]** COWBOY Energia. Seis componentes que homem conhece pelo nome: taurina, arginina, feno-grego, vitamina B6, zinco e boro. Numa porção só, doze gotas, uma vez por dia, medida no conta-gotas do próprio frasco. Sem cápsula, sem receita, sem assinatura escondida. Fabricado pela BNT Farma, CNPJ impresso no rótulo. E olha o que ninguém nesse mercado faz: a gente abre o rótulo. Cada miligrama está escrito na embalagem e na página. Enquanto o resto promete milagre em sete dias com foto de banco de imagem, eu te mostro o que tem dentro e coloco o meu dinheiro em risco, não o seu.
+*Dr. Durval, fala mais lenta, plano único, sem cortes. É o bloco mais importante.*
 
-*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Eu deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
+**[DR. DURVAL]** Então aqui vai o meu desafio para você. Você não vai comprar um suplemento. Você vai fazer um teste de trinta dias, e o risco não é seu. Usa. Se em dez dias você quiser desistir, manda uma mensagem e a COWBOY devolve o valor dos produtos. Sem justificativa. Sem formulário. Sem ninguém te ligar perguntando por quê. Trinta dias para decidir. Dez para sair na hora. Eu coloco o meu nome nisso. Agora me responde: qual é a sua desculpa?
 
-**[TELA]** 6 componentes. 12 gotas. 1 vez por dia. / Rótulo aberto. CNPJ no rótulo. / Meu dinheiro em risco. Não o seu.
+*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
 
-**[B-ROLL]** Rotina da manhã, macro da gota, tabela de composição animada.
-
-### 2:30 a 3:05 — O desafio
-
-*Apresentador, fala mais lenta, plano único, sem cortes.*
-
-**[FALA]** Então aqui vai o meu desafio. Você não vai comprar um suplemento. Você vai fazer um teste de trinta dias, e quem banca o risco sou eu. Usa. Se em dez dias você quiser desistir, manda uma mensagem e o valor dos produtos volta. Sem justificativa. Sem formulário. Sem eu te ligar perguntando por quê. Trinta dias para decidir. Dez para sair na hora. Eu assino embaixo disso com o meu nome. Agora me diz: qual é a sua desculpa?
-
-*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Eu deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
-
-**[TELA]** Selo 30 DIAS / Desistiu em 10 dias? Devolvemos na hora. / Qual é a sua desculpa?
+**[EDIÇÃO]** Selo dourado '30 DIAS' entra ao lado do rosto. Legendas: 'Desistiu em 10 dias? Devolve na hora.' / 'Qual é a sua desculpa?'
 
 **[NOTA]** Condições completas da garantia nos Termos antes de o vídeo ir ao ar.
 
-### 3:05 a 3:40 — A oferta, sem rodeio
+### 2:55 a 3:30 — A oferta
 
-*Apresentador.*
+*Dr. Durval. Direto, sem rodeio.*
 
-**[FALA]** O teste completo é o kit de dois frascos. Sessenta porções, cobre os trinta dias com folga. Oitenta e quatro e setenta e seis. Um real e quarenta por porção. Você gasta mais que isso em café e não pensa duas vezes. O segundo frasco sai por trinta reais a mais que o primeiro, e é por isso que quem começa, começa com dois. Frete na tela antes de pagar, sem surpresa. O botão está aqui embaixo. Você já adiou o suficiente.
+**[DR. DURVAL]** O teste completo é o kit de dois frascos. Sessenta porções, cobre os trinta dias com folga. Oitenta e quatro reais e setenta e seis centavos. Dá um real e quarenta por porção. Você gasta mais que isso em café todo dia e não pensa duas vezes. O segundo frasco sai por trinta reais a mais que o primeiro. É por isso que quem começa, começa com dois. O frete aparece na tela antes de você pagar. O botão está aqui embaixo.
 
-*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Eu deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
+*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
 
-**[TELA]** Kit de 2 · R$ 84,76 · 60 porções · R$ 1,41 por porção / Quero meu teste de 30 dias
+**[EDIÇÃO]** Foto do kit de 2 (imagens/kits/kit-2). Cartela: 'Kit de 2 · R$ 84,76 · 60 porções · R$ 1,41 por porção'. Botão animado: 'Quero meu teste de 30 dias'.
 
-**[NOTA]** Se o frete entrar no preço, 'frete incluso' substitui a frase do frete.
+**[NOTA]** Se o frete entrar no preço, trocar a frase do frete por 'frete incluso'.
 
-### 3:40 a 3:55 — Fechamento
+### 3:30 a 3:50 — Fechamento
 
-*Médico e apresentador.*
+*Dr. Durval, close, pausa antes da última frase.*
 
-**[FALA (Dr. Durval)]** O que eu mais vejo não é homem que tentou e não deu certo. É homem que nunca começou.
+**[DR. DURVAL]** Em vinte anos de consultório, o que eu mais vi não foi homem que tentou e não deu certo. Foi homem que nunca começou. Trinta dias. O risco não é seu. A decisão é. Ou você começa hoje, ou daqui a um mês você está aqui de novo, de madrugada, assistindo isso.
 
-**[FALA (apresentador)]** Trinta dias. Risco meu. Decisão sua. Ou você começa hoje, ou daqui a um mês você está aqui de novo, assistindo isso de madrugada.
+*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
 
-*(ESPAÇO SEU: aqui você escreve, se quiser, a frase de promessa que decidiu usar. Eu deixei em branco de propósito; o que entrar aqui fica por sua conta e responsabilidade.)*
+**[EDIÇÃO]** Legenda final: 'Quero meu teste de 30 dias', seta para o botão. Tela preta com o selo 30 DIAS por 2 segundos.
 
-**[TELA]** Quero meu teste de 30 dias, com seta para o botão.
+**[NOTA]** 'Vinte anos' é exemplo; usar o tempo real de consultório dele.
 
 ## Produção
 
-- Apresentador: você ou um ator com cara de 40+, roupa escura, close fechado, fundo preto ou parede escura com luz lateral quente. Fala para a câmera, com pausas curtas nos socos.
-- Dr. Durval: consultório real, dois trechos, sem jaleco com marca. Liberação do advogado dele antes de gravar.
-- Edição: cortes a cada 2 a 4 segundos nos blocos rápidos; o bloco do desafio em plano único. Legendas em Oswald, dourado sobre preto, palavras-chave maiores. Sem música sobre os depoimentos.
-- Entrega: MP4 H.264, 9:16, até 25 MB, poster com o apresentador olhando na câmera e o texto 'Qual é a sua desculpa?'.
+- Captação: consultório real, Dr. Durval sentado, câmera na altura dos olhos, close fechado. Luz de janela lateral ou uma luz quente. Roupa escura ou jaleco sem marca. Lapela. Celular em 4K vertical serve.
+- Direção: pedir que fale como fala com paciente, não como quem lê. Gravar cada bloco duas vezes; a segunda costuma ser a melhor.
+- Edição: cortes a cada 3 a 5 segundos nos blocos de fala; o bloco do desafio em plano único. Depoimentos inteiros, sem música por cima. Legendas em Oswald, dourado sobre preto, palavras-chave maiores.
+- Entrega: MP4 H.264, 9:16, até 25 MB, poster com o médico olhando na câmera e a legenda 'Eu achei que ia passar.'
 
 ## Como entra na página
 
@@ -117,6 +109,6 @@ Data: 10/09/2026. Duração alvo: 3 a 4 minutos, vertical 9:16, legendas queimad
 ## Próximos passos
 
 1. Você preenche os espaços seus e aprova o roteiro.
-2. Liberar com o advogado do Dr. Durval os dois trechos dele.
+2. Confirmar com o Dr. Durval os fatos da história dele (anos de pesquisa, participação na fórmula, tempo de consultório) e a liberação com o advogado.
 3. Fechar as condições da garantia (30 dias, saída em 10) nos Termos.
 4. Decidir o frete. Gravar. O player e a integração na página ficam comigo.
