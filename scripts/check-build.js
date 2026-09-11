@@ -24,11 +24,14 @@ assert.equal(vercel.outputDirectory, 'dist');
 assert.equal(vercel.buildCommand, 'node scripts/build-site.js');
 for (const page of PAGES.filter((name) => name.endsWith('.html'))) {
   const html = fs.readFileSync(path.join(OUTPUT, page), 'utf8');
-  for (const match of html.matchAll(/(?:src|href|srcset)=["']([^"']+)["']/g)) {
-    const target = match[1].split(/[?#]/)[0];
-    if (!target || /^(?:https?:|mailto:|tel:|data:|\/api\/)/.test(target)) continue;
-    const normalized = target.replace(/^\//, '') || 'index.html';
-    assert.ok(fs.existsSync(path.join(OUTPUT, normalized)) || fs.existsSync(path.join(OUTPUT, `${normalized}.html`)), `${page}: missing ${target}`);
+  for (const match of html.matchAll(/(?:src|href|srcset|imagesrcset)=["']([^"']+)["']/g)) {
+    // srcset/imagesrcset carry comma-separated candidates with width descriptors ("a.webp 720w, b.webp 1122w").
+    for (const candidate of match[1].split(',')) {
+      const target = candidate.trim().split(/\s+/)[0].split(/[?#]/)[0];
+      if (!target || /^(?:https?:|mailto:|tel:|data:|\/api\/)/.test(target)) continue;
+      const normalized = target.replace(/^\//, '') || 'index.html';
+      assert.ok(fs.existsSync(path.join(OUTPUT, normalized)) || fs.existsSync(path.join(OUTPUT, `${normalized}.html`)), `${page}: missing ${target}`);
+    }
   }
 }
 console.log('Public build checks passed: exact allowlist, local references, Vercel output isolation.');
