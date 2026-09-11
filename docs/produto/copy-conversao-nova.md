@@ -144,3 +144,20 @@ Com essas quatro respostas, monto a página nova no mesmo visual (preto e dourad
 - **Fechamento:** `Ou você começa hoje, ou daqui a um mês está aqui de novo, de madrugada, lendo isso.`
 - **Fora, em qualquer versão:** alegação de tratar disfunção erétil ou ejaculação precoce, percentuais ou minutos de efeito, "comprimido não funciona", médico garantindo resultado, spray/maca (o produto é gotas e a fórmula tem boro).
 - **Pendente do proprietário:** condições da garantia nos Termos (30 dias, saída em 10, o que é devolvido, frasco aberto) e decisão de embutir o frete no preço.
+
+## Página modelada na VSL (11/09/2026)
+
+Ordem da página = ordem dos blocos da VSL do Dr. Durval. O vídeo fica no topo (espaço reservado, poster e botão de play, até o arquivo existir). Em cada bloco há um **espaço da copy** (caixa tracejada dourada) onde entram as falas do Dr. Durval que ficam por conta do proprietário.
+
+| Bloco da VSL | Seção da página | O que já está | Espaço da copy |
+|---|---|---|---|
+| 1 Gancho | Hero + VSL | "Se você já tentou e não foi o que prometeram, o problema nunca foi você." + player | Duas primeiras frases do Dr. Durval |
+| 2 Dor | `#dor` | Citação do Dr. Durval sobre os homens 55+, seis cartões de identificação | Trecho completo dele |
+| 3 Mecanismo | `#mecanismo` | Título e lugar da animação | Explicação do mecanismo, por conta do proprietário |
+| 4 Virada | `#virada` | "Foi vendo isso repetir que eu decidi fazer diferente", seis componentes, tabela, B6 | Fala dele sobre a fórmula |
+| 5 Prova 1 | `#prova` | Dois vídeos reais | Frase dele após o depoimento |
+| 6 Oferta | `#kit` | "Esse protocolo se chama COWBOY Energia", gotas, só aqui, kits, frete R$ 25 | Apresentação do produto e preço na voz dele |
+| 7 Garantia + prova 2 | `#garantia` | 10 dias para desistir, 30 de teste, selo 10 DIAS, seis fotos de clientes | Garantia na voz dele |
+| 8 CTA final | `#fim` | "Você tem duas opções agora" + botão | Fechamento dele |
+
+Correções de fato aplicadas em relação ao roteiro recebido: o produto é gotas (não spray) e a fórmula tem boro (não maca). Números de efeito, alegações de tratar disfunção erétil ou ejaculação precoce e "comprimido não funciona" ficam fora do que eu escrevo; os espaços da copy existem para o que o proprietário decidir, por conta dele.

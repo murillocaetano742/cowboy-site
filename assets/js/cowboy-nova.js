@@ -53,8 +53,8 @@
     });
     if (recapTitle) {
       recapTitle.textContent = done.length === keys.length
-        ? 'Você conferiu os ' + keys.length + ' capítulos. Boa escolha.'
-        : 'Você já conferiu ' + done.length + ' de ' + keys.length + ' capítulos. Faltam:';
+        ? 'Você conferiu os ' + keys.length + ' blocos. Boa escolha.'
+        : 'Você já conferiu ' + done.length + ' de ' + keys.length + ' blocos. Faltam:';
     }
     recap.hidden = false;
   }

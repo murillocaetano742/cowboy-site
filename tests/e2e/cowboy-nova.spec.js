@@ -23,9 +23,10 @@ test.describe('COWBOY Energia — página nova', () => {
     await expect(page).toHaveTitle(/COWBOY Energia/);
     const html = await page.content();
     const at = (id) => html.indexOf(`id="${id}"`);
-    expect(at('relatos')).toBeGreaterThan(at('topo'));
-    expect(at('relatos')).toBeLessThan(at('reconhece'));
-    expect(at('garantia')).toBeLessThan(at('kit'));
+    expect(at('dor')).toBeGreaterThan(at('topo'));
+    expect(at('mecanismo')).toBeLessThan(at('prova'));
+    expect(at('prova')).toBeLessThan(at('kit'));
+    expect(at('kit')).toBeLessThan(at('garantia'));
     const before = html.slice(0, at('kit'));
     expect(before).not.toMatch(/api\/checkout|data-checkout-button/i);
     expect(html.match(/data-checkout-button/g)).toHaveLength(1);
@@ -36,19 +37,19 @@ test.describe('COWBOY Energia — página nova', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('mobile: vídeos no topo com controles, sem autoplay', async ({ page }) => {
+  test('mobile: vídeos na prova social com controles, sem autoplay; fotos na garantia', async ({ page }) => {
     await page.goto(URL, { waitUntil: 'networkidle' });
-    const videos = page.locator('#relatos video');
+    const videos = page.locator('#prova video');
     await expect(videos).toHaveCount(2);
     for (const video of await videos.all()) {
       await expect(video).toHaveAttribute('controls', '');
       await expect(video).not.toHaveAttribute('autoplay', /.*/);
     }
-    await expect(page.locator('#relatos .badge-video')).toContainText(/segundo frasco/i);
-    await expect(page.locator('#relatos .photo-card')).toHaveCount(6);
-    const order = await page.locator('#relatos .relatos-track > *').evaluateAll((els) => els.map((el) => el.classList.contains('video-card') ? 'v' : 'p').join(''));
-    expect(order).toBe('vvpppppp');
-    await page.locator('#relatos').scrollIntoViewIfNeeded();
+    await expect(page.locator('#prova .badge-video')).toContainText(/segundo frasco/i);
+    await expect(page.locator('#garantia .photo-card')).toHaveCount(6);
+    await expect(page.locator('[data-vsl]')).toBeVisible();
+    await expect(page.locator('.copy-slot')).toHaveCount(8);
+    await page.locator('#garantia').scrollIntoViewIfNeeded();
     await page.locator('[data-gallery-next]').click();
     await page.waitForTimeout(700);
     await expect(page.locator('[data-gallery-dots] button').nth(1)).toHaveAttribute('aria-current', 'true');
