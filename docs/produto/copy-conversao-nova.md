@@ -161,3 +161,23 @@ Ordem da página = ordem dos blocos da VSL do Dr. Durval. O vídeo fica no topo 
 | 8 CTA final | `#fim` | "Você tem duas opções agora" + botão | Fechamento dele |
 
 Correções de fato aplicadas em relação ao roteiro recebido: o produto é gotas (não spray) e a fórmula tem boro (não maca). Números de efeito, alegações de tratar disfunção erétil ou ejaculação precoce e "comprimido não funciona" ficam fora do que eu escrevo; os espaços da copy existem para o que o proprietário decidir, por conta dele.
+
+## Site como complemento da VSL (11/09/2026, versão atual)
+
+Pesquisa (Swipe Pages, Verlua, Vidico, ClickFunnels): título acima do vídeo, player sem distrações (sem menu), 3 a 5 linhas escaneáveis, botão que pode ser revelado no minuto da oferta para tráfego frio, e abaixo a versão escrita curta do argumento para quem não assiste, prova, oferta, garantia como remoção de risco, FAQ, CTAs repetidos com texto que evolui. "O vídeo vende o resultado; a página remove o risco."
+
+Estrutura da página `cowboy-nova.html`:
+
+1. **Hero:** "Assista antes de decidir · 6 minutos" · "O que ninguém te contou na farmácia. E o desafio de 30 dias do Dr. Durval." · player (poster e play; o arquivo do vídeo entra como `<video data-vsl-video>`) · 3 linhas do que ele vai ver · botão "Quero meu teste de 30 dias" · frete R$ 25 declarado.
+2. **Transição:** "O vídeo mostra o caminho. Aqui embaixo está o que você precisa para decidir."
+3. **Prova:** 2 vídeos + 6 fotos reais em rolagem lateral · botão "Ver os kits e o preço".
+4. **Para quem não vai assistir:** versão escrita curta (o problema nunca foi você; gotas; seis componentes; rótulo aberto; só aqui) + composição em bloco recolhível.
+5. **Dr. Durval:** citação e credenciais (foto, CRM e tempo de consultório após liberação).
+6. **Oferta:** kits 1/2/3/4, kit de 2 como "Teste completo", pilha de valor, frete R$ 25, botão.
+7. **Garantia:** selo 10 dias, "use por 10 dias, quer desistir? o dinheiro volta na hora", 30 dias de teste, anti-garantia, botão.
+8. **FAQ** (8 objeções, incluindo frete e "onde mais encontro").
+9. **Decisão:** "Você tem duas opções agora" + botão.
+
+Revelação atrasada: os botões marcados `data-reveal` ficam travados até o vídeo chegar ao segundo definido em `data-reveal-at` (290 s, o minuto da oferta na VSL) ou terminar; um link "Já assistiu? Ir direto para a oferta" aparece após 45 s de reprodução. Sem arquivo de vídeo, nada fica travado. Botão flutuante aparece depois da garantia.
+
+Velocidade: sem menu, sem pill, sem fontes externas, poster do vídeo em 720 px para celular, imagens abaixo da dobra em carregamento preguiçoso. Lighthouse mobile após a mudança registrado em `docs/qa/nova/relatorio-qa-nova.md`.

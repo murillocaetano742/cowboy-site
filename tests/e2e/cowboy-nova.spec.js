@@ -23,10 +23,10 @@ test.describe('COWBOY Energia — página nova', () => {
     await expect(page).toHaveTitle(/COWBOY Energia/);
     const html = await page.content();
     const at = (id) => html.indexOf(`id="${id}"`);
-    expect(at('dor')).toBeGreaterThan(at('topo'));
-    expect(at('mecanismo')).toBeLessThan(at('prova'));
+    expect(at('prova')).toBeGreaterThan(at('topo'));
     expect(at('prova')).toBeLessThan(at('kit'));
     expect(at('kit')).toBeLessThan(at('garantia'));
+    expect(html).not.toMatch(/class="menu"|data-pill|class="announce"/);
     const before = html.slice(0, at('kit'));
     expect(before).not.toMatch(/api\/checkout|data-checkout-button/i);
     expect(html.match(/data-checkout-button/g)).toHaveLength(1);
@@ -46,16 +46,16 @@ test.describe('COWBOY Energia — página nova', () => {
       await expect(video).not.toHaveAttribute('autoplay', /.*/);
     }
     await expect(page.locator('#prova .badge-video')).toContainText(/segundo frasco/i);
-    await expect(page.locator('#garantia .photo-card')).toHaveCount(6);
+    await expect(page.locator('#prova .photo-card')).toHaveCount(6);
     await expect(page.locator('[data-vsl]')).toBeVisible();
-    await expect(page.locator('.copy-slot')).toHaveCount(8);
-    await page.locator('#garantia').scrollIntoViewIfNeeded();
+    await expect(page.locator('[data-reveal][data-locked]')).toHaveCount(0);
+    await page.locator('#prova').scrollIntoViewIfNeeded();
     await page.locator('[data-gallery-next]').click();
     await page.waitForTimeout(700);
     await expect(page.locator('[data-gallery-dots] button').nth(1)).toHaveAttribute('aria-current', 'true');
   });
 
-  test('mobile: kit selecionado atualiza painel, recapitulação aparece, pill abre e fecha', async ({ page }) => {
+  test('mobile: kit selecionado atualiza painel e recapitulação aparece', async ({ page }) => {
     await page.goto(URL, { waitUntil: 'networkidle' });
     await page.locator('#kit').scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
@@ -63,11 +63,6 @@ test.describe('COWBOY Energia — página nova', () => {
     await page.getByLabel(/4 frascos/).check();
     await expect(page.locator('[data-selected-kit]')).toHaveText('4 frascos selecionados');
     await expect(page.locator('[data-recap]')).toBeVisible();
-    await expect(page.locator('[data-pill]')).toBeVisible();
-    await page.locator('[data-pill-open]').click();
-    await expect(page.locator('[data-sheet]')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.locator('[data-sheet]')).toBeHidden();
     const form = page.locator('[data-checkout-form]');
     await expect(form).toHaveAttribute('action', /\/api\/checkout/); // a UTMify pode acrescentar parâmetros ao action
     await expect(form).toHaveAttribute('method', /get/i);

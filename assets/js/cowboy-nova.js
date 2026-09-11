@@ -169,6 +169,23 @@
     });
   }).catch(function () {});
 
+  // VSL delayed reveal: when a real video is present, offer CTAs stay locked until the video reaches data-reveal-at
+  // seconds (or ends). A 'skip' link appears after 45 s so warm traffic is never trapped. Without a video, nothing is locked.
+  var vsl = document.querySelector('[data-vsl]');
+  var vslVideo = vsl && vsl.querySelector('video[data-vsl-video]');
+  var reveals = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
+  var skip = document.querySelector('[data-vsl-skip]');
+  function unlock() { reveals.forEach(function (el) { el.removeAttribute('data-locked'); }); if (skip) skip.hidden = true; }
+  if (vsl && vslVideo && reveals.length) {
+    var at = Number(vsl.dataset.revealAt) || 0;
+    reveals.forEach(function (el) { el.setAttribute('data-locked', ''); });
+    var started = false;
+    vslVideo.addEventListener('play', function () { if (!started) { started = true; window.setTimeout(function () { if (skip && skip.hidden) skip.hidden = false; }, 45000); } });
+    vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= at) unlock(); });
+    vslVideo.addEventListener('ended', unlock);
+    if (skip) skip.addEventListener('click', unlock);
+  }
+
   // Sticky CTA: shows after the visitor reads the guarantee, hides while the kit section is on screen.
   var sticky = document.querySelector('[data-sticky-cta]');
   var guaranteeSection = document.getElementById('garantia');
