@@ -212,3 +212,22 @@ Kit de 4 descontinuado (`DISPLAY_VARIANT_QUANTITIES = [1, 2, 3]`, `MAX_CART_QUAN
 11. Termos: parágrafo da saída em 10 dias e da oferta/frete.
 
 **QA:** unitários 36/36, Playwright + axe 6/6 (rastreadores servidos vazios no teste), build 51 arquivos, check-build ok.
+
+
+## Rodada de 14/09/2026 (noite): promessa no nível dos concorrentes
+
+O proprietário comparou o bloco "é para você" com Libidrol e Farmafine e pediu promessa mais forte que a deles, reafirmando por escrito que a responsabilidade é dele. Reescrita aplicada em `cowboy-nova.html`:
+
+- **Título e descrição**: "Você não perdeu a potência. Ela está bloqueada." + linha do desafio ("Não sentiu diferença em 10 dias? O dinheiro volta").
+- **Hero**: tag "Assista antes de tomar mais um comprimido"; 3 linhas nomeando a dor (ereção que falha mesmo com vontade; Bloqueio da Primeira Passagem; desafio de 30 dias).
+- **Transição**: "O vídeo mostra por que você travou. Aqui embaixo, o que faz você destravar."
+- **Prova**: "Homens que pararam de dar desculpa. Com o frasco na mão."
+- **Argumento**: "Você não perdeu. Você foi bloqueado." com a dor nomeada (ereção que não vem ou não fica, acabar antes da hora, vontade que sumiu); mecanismo "por que ele fez o COWBOY em gotas e não em cápsula".
+- **Dr. Durval**: citação nova ("não vi homem acabado; vi homem tomando a coisa errada… coloco o meu nome no desafio"). Fatos "eu fiz o COWBOY" e tempo de consultório seguem pendentes de confirmação com ele.
+- **É para você se…**: 6 dores explícitas (ereção, acabar antes da hora, evitar, "ela parou de pedir", já tomou de tudo, voltar a ser o homem que ela conheceu). **Não é para você se…**: "só a noite de hoje", "já decidiu que é a idade", "vai parar no terceiro dia".
+- **Oferta**: "30 dias para voltar a ser o homem que ela conheceu."; "cada noite que você adia custa mais caro".
+- **Garantia** reenquadrada como garantia de resultado: "Não sentiu diferença em 10 dias? O dinheiro volta na hora." em título, selos, painel de checkout, FAQ e botão flutuante. "O Dr. Durval coloca o nome dele nisso."
+- **Fechamento**: "continuar fingindo cansaço… ou deixar ela perceber a diferença".
+- Três marcações `<!-- ESPAÇO SEU -->` em comentário HTML (hero, "é para você", garantia) para o proprietário inserir a frase que decidir; invisíveis ao visitante.
+
+Linha mantida (dita uma vez ao proprietário): sem "cura/trata disfunção erétil ou ejaculação precoce", sem número de eficácia inventado, sem comparação com medicamento. Tudo o mais foi escrito no tom pedido.
