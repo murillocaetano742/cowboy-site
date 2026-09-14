@@ -75,3 +75,8 @@ npm test && npm run test:e2e
 ```
 
 Antes de editar arquivos compartilhados (`scripts/build-site.js`, `config/commerce.js`, `vercel.json`, `tests/`), conferir se o Codex mexeu neles (`git diff` e `tasklist | grep codex`). Commits via índice temporário; push direto em `feat/pagina-nova`.
+
+## 8. Atualização 14/09 (tarde)
+
+- **Produção não tem a versão VSL.** O PR #1 foi mesclado em 08/09 (versão de conversão). Depois o Codex mesclou os PRs #2 a #10 em `main` (Pixel Meta, GA4, UTMify, `/nova`, versões `cowboy-v1-1.html` e `cowboy-v1-2.html`). Hoje a raiz do site é a **v1.2** do Codex; `cowboy-nova.html` fica em `/v1-0` e `/nova`. Os commits da versão VSL (843bca6 → fa86438) estão só em `feat/pagina-nova`, que diverge de `origin/main` em 37 commits. Para publicar a VSL: rebase da branch sobre `origin/main` (conflitos pequenos em `cowboy-nova.html` [2 scripts], `cowboy-nova.css` [bloco REBUILD-016] e `scripts/build-site.js` [aliases]) e novo PR. Não publicar antes do vídeo existir.
+- **Auditoria de concorrentes** (Libidrol/GH Muscle e Fórmula Masculina 1000/Farmafine): `docs/produto/auditoria-concorrentes-2026-09-14.md`, textos integrais em `docs/produto/concorrentes/` (capturas de tela ficaram fora do repositório pelo tamanho), Notion: https://app.notion.com/p/3db691faccdc8120b64ee435923880a7. Plano priorizado com 21 ajustes; 9 sem dependência (itens 6, 10, 11, 15, 16, 17, 19, 20, 21).
