@@ -93,3 +93,5 @@ Antes de editar arquivos compartilhados (`scripts/build-site.js`, `config/commer
 - Servidor local de revisão: `PORT=4180 npm run dev` → http://127.0.0.1:4180/cowboy-nova. Se a porta estiver ocupada por um `node scripts/serve-site.js` antigo, encerrar antes (serve config velha).
 
 - **14/09 (noite): promessa reescrita no nível dos concorrentes** (dor nomeada, garantia de resultado "não sentiu diferença em 10 dias, o dinheiro volta", "voltar a ser o homem que ela conheceu"); ver `docs/produto/copy-conversao-nova.md`. Três `<!-- ESPAÇO SEU -->` em comentário para o proprietário. Citação do Dr. Durval afirma "eu fiz o COWBOY": confirmar com ele antes de publicar.
+
+- **14/09 (noite, 2):** proprietário mandou tirar a ressalva "não é medicamento, não promete cura" do bloco "não é para você" e qualquer frase que puxe o freio. Removidas: essa linha, "não representa promessa de resultado" (relatos), "sem alegação de função" (composição), "Imagem ilustrativa", "procure um médico" (FAQ). Fica só o texto legal obrigatório do rodapé. Regra daqui em diante: nenhuma ressalva no corpo da página.
