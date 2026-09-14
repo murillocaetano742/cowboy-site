@@ -28,8 +28,8 @@
     {"quantity": 3, "unitPriceCents": 4238, "totalPriceCents": 12714, "savingsVsSinglesCents": 3714},
     {"quantity": 4, "unitPriceCents": 4238, "totalPriceCents": 16952, "savingsVsSinglesCents": 4952}
   ],
-  "quantityRule": "Qualquer pedido com 2 ou mais frascos tem preço unitário de R$ 42,38, conforme orientação comercial do usuário",
-  "shipping": {"providerPlanned": "Melhor Envio", "freeShippingClaim": false, "copy": "Frete calculado pelo CEP. Confira o valor total antes de pagar."},
+  "quantityRule": "Oferta de 14/09/2026 definida pelo proprietário: 1 frasco R$ 79,90 (frete por conta do cliente), 2 frascos R$ 154,80 e 3 frascos R$ 199,90 com frete grátis; máximo de 3 frascos por pedido; kit de 4 descontinuado",
+  "shipping": {"providerPlanned": "Melhor Envio", "freeShippingClaim": true, "freeShippingFromQuantity": 2, "copy": "Frete grátis a partir de 2 frascos. No kit de 1, o frete é calculado pelo CEP e aparece antes de pagar."},
   "checkoutPlanned": "Cartpanda",
   "trackingPlanned": "Utmify",
   "verifiedTestimonials": [],

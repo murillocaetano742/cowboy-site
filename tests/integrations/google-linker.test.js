@@ -9,7 +9,7 @@ const checkoutHandler = require('#api/checkout');
 const LINKER = '1*validation*_ga*' + 'A'.repeat(300) + '*_ga_VYR2542XCN*fixture';
 
 test('redirecionamento dos quatro kits preserva linker longo e UTMs sem liberar campos arbitrários', () => {
-  for (const quantity of [1, 2, 3, 4]) {
+  for (const quantity of [1, 2, 3]) {
     const params = new URLSearchParams({ quantity: String(quantity), _gl: LINKER, utm_source: 'organic', cid: 'validation', email: 'excluded@example.com', redirect: 'https://example.com' });
     const result = {};
     const response = {

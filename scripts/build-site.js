@@ -23,6 +23,7 @@ const ASSETS = [
   'assets/js/cowboy-floating-checkout-v1-2.js',
   'assets/js/cowboy-pixel.js',
   'assets/js/cowboy-google.js',
+  'assets/data/atividade.json',
   'assets/fonts/oswald-latin-wght-normal.woff2',
   'assets/fonts/manrope-latin-wght-normal.woff2',
   'assets/fonts/LICENSES.txt',

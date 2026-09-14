@@ -16,7 +16,8 @@
   var shippingRequestId = 0;
   var checkoutParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'src', 'sck', 'cid', 'gclid', 'fbclid', 'keyword', 'device', 'network'];
   var attributionStorageKey = 'cowboy_attribution';
-  var productTotals = { 1: 5476, 2: 8476, 3: 12714, 4: 16952 };
+  var productTotals = { 1: 7990, 2: 15480, 3: 19990 };
+  var freeShippingFrom = 2;
 
   // Google deliberately skips linker decoration for same-host forms. Keep
   // the validated API checkout flow, using our other production hostname as
@@ -147,7 +148,9 @@
         var item = document.createElement('li');
         var service = [quote.company, quote.service].filter(Boolean).join(' · ') || 'Entrega';
         var days = Number.isFinite(quote.deliveryDays) ? ' · prazo estimado: ' + quote.deliveryDays + (quote.deliveryDays === 1 ? ' dia útil' : ' dias úteis') : '';
-        item.textContent = service + ' — frete ' + brlFromCents(freightCents) + ' · produtos + frete ' + brlFromCents(productTotals[quantity] + freightCents) + days;
+        item.textContent = quantity >= freeShippingFrom
+          ? service + ' — frete grátis · total ' + brlFromCents(productTotals[quantity]) + days
+          : service + ' — frete ' + brlFromCents(freightCents) + ' · produtos + frete ' + brlFromCents(productTotals[quantity] + freightCents) + days;
         shippingResults.appendChild(item);
       });
     }).catch(function (error) {

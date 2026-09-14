@@ -14,7 +14,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
       await page.route('https://**/*', (route) => route.abort());
     });
 
-    for (const quantity of [1, 2, 3, 4]) {
+    for (const quantity of [1, 2, 3]) {
       test(`floating checkout submits kit ${quantity} and attribution`, async ({ page }) => {
         const query = 'utm_source=validacao&utm_campaign=CTA_027&cid=76324699889';
         await page.goto(`${BASE}/v1-1?${query}`);
@@ -51,7 +51,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
       await page.goto(`${BASE}/v1-0`);
       await expect(page.locator('[data-floating-checkout]')).toHaveCount(0);
       await expect(page.locator('[data-checkout-button]')).toHaveCount(1);
-      await expect(page.locator('.kit')).toHaveCount(4);
+      await expect(page.locator('.kit')).toHaveCount(3);
       await expect(page.locator('#relatos video')).toHaveCount(2);
     });
 

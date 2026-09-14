@@ -181,3 +181,34 @@ Estrutura da página `cowboy-nova.html`:
 Revelação atrasada: os botões marcados `data-reveal` ficam travados até o vídeo chegar ao segundo definido em `data-reveal-at` (290 s, o minuto da oferta na VSL) ou terminar; um link "Já assistiu? Ir direto para a oferta" aparece após 45 s de reprodução. Sem arquivo de vídeo, nada fica travado. Botão flutuante aparece depois da garantia.
 
 Velocidade: sem menu, sem pill, sem fontes externas, poster do vídeo em 720 px para celular, imagens abaixo da dobra em carregamento preguiçoso. Lighthouse mobile após a mudança registrado em `docs/qa/nova/relatorio-qa-nova.md`.
+
+
+## Rodada de 14/09/2026 (tarde): auditoria de concorrentes aplicada + nova oferta
+
+Base: `docs/produto/auditoria-concorrentes-2026-09-14.md`. O proprietário aprovou todos os ajustes propostos e definiu a oferta nova. Aplicado em `cowboy-nova.html`, `assets/css/cowboy-nova.css`, `assets/js/cowboy-nova.js`, `config/commerce.js`, `api/config.js`, `assets/js/cowboy-store.js`, `termos.html`, `assets/data/atividade.json`.
+
+**Oferta (decisão do proprietário):**
+
+| Kit | Preço | Frete | Por dia | Economia mostrada |
+|---|---|---|---|---|
+| 1 frasco | R$ 79,90 | por conta do cliente | R$ 2,66 | — |
+| 2 frascos (Teste completo, padrão) | R$ 154,80 | grátis | R$ 2,58 | R$ 30 com o frete |
+| 3 frascos (Melhor preço) | R$ 199,90 | grátis | R$ 2,22 | R$ 64,80 (R$ 39,80 + frete) |
+
+Kit de 4 descontinuado (`DISPLAY_VARIANT_QUANTITIES = [1, 2, 3]`, `MAX_CART_QUANTITY = 3`). **O Cartpanda ainda cobra os preços antigos (54,76 / 84,76 / 127,14 + frete R$ 25): o proprietário precisa atualizar as variantes 211742450, 211742746 e 212751381 e configurar frete grátis nos kits de 2 e 3 antes de publicar.** Parcelamento aparece como "em até 12x no cartão" sem valor de parcela até confirmar as regras de parcelamento do checkout.
+
+**Blocos novos ou alterados, na ordem da página:**
+
+1. Hero: nota "Frete grátis a partir de 2 frascos".
+2. `#argumento`: faixa de números (6 · 12 · 30 · 0), card "O Bloqueio da Primeira Passagem" (curiosidade que aponta para o vídeo, sem alegação), composição em 6 cards visíveis + alegação da B6 + tabela do rótulo recolhida, âncora "Ver a oferta do vídeo".
+3. `#pra-quem` (nova seção): "É para você se…" (5 itens) e "Não é para você se…" (4 itens), lado a lado no desktop.
+4. `#kit`: bloco de urgência com prazo real (`data-deadline`, hoje 30/09/2026 23:59 BRT; some sozinho quando passa; `data-stock` opcional para estoque real), contagem regressiva, "máximo de 3 frascos por pedido"; 3 kits com flags comparativas (teste de 30 dias, meses de rotina, frete ✓/✗), "ou em até 12x no cartão", economia; pilha de valor atualizada; bloco "Como chega" (prazo pelo CEP, rastreio, embalagem discreta, pagamento); painel de checkout e selos com frete grátis a partir de 2.
+5. `#garantia`: certificado de garantia (30 dias de teste · saída em 10, link para os Termos), passo a passo em 3 etapas, fechamento "Qual é a sua desculpa?".
+6. `#perguntas`: +5 perguntas (funciona no mesmo dia, parcelar, envio discreto, quem é o Dr. Durval, mais de 3 frascos), frete atualizado, bloco de WhatsApp (oculto até o número entrar em `<body data-whatsapp>`), aviso anti-marketplace.
+7. `#fim`: eco da urgência com a data.
+8. Botão flutuante aparece depois da prova (não mais depois da garantia) e respeita a trava da VSL.
+9. Avisos de atividade (toast no topo): lidos de `assets/data/atividade.json`. `pedidos` (vazio; só pedidos reais, preenchidos pelo proprietário ou por webhook do Cartpanda) e `relatos` (os 8 clientes reais da galeria). Aparece após 9 s, a cada 16 s, no máximo 6 por visita, não aparece com o vídeo tocando, fechável. **Nenhum nome ou compra é inventado.**
+10. Medição: eventos `vsl_start`, `vsl_progress` (25/50/75) e `vsl_complete` para GA4 e Meta quando o vídeo existir; Pixel e GA4 herdados da `main`.
+11. Termos: parágrafo da saída em 10 dias e da oferta/frete.
+
+**QA:** unitários 36/36, Playwright + axe 6/6 (rastreadores servidos vazios no teste), build 51 arquivos, check-build ok.

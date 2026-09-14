@@ -11,22 +11,21 @@ const { LOGISTICS } = require('#logistics');
 const OFFER = Object.freeze({
   currency: 'BRL',
   variants: Object.freeze({
-    1: Object.freeze({ quantity: 1, unitPriceCents: 5476, totalPriceCents: 5476, checkoutEnv: 'CARTPANDA_CHECKOUT_1_URL' }),
-    2: Object.freeze({ quantity: 2, unitPriceCents: 4238, totalPriceCents: 8476, checkoutEnv: 'CARTPANDA_CHECKOUT_2_URL' }),
-    3: Object.freeze({ quantity: 3, unitPriceCents: 4238, totalPriceCents: 12714, checkoutEnv: 'CARTPANDA_CHECKOUT_3_URL' }),
-    4: Object.freeze({ quantity: 4, unitPriceCents: 4238, totalPriceCents: 16952, checkoutEnv: 'CARTPANDA_CHECKOUT_4_URL' }),
+    // Oferta de 14/09/2026 (decisão do proprietário): 1 frasco R$ 79,90 com frete por conta do cliente;
+    // 2 frascos R$ 154,80 e 3 frascos R$ 199,90 com frete grátis. Kit de 4 descontinuado.
+    1: Object.freeze({ quantity: 1, unitPriceCents: 7990, totalPriceCents: 7990, freeShipping: false, checkoutEnv: 'CARTPANDA_CHECKOUT_1_URL' }),
+    2: Object.freeze({ quantity: 2, unitPriceCents: 7740, totalPriceCents: 15480, freeShipping: true, checkoutEnv: 'CARTPANDA_CHECKOUT_2_URL' }),
+    3: Object.freeze({ quantity: 3, unitPriceCents: 6663, totalPriceCents: 19990, freeShipping: true, checkoutEnv: 'CARTPANDA_CHECKOUT_3_URL' }),
   }),
 });
 
-// Keep the initial page focused while allowing the rule “2+ at R$42,38 each”
-// to be honored if a future Cartpanda kit for 3 is explicitly configured.
-const DISPLAY_VARIANT_QUANTITIES = Object.freeze([1, 2, 3, 4]);
+const DISPLAY_VARIANT_QUANTITIES = Object.freeze([1, 2, 3]);
+const FREE_SHIPPING_FROM_QUANTITY = 2;
 
 const CARTPANDA_PUBLIC_CHECKOUT_URLS = Object.freeze({
   1: 'https://cowboy-energia.mycartpanda.com/checkout/211742450:1',
   2: 'https://cowboy-energia.mycartpanda.com/checkout/211742746:1',
   3: 'https://cowboy-energia.mycartpanda.com/checkout/212751381:1',
-  4: 'https://cowboy-energia.mycartpanda.com/checkout/211742749:1',
 });
 
 const UTM_ALLOWLIST = Object.freeze([
@@ -47,7 +46,7 @@ const UTM_ALLOWLIST = Object.freeze([
 
 const MAX_QUERY_VALUE_LENGTH = 256;
 const MAX_LINKER_VALUE_LENGTH = 2048;
-const MAX_CART_QUANTITY = 4;
+const MAX_CART_QUANTITY = 3;
 
 function parseBrazilianPostalCode(value) {
   if (typeof value !== 'string') return null;
@@ -136,6 +135,7 @@ module.exports = {
   OFFER,
   CARTPANDA_PUBLIC_CHECKOUT_URLS,
   DISPLAY_VARIANT_QUANTITIES,
+  FREE_SHIPPING_FROM_QUANTITY,
   UTM_ALLOWLIST,
   checkoutUrlFor,
   getShippingBaseUrl,

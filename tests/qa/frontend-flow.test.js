@@ -139,27 +139,27 @@ test('QA: indisponibilidade conserva mensagem, impede submit e oferece SAC', asy
 test('QA: resposta atrasada do kit anterior não aparece no kit atual', async () => {
   const f = fixture(); await settle(); f.submit();
   const old = f.pending[0];
-  f.select(4); f.submit();
+  f.select(1); f.submit();
   assert.equal(old.options.signal.aborted, true);
   quote(old, 1); await settle();
   assert.equal(f.elements['shipping-results'].children.length, 0);
   assert.equal(f.shippingButton.disabled, true);
   quote(f.pending[1], 10); await settle();
-  assert.match(f.elements['shipping-results'].children[0].textContent, /179,52/);
+  assert.match(f.elements['shipping-results'].children[0].textContent, /89,90/);
   assert.equal(f.shippingButton.disabled, false);
 });
 
 test('QA: mudança de CEP invalida cotação anterior e permite recuperação após erro', async () => {
   const f = fixture(); await settle(); f.submit();
   quote(f.pending[0], 10); await settle();
-  assert.match(f.elements['shipping-results'].children[0].textContent, /94,76/);
+  assert.match(f.elements['shipping-results'].children[0].textContent, /frete grátis · total R\$ 154,80/);
   f.postalCode.value = '22290-040'; f.postalCode.fire('input');
   assert.equal(f.elements['shipping-results'].children.length, 0);
   f.submit(); f.pending[1].reject(new Error('provider')); await settle();
   assert.equal(f.shippingButton.disabled, false);
   assert.equal(f.elements['shipping-status'].dataset.state, 'error');
   f.submit(); quote(f.pending[2], 20); await settle();
-  assert.match(f.elements['shipping-results'].children[0].textContent, /104,76/);
+  assert.match(f.elements['shipping-results'].children[0].textContent, /frete grátis · total R\$ 154,80/);
 });
 
 test('QA: HTML oferece compra GET com todos os kits sem depender do script', () => {

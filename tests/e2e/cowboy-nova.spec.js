@@ -14,6 +14,14 @@ fs.mkdirSync(OUT, { recursive: true });
 
 test.describe('COWBOY Energia — página nova', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  test.beforeEach(async ({ page }) => {
+    // Rastreadores (Pixel/UTMify/GA4) não fazem parte do QA da página e, em localhost, o SDK da UTMify tenta
+    // um endpoint de desenvolvimento inexistente. Servimos os loaders vazios e bloqueamos chamadas externas.
+    const empty = (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: '' });
+    await page.route('**/assets/js/cowboy-pixel.js', empty);
+    await page.route('**/assets/js/cowboy-google.js', empty);
+    await page.route('https://**', (route) => route.abort());
+  });
 
   test('mobile: ordem de conversão, compra só no fim, sem claims proibidos, sem rolagem horizontal', async ({ page }) => {
     const errors = [];
@@ -59,9 +67,9 @@ test.describe('COWBOY Energia — página nova', () => {
     await page.goto(URL, { waitUntil: 'networkidle' });
     await page.locator('#kit').scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
-    await expect(page.locator('.kit')).toHaveCount(4);
-    await page.getByLabel(/4 frascos/).check();
-    await expect(page.locator('[data-selected-kit]')).toHaveText('4 frascos selecionados');
+    await expect(page.locator('.kit')).toHaveCount(3);
+    await page.getByLabel(/3 frascos/).check();
+    await expect(page.locator('[data-selected-kit]')).toHaveText('3 frascos selecionados');
     await expect(page.locator('[data-recap]')).toBeVisible();
     const form = page.locator('[data-checkout-form]');
     await expect(form).toHaveAttribute('action', /\/api\/checkout/); // a UTMify pode acrescentar parâmetros ao action

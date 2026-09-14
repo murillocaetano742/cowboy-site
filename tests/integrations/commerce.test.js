@@ -34,6 +34,7 @@ test('normaliza CEP e aceita somente kits comercialmente configurados', () => {
   assert.equal(commerce.parseQuantity('1'), 1);
   assert.equal(commerce.parseQuantity(2), 2);
   assert.equal(commerce.parseQuantity(3), 3);
+  assert.equal(commerce.parseQuantity(4), null);
   assert.equal(commerce.parseQuantity(5), null);
 });
 
@@ -78,7 +79,7 @@ test('cotação envia dados reais do kit e prefere preço/prazo customizados', a
   assert.equal(body.products[0].quantity, 1);
   assert.equal(body.products[0].weight, 0.5);
   assert.deepEqual([body.products[0].length, body.products[0].width, body.products[0].height], [23, 8, 8]);
-  assert.equal(body.products[0].insurance_value, '84.76');
+  assert.equal(body.products[0].insurance_value, '154.80');
   assert.equal(result.status, 200);
   assert.deepEqual(result.body.quotes, [
     { id: 1, company: 'Correios', service: 'PAC', price: 21.44, deliveryDays: 5 },
@@ -145,11 +146,11 @@ test('checkout exige HTTPS e host Cartpanda ou domínio customizado explicitamen
 });
 
 test('checkout usa somente os links públicos Cartpanda confirmados quando não há override', () => {
-  assert.deepEqual(Object.keys(commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS), ['1', '2', '3', '4']);
+  assert.deepEqual(Object.keys(commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS), ['1', '2', '3']);
   assert.equal(commerce.checkoutUrlFor(3, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/212751381:1');
   assert.equal(commerce.checkoutUrlFor(1, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742450:1');
   assert.equal(commerce.checkoutUrlFor(2, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742746:1');
-  assert.equal(commerce.checkoutUrlFor(4, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742749:1');
+  assert.equal(commerce.checkoutUrlFor(4, {}), null);
   assert.equal(commerce.checkoutUrlFor(3, { CARTPANDA_CHECKOUT_3_URL: 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1' }), null);
   assert.equal(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'https://example.com/checkout/1' }), null);
 });
@@ -179,7 +180,10 @@ test('configuração pública expõe oferta inicial e disponibilidade sem segred
   const response = mockResponse();
   configHandler({ method: 'GET' }, response);
   assert.equal(response.result.statusCode, 200);
-  assert.deepEqual(response.result.body.variants.map((variant) => variant.quantity), [1, 2, 3, 4]);
+  assert.deepEqual(response.result.body.variants.map((variant) => variant.quantity), [1, 2, 3]);
+  assert.equal(response.result.body.freeShippingFromQuantity, 2);
+  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 1).freeShipping, false);
+  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).freeShipping, true);
   assert.equal(response.result.body.variants.find((variant) => variant.quantity === 2).checkoutAvailable, true);
   // Kit de 3 criado no Cartpanda em 08/09/2026 (produto 29892228, variante 212751381).
   assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).checkoutAvailable, true);
@@ -193,8 +197,8 @@ test('configuração pública expõe oferta inicial e disponibilidade sem segred
   else process.env.CARTPANDA_CHECKOUT_2_URL = checkoutRetained;
 });
 
-test('pacote de 1 a 4 frascos mantém peso e dimensões totais e muda apenas seguro', () => {
-  for (const [quantity, insuredValue] of [[1, '54.76'], [2, '84.76'], [4, '169.52']]) {
+test('pacote de 1 a 3 frascos mantém peso e dimensões totais e muda apenas seguro', () => {
+  for (const [quantity, insuredValue] of [[1, '79.90'], [2, '154.80'], [3, '199.90']]) {
     const payload = freightHandler.buildPayload('01001000', quantity);
     assert.deepEqual(payload.products[0], {
       id: `cowboy-energia-kit-${quantity}`,
