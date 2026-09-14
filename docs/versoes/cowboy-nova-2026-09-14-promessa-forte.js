@@ -314,26 +314,6 @@
     }).catch(function () {});
   }
 
-  // Background parallax: each [data-bg] section moves its .bg-layer a little against the scroll (6 % desktop, 3 % mobile).
-  var bgLayers = Array.prototype.slice.call(document.querySelectorAll('[data-bg] > .bg-layer'));
-  if (bgLayers.length && !reduceMotion) {
-    var bgTick = false;
-    function paintBg() {
-      bgTick = false;
-      var vh = window.innerHeight;
-      var factor = window.innerWidth < 640 ? 0.03 : 0.06;
-      bgLayers.forEach(function (layer) {
-        var rect = layer.parentNode.getBoundingClientRect();
-        if (rect.bottom < -vh || rect.top > vh * 2) return;
-        var offset = (rect.top + rect.height / 2 - vh / 2) * -factor;
-        layer.style.transform = 'translate3d(0,' + offset.toFixed(1) + 'px,0)';
-      });
-    }
-    window.addEventListener('scroll', function () { if (!bgTick) { bgTick = true; window.requestAnimationFrame(paintBg); } }, { passive: true });
-    window.addEventListener('resize', paintBg);
-    paintBg();
-  }
-
   // One authored moment: hero product settles into place on load.
   var heroArt = document.querySelector('.hero-art img');
   if (heroArt && !reduceMotion && 'animate' in heroArt) {

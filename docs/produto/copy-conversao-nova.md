@@ -231,3 +231,8 @@ O proprietário comparou o bloco "é para você" com Libidrol e Farmafine e pedi
 - Três marcações `<!-- ESPAÇO SEU -->` em comentário HTML (hero, "é para você", garantia) para o proprietário inserir a frase que decidir; invisíveis ao visitante.
 
 Linha mantida (dita uma vez ao proprietário): sem "cura/trata disfunção erétil ou ejaculação precoce", sem número de eficácia inventado, sem comparação com medicamento. Tudo o mais foi escrito no tom pedido.
+
+
+## Rodada de 14/09/2026 (noite, 3): imagens v5 alinhadas à promessa, fundos com paralaxe, kits sem corte
+
+Auditoria de alinhamento em `docs/produto/auditoria-alinhamento-2026-09-14.md`; briefing em `docs/criacao/briefing-imagens-v5-2026-09-14.md`. Oito imagens geradas pelo Codex em `imagens/v5/` (poster de consultório sem rosto, gotas douradas, quarto à noite, casal na varanda, macro do conta-gotas, textura de couro, caixa discreta, mãos de médico com o frasco) e três kits montados com o packshot real (`kit-1..3`, frasco inteiro, fundo preto/dourado). Fundos com paralaxe leve (`[data-bg] > .bg-layer`, 6% desktop / 3% celular, desligado com movimento reduzido), frasco flutuante na oferta, card do kit com `object-fit: contain` e caixa de 6,6 rem. Versão anterior preservada: `imagens/v4/` intacta e página anterior em `docs/versoes/cowboy-nova-2026-09-14-promessa-forte.*`. QA: E2E + axe 6/6, Lighthouse celular 91/100/96/100 (LCP 3,2 s, 967 KB).
