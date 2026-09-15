@@ -180,10 +180,25 @@
     var at = Number(vsl.dataset.revealAt) || 0;
     reveals.forEach(function (el) { el.setAttribute('data-locked', ''); });
     var started = false;
-    vslVideo.addEventListener('play', function () { if (!started) { started = true; window.setTimeout(function () { if (skip && skip.hidden) skip.hidden = false; }, 45000); } });
+    function showSkip() { if (skip && skip.hidden && reveals.some(function (el) { return el.hasAttribute('data-locked'); })) skip.hidden = false; }
+    vslVideo.addEventListener('play', function () { if (!started) { started = true; window.setTimeout(showSkip, 45000); } });
+    // Warm traffic that never presses play still gets a way to the offer after 60 s on the page.
+    window.setTimeout(showSkip, 60000);
     vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= at) unlock(); });
     vslVideo.addEventListener('ended', unlock);
     if (skip) skip.addEventListener('click', unlock);
+
+    // Play overlay: one tap starts the video with sound; native controls take over after that.
+    var frame = vslVideo.closest('.vsl-frame');
+    var playButton = vsl.querySelector('[data-vsl-play]');
+    function startVideo() {
+      vslVideo.muted = false;
+      var p = vslVideo.play();
+      if (p && p.catch) p.catch(function () { vslVideo.muted = true; vslVideo.play().catch(function () {}); });
+    }
+    if (playButton) playButton.addEventListener('click', startVideo);
+    vslVideo.addEventListener('play', function () { if (frame) frame.setAttribute('data-playing', ''); vslVideo.setAttribute('controls', ''); });
+    vslVideo.addEventListener('ended', function () { if (frame) frame.removeAttribute('data-playing'); });
   }
 
   // Sticky CTA: shows after the visitor passes the proof block (or the guarantee, if the page has no proof block),

@@ -14,7 +14,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2712%27 fill=%27%230a0a0a%27/%3E%3Cpath d=%27M32 10c-6 9-11 15-11 23a11 11 0 0 0 22 0c0-8-5-14-11-23z%27 fill=%27%23e8bf6a%27/%3E%3C/svg%3E">
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/oswald-latin-wght-normal.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/manrope-latin-wght-normal.woff2" crossorigin>
-  <link rel="preload" as="image" href="imagens/v5/vsl-poster-consultorio-720.webp" imagesrcset="imagens/v5/vsl-poster-consultorio-720.webp 720w, imagens/v5/vsl-poster-consultorio.webp 1080w" imagesizes="(min-width: 900px) 640px, 100vw">
+  <link rel="preload" as="image" href="imagens/v5/vsl-poster-frame.webp">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoObject","name":"Você não perdeu a potência. Ela está bloqueada. O desafio de 30 dias do Dr. Durval","description":"Um médico explica o Bloqueio da Primeira Passagem e apresenta o desafio de 30 dias com o COWBOY Energia em gotas.","thumbnailUrl":"https://cowboyenergiamasculina.com.br/imagens/v5/vsl-poster-frame.webp","uploadDate":"2026-09-15","duration":"PT4M36S","contentUrl":"https://cowboyenergiamasculina.com.br/videos/vsl/vsl-dr-durval-720.mp4","inLanguage":"pt-BR"}</script>
   <link rel="stylesheet" href="assets/css/cowboy-nova.css">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"COWBOY Energia","description":"Suplemento alimentar em gotas, frasco de 30 mL.","image":"https://cowboyenergiamasculina.com.br/imagens/kits/kit-1.jpg","category":"Suplemento alimentar em gotas","offers":[{"@type":"Offer","priceCurrency":"BRL","price":"79.90","name":"1 frasco","url":"https://cowboyenergiamasculina.com.br/#kit"},{"@type":"Offer","priceCurrency":"BRL","price":"154.80","name":"2 frascos","url":"https://cowboyenergiamasculina.com.br/#kit"},{"@type":"Offer","priceCurrency":"BRL","price":"199.90","name":"3 frascos","url":"https://cowboyenergiamasculina.com.br/#kit"}]}</script>
 </head>
@@ -68,13 +69,19 @@
           <p class="lead">Um médico explica o Bloqueio da Primeira Passagem e te desafia: 30 dias com o COWBOY em gotas. Não sentiu diferença em 10 dias? O dinheiro volta.</p>
           <!-- ESPAÇO SEU (opcional): uma frase de promessa sua entre o título e o vídeo. O que entrar aqui é decisão e responsabilidade sua. -->
         </div>
-        <figure class="vsl" data-vsl data-reveal-at="290">
-          <div class="vsl-frame">
-            <img src="imagens/v5/vsl-poster-consultorio-720.webp" srcset="imagens/v5/vsl-poster-consultorio-720.webp 720w, imagens/v5/vsl-poster-consultorio.webp 1080w" sizes="(min-width: 900px) 640px, 100vw" width="720" height="1040" fetchpriority="high" decoding="async" alt="Consultório do Dr. Durval, com o frasco COWBOY Energia sobre a mesa">
+        <figure class="vsl" data-vsl data-reveal-at="200">
+          <!-- data-reveal-at: segundo do vídeo em que a oferta é liberada na página (a oferta começa aos 3:25 no vídeo de 15/09). -->
+          <div class="vsl-frame" data-has-video>
+            <video data-vsl-video playsinline preload="metadata" poster="imagens/v5/vsl-poster-frame.webp" width="720" height="1280" aria-label="Vídeo do Dr. Durval: o Bloqueio da Primeira Passagem e o desafio de 30 dias">
+              <source src="videos/vsl/vsl-dr-durval-720.mp4" type="video/mp4">
+              Seu navegador não suporta a reprodução de vídeo.
+            </video>
+            <img src="imagens/v5/vsl-poster-frame.webp" width="720" height="1280" fetchpriority="high" decoding="async" alt="">
             <button type="button" class="vsl-play" data-vsl-play aria-label="Assistir ao vídeo do Dr. Durval"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg></button>
-            <span class="vsl-label">Vídeo em produção · o player entra aqui</span>
+            <span class="vsl-sound" aria-hidden="true">Toque para assistir com som</span>
+            <span class="vsl-label">4 min 36 s · legendado</span>
           </div>
-          <figcaption>Sem som? Ative as legendas no player.</figcaption>
+          <figcaption>O vídeo é legendado. A oferta aparece na página no momento em que ele fala dela.</figcaption>
         </figure>
         <ul class="vsl-bullets" aria-label="O que você vai ver no vídeo">
           <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>Por que a ereção falha <b>mesmo quando a vontade existe</b>, e por que não é a idade</span></li>

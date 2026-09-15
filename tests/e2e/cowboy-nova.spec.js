@@ -56,7 +56,15 @@ test.describe('COWBOY Energia — página nova', () => {
     await expect(page.locator('#prova .badge-video')).toContainText(/segundo frasco/i);
     await expect(page.locator('#prova .photo-card')).toHaveCount(6);
     await expect(page.locator('[data-vsl]')).toBeVisible();
+    // VSL real: a oferta fica travada até o vídeo chegar em data-reveal-at (ou terminar); o fim do vídeo destrava.
+    const vslVideo = page.locator('video[data-vsl-video]');
+    await expect(vslVideo).toHaveCount(1);
+    await expect(vslVideo).not.toHaveAttribute('autoplay', /.*/);
+    expect(await page.locator('[data-reveal][data-locked]').count()).toBeGreaterThan(0);
+    await expect(page.locator('#kit')).toBeHidden();
+    await vslVideo.evaluate((v) => v.dispatchEvent(new Event('ended')));
     await expect(page.locator('[data-reveal][data-locked]')).toHaveCount(0);
+    await expect(page.locator('#kit')).toBeVisible();
     await page.locator('#prova').scrollIntoViewIfNeeded();
     await page.locator('[data-gallery-next]').click();
     await page.waitForTimeout(700);
@@ -65,6 +73,7 @@ test.describe('COWBOY Energia — página nova', () => {
 
   test('mobile: kit selecionado atualiza painel e recapitulação aparece', async ({ page }) => {
     await page.goto(URL, { waitUntil: 'networkidle' });
+    await page.locator('video[data-vsl-video]').evaluate((v) => v.dispatchEvent(new Event('ended')));
     await page.locator('#kit').scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
     await expect(page.locator('.kit')).toHaveCount(3);

@@ -19,6 +19,8 @@ scripts/cartpanda-*
 videos/*
 !videos/clientes/
 !videos/clientes/**
+!videos/vsl/
+!videos/vsl/**
 DPJABA.mp4
 DPTHIAGO.mp4
 imagens/*
@@ -52,6 +54,7 @@ imagens/v5/*
 !imagens/v5/kit-3.webp
 !imagens/v5/vsl-poster-consultorio.webp
 !imagens/v5/vsl-poster-consultorio-720.webp
+!imagens/v5/vsl-poster-frame.webp
 !imagens/v5/fundo-hero-gotas.webp
 !imagens/v5/fundo-quarto-noite.webp
 !imagens/v5/casal-varanda.webp

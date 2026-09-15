@@ -97,3 +97,5 @@ Antes de editar arquivos compartilhados (`scripts/build-site.js`, `config/commer
 - **14/09 (noite, 2):** proprietário mandou tirar a ressalva "não é medicamento, não promete cura" do bloco "não é para você" e qualquer frase que puxe o freio. Removidas: essa linha, "não representa promessa de resultado" (relatos), "sem alegação de função" (composição), "Imagem ilustrativa", "procure um médico" (FAQ). Fica só o texto legal obrigatório do rodapé. Regra daqui em diante: nenhuma ressalva no corpo da página.
 
 - **14/09 (noite, 3): imagens v5 + fundos com paralaxe + kits sem corte.** Ver `docs/produto/auditoria-alinhamento-2026-09-14.md`. Regra do proprietário: nunca apagar a versão anterior; novas versões entram como atualização (v4 intacta, snapshot em `docs/versoes/`). Poster do player agora é consultório sem rosto até a foto/vídeo do Dr. Durval.
+
+- **15/09: VSL real na página** (`videos/vsl/vsl-dr-durval-720.mp4`, poster `imagens/v5/vsl-poster-frame.webp`, `data-reveal-at="200"`). Ver `docs/produto/copy-conversao-nova.md` (15/09) para as três observações (cenas explícitas, "maca", identidade do médico). Original de 283 MB fica fora do repositório (Downloads).

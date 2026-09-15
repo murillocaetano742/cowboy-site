@@ -45,6 +45,8 @@ const ASSETS = [
   'imagens/v5/kit-3.webp',
   'imagens/v5/vsl-poster-consultorio.webp',
   'imagens/v5/vsl-poster-consultorio-720.webp',
+  'imagens/v5/vsl-poster-frame.webp',
+  'videos/vsl/vsl-dr-durval-720.mp4',
   'imagens/v5/fundo-hero-gotas.webp',
   'imagens/v5/fundo-quarto-noite.webp',
   'imagens/v5/casal-varanda.webp',
