@@ -204,19 +204,30 @@
     vslVideo.addEventListener('ended', function () { if (frame) frame.removeAttribute('data-playing'); });
   }
 
-  // Sticky CTA: shows after the visitor passes the proof block (or the guarantee, if the page has no proof block),
-  // hides while the kit section is on screen. Respects the VSL lock: [data-reveal] rules apply to it too.
+  // Sticky CTA (16/09, decisão do proprietário): aparece só enquanto a seção de escolher o kit está na tela e o botão
+  // principal de compra não está visível. É um submit do mesmo formulário, com o kit marcado.
   var sticky = document.querySelector('[data-sticky-cta]');
-  var stickyTrigger = document.getElementById('prova') || document.getElementById('garantia');
   var kitSection = document.getElementById('kit');
-  if (sticky && stickyTrigger && kitSection) {
-    var passedTrigger = false;
-    var kitVisible = false;
-    function paintSticky() { var show = passedTrigger && !kitVisible && !sticky.hasAttribute('data-locked'); sticky.hidden = !show; if (show) document.body.setAttribute('data-sticky', ''); else document.body.removeAttribute('data-sticky'); }
-    window.addEventListener('scroll', function () { if (!passedTrigger && stickyTrigger.getBoundingClientRect().bottom < window.innerHeight * 0.6) { passedTrigger = true; paintSticky(); } }, { passive: true });
-    if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { kitVisible = entries.some(function (e) { return e.isIntersecting; }); paintSticky(); }, { threshold: 0.05 }).observe(kitSection);
+  var mainButton = document.querySelector('[data-checkout-button]');
+  var stickyKit = sticky && sticky.querySelector('[data-sticky-kit]');
+  if (sticky && kitSection && 'IntersectionObserver' in window) {
+    var kitVisible = false, mainVisible = false;
+    var kitLabels = { 1: '1 frasco · R$ 79,90', 2: '2 frascos · R$ 154,80 · frete grátis', 3: '3 frascos · R$ 199,90 · frete grátis' };
+    function paintSticky() {
+      var show = kitVisible && !mainVisible && !sticky.hasAttribute('data-locked') && !(mainButton && mainButton.disabled);
+      sticky.hidden = !show;
+      if (show) document.body.setAttribute('data-sticky', ''); else document.body.removeAttribute('data-sticky');
+    }
+    function paintStickyKit() {
+      var checked = document.querySelector('[name="quantity"]:checked');
+      if (stickyKit && checked && kitLabels[checked.value]) stickyKit.textContent = kitLabels[checked.value];
+    }
+    new IntersectionObserver(function (entries) { kitVisible = entries.some(function (e) { return e.isIntersecting; }); paintSticky(); }, { threshold: 0.02 }).observe(kitSection);
+    if (mainButton) new IntersectionObserver(function (entries) { mainVisible = entries.some(function (e) { return e.isIntersecting; }); paintSticky(); }, { threshold: 0.4 }).observe(mainButton);
+    Array.prototype.forEach.call(document.querySelectorAll('[name="quantity"]'), function (input) { input.addEventListener('change', paintStickyKit); });
+    paintStickyKit();
     sticky.setAttribute('data-reveal', '');
-    if (gateOn) { sticky.setAttribute('data-locked', ''); vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= (Number(vsl.dataset.revealAt) || 0)) { sticky.removeAttribute('data-locked'); paintSticky(); } }); vslVideo.addEventListener('ended', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); if (skip) skip.addEventListener('click', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); }
+    if (gateOn && vslVideo) { sticky.setAttribute('data-locked', ''); vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= (Number(vsl.dataset.revealAt) || 0)) { sticky.removeAttribute('data-locked'); paintSticky(); } }); vslVideo.addEventListener('ended', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); if (skip) skip.addEventListener('click', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); }
   }
 
   // VSL measurement: play and 25/50/75/100 % progress to GA4 (gtag) and Meta (fbq) when those loaders exist.

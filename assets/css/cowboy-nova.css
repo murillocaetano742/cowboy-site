@@ -639,3 +639,12 @@ html, body { overflow-x: clip; max-width: 100%; }
 .save { width: auto; max-width: 100%; white-space: normal; line-height: 1.3; }
 .kit-price small { white-space: normal; }
 @media (max-width: 379px) { .kit { grid-template-columns: 5.4rem minmax(0, 1fr); gap: .7rem; padding: .85rem; } .kit-img { width: 5.4rem; height: 5.4rem; } .kit-name { font-size: 1.1rem; } }
+
+/* 16/09 (3): flutuante como botão de compra, só na seção do kit; compatibilidade com Safari antigo para o clip */
+.sticky-cta { border: 0; cursor: pointer; font-family: inherit; width: auto; }
+.sticky-cta:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+html, body { overflow-x: hidden; overflow-x: clip; }
+.hero, .section[data-bg], .hero[data-bg] { overflow: hidden; overflow: clip; }
+.page { overflow-x: hidden; overflow-x: clip; }
+img, video, svg { max-width: 100%; }
+.vsl-note { justify-content: center; text-align: center; }

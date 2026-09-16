@@ -89,10 +89,7 @@
           <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>O <b>Bloqueio da Primeira Passagem</b>: por que tanta coisa que você já tomou nunca chegou onde devia</span></li>
           <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>O desafio: <b>30 dias</b>. Não sentiu diferença em 10? O dinheiro volta</span></li>
         </ul>
-        <div class="vsl-cta" data-reveal>
-          <a class="btn btn-gold" href="#kit">Quero meu teste de 30 dias <svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
-          <p class="note-buy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Frete grátis a partir de 2 frascos. Total na tela antes de pagar.</p>
-        </div>
+        <p class="note-buy vsl-note"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Frete grátis a partir de 2 frascos. Os kits e os preços estão no fim da página.</p>
         <p class="vsl-skip" data-vsl-skip hidden><a href="#kit">Já assistiu? Ir direto para a oferta</a></p>
       </div>
     </section>
@@ -196,7 +193,7 @@
               </table>
             </div>
           </details>
-          <p class="cta-line" data-reveal><a class="btn btn-outline" href="#kit">Ver a oferta do vídeo <svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></p>
+          <!-- âncora para a oferta removida a pedido do proprietário (16/09): botões só no fim -->
         </div>
         <figure class="ship-img virada-img"><img src="imagens/v4/rotina-manha.webp" width="1254" height="1254" loading="lazy" alt="Frasco COWBOY Energia na mesa de cabeceira, com o conta-gotas acima e uma gota se formando"><figcaption>12 gotas na mesa de cabeceira. É toda a rotina.</figcaption></figure>
       </div>
@@ -244,7 +241,7 @@
             </ul>
           </div>
         </div>
-        <p class="cta-line" data-reveal><a class="btn btn-outline" href="#kit">Ver a oferta do vídeo <svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg></a></p>
+        <!-- âncora para a oferta removida a pedido do proprietário (16/09): botões só no fim -->
       </div>
     </section>
 
@@ -267,7 +264,7 @@
           </div>
           <p class="urgency-limit">Máximo de 3 frascos por pedido nesta condição.<span data-stock-note hidden> Restam <b data-stock-count></b> kits neste lote.</span></p>
         </div>
-        <form action="/api/checkout" method="get" data-checkout-form>
+        <form id="cowboy-checkout" action="/api/checkout" method="get" data-checkout-form>
           <div class="kits" role="radiogroup" aria-label="Escolha um kit">
             <label class="kit">
               <input type="radio" name="quantity" value="1">
@@ -455,7 +452,7 @@
   </footer>
 </div>
 
-<a class="sticky-cta" data-sticky-cta href="#kit" hidden><span>Não sentiu diferença em 10 dias? Devolvemos</span><b>Quero meu teste de 30 dias</b></a>
+<button class="sticky-cta" data-sticky-cta type="submit" form="cowboy-checkout" hidden><span data-sticky-kit>2 frascos · R$ 154,80 · frete grátis</span><b>Quero meu teste de 30 dias</b></button>
 
 <div class="toast" data-toast hidden role="status" aria-live="polite">
   <span class="toast-icon" aria-hidden="true"><svg class="icon"><use href="#i-drop"/></svg></span>
