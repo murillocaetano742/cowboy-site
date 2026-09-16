@@ -12,15 +12,21 @@ const URL = `${BASE}/cowboy-nova`;
 const OUT = process.env.E2E_OUT || path.resolve('docs/qa/nova');
 fs.mkdirSync(OUT, { recursive: true });
 
+async function isolateTracking(context) {
+  // Registre os mocks por último: as rotas Playwright usam a ordem inversa de registro.
+  await context.route(/^https:\/\//, (route) => route.abort());
+  const empty = (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: '' });
+  await context.route('**/assets/js/cowboy-pixel.js', empty);
+  await context.route('**/assets/js/cowboy-google.js', empty);
+  await context.route('https://cdn.utmify.com.br/scripts/utms/latest.js', empty);
+}
+
 test.describe('COWBOY Energia — página nova', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ context }) => {
     // Rastreadores (Pixel/UTMify/GA4) não fazem parte do QA da página e, em localhost, o SDK da UTMify tenta
     // um endpoint de desenvolvimento inexistente. Servimos os loaders vazios e bloqueamos chamadas externas.
-    const empty = (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: '' });
-    await page.route('**/assets/js/cowboy-pixel.js', empty);
-    await page.route('**/assets/js/cowboy-google.js', empty);
-    await page.route('https://**', (route) => route.abort());
+    await isolateTracking(context);
   });
 
   test('mobile: ordem de conversão, compra só no fim, sem claims proibidos, sem rolagem horizontal', async ({ page }) => {
@@ -100,6 +106,7 @@ test.describe('COWBOY Energia — página nova', () => {
 
   test('captura desktop', async ({ browser }) => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await isolateTracking(context);
     const page = await context.newPage();
     await page.goto(URL, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);

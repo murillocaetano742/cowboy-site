@@ -4,6 +4,7 @@
   "version": "1.2.1",
   "imports": {
     "#commerce": "./config/commerce.js",
+    "#activity": "./scripts/cartpanda-sync-activity.js",
     "#logistics": "./config/logistics.js",
     "#api/*": "./api/*.js"
   },
@@ -15,7 +16,9 @@
     "test": "node --test tests/integrations/*.test.js tests/qa/*.test.js",
     "test:e2e": "playwright test tests/e2e",
     "test:integrations": "node --test tests/integrations/*.test.js",
-    "check:commerce": "node --env-file-if-exists=.env.local scripts/check-commerce-config.js"
+    "check:commerce": "node --env-file-if-exists=.env.local scripts/check-commerce-config.js",
+    "activity:check": "node --env-file-if-exists=.env.local scripts/cartpanda-sync-activity.js",
+    "activity:sync": "node --env-file-if-exists=.env.local scripts/cartpanda-sync-activity.js --write"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
