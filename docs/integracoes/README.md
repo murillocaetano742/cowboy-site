@@ -1,5 +1,7 @@
 # Integrações comerciais — COWBOY Energia
 
+> **Estado atual (16/09/2026):** consulte [integração da VSL](integracao-vsl-2026-09-16.md). Os preços atuais, já atualizados na Cartpanda, são R$ 79,90 / R$ 154,80 / R$ 199,90 para 1 / 2 / 3 frascos. O kit de 4 não pertence à oferta atual. Frete grátis nos kits de 2 e 3 ainda aguarda configuração no painel. As seções abaixo registram a integração anterior e não devem ser usadas como tabela comercial ou instrução de atualização de preços.
+
 ## Estado de entrega
 
 Retomada mais recente: `docs/integracoes/checkpoint-2026-09-08.md`. O catálogo foi relido, os preços permaneceram corretos e foram identificadas configurações distintas de limite de quantidade entre avulso e kits. O cadastro fiscal e as demais contas seguem pendentes de acesso suportado.
