@@ -5,13 +5,10 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT = path.join(ROOT, 'dist');
-// Version 1.2 is current; preserve both approved prior pages and their assets.
-const PAGES = ['cowboy-nova.html', 'cowboy-v1-1.html', 'cowboy-v1-2.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
+// 16/09/2026: a página VSL (cowboy-nova.html) é a raiz do site. As versões 1.1/1.2 ficam no repositório, fora do build.
+const PAGES = ['cowboy-nova.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
 const OUTPUT_ALIASES = [
-  { source: 'cowboy-v1-2.html', destination: 'index.html' },
-  { source: 'cowboy-nova.html', destination: 'v1-0.html' },
-  { source: 'cowboy-v1-1.html', destination: 'v1-1.html' },
-  { source: 'cowboy-v1-2.html', destination: 'v1-2.html' },
+  { source: 'cowboy-nova.html', destination: 'index.html' },
 ];
 const ASSETS = [
   // Página nova (cowboy-nova.html): estilos, scripts, fontes auto-hospedadas e imagens próprias.

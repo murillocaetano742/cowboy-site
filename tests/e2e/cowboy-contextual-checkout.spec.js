@@ -1,6 +1,9 @@
 'use strict';
 
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs');
+// 16/09/2026: as versões 1.1/1.2 saíram do build (a página VSL é a raiz). Estes testes só rodam se elas voltarem ao dist.
+test.skip(!fs.existsSync(require('node:path').resolve('dist', 'v1-2.html')), 'v1.1/v1.2 fora do build desde 16/09/2026');
 const path = require('node:path');
 const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4198';
 const OUT = process.env.E2E_OUT || path.resolve('.local', 'cta-028-evidence');
