@@ -176,7 +176,8 @@
   var reveals = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
   var skip = document.querySelector('[data-vsl-skip]');
   function unlock() { reveals.forEach(function (el) { el.removeAttribute('data-locked'); }); if (skip) skip.hidden = true; }
-  if (vsl && vslVideo && reveals.length) {
+  var gateOn = Boolean(vsl && vslVideo && vsl.dataset.vslGate !== 'off');
+  if (vsl && vslVideo && reveals.length && gateOn) {
     var at = Number(vsl.dataset.revealAt) || 0;
     reveals.forEach(function (el) { el.setAttribute('data-locked', ''); });
     var started = false;
@@ -187,8 +188,10 @@
     vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= at) unlock(); });
     vslVideo.addEventListener('ended', unlock);
     if (skip) skip.addEventListener('click', unlock);
+  }
 
-    // Play overlay: one tap starts the video with sound; native controls take over after that.
+  // Play overlay (independent of the gate): one tap starts the video with sound; native controls take over after that.
+  if (vsl && vslVideo) {
     var frame = vslVideo.closest('.vsl-frame');
     var playButton = vsl.querySelector('[data-vsl-play]');
     function startVideo() {
@@ -213,7 +216,7 @@
     window.addEventListener('scroll', function () { if (!passedTrigger && stickyTrigger.getBoundingClientRect().bottom < window.innerHeight * 0.6) { passedTrigger = true; paintSticky(); } }, { passive: true });
     if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { kitVisible = entries.some(function (e) { return e.isIntersecting; }); paintSticky(); }, { threshold: 0.05 }).observe(kitSection);
     sticky.setAttribute('data-reveal', '');
-    if (vsl && vslVideo) { sticky.setAttribute('data-locked', ''); vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= (Number(vsl.dataset.revealAt) || 0)) { sticky.removeAttribute('data-locked'); paintSticky(); } }); vslVideo.addEventListener('ended', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); if (skip) skip.addEventListener('click', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); }
+    if (gateOn) { sticky.setAttribute('data-locked', ''); vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= (Number(vsl.dataset.revealAt) || 0)) { sticky.removeAttribute('data-locked'); paintSticky(); } }); vslVideo.addEventListener('ended', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); if (skip) skip.addEventListener('click', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); }
   }
 
   // VSL measurement: play and 25/50/75/100 % progress to GA4 (gtag) and Meta (fbq) when those loaders exist.

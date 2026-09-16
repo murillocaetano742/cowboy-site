@@ -60,11 +60,10 @@ test.describe('COWBOY Energia — página nova', () => {
     const vslVideo = page.locator('video[data-vsl-video]');
     await expect(vslVideo).toHaveCount(1);
     await expect(vslVideo).not.toHaveAttribute('autoplay', /.*/);
-    expect(await page.locator('[data-reveal][data-locked]').count()).toBeGreaterThan(0);
-    await expect(page.locator('#kit')).toBeHidden();
-    await vslVideo.evaluate((v) => v.dispatchEvent(new Event('ended')));
+    // Trava desligada (data-vsl-gate="off"): kits e botões sempre visíveis, mesmo sem dar play.
     await expect(page.locator('[data-reveal][data-locked]')).toHaveCount(0);
     await expect(page.locator('#kit')).toBeVisible();
+    await expect(page.locator('.kit')).toHaveCount(3);
     await page.locator('#prova').scrollIntoViewIfNeeded();
     await page.locator('[data-gallery-next]').click();
     await page.waitForTimeout(700);
