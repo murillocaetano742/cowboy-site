@@ -1,6 +1,6 @@
 # VSL-030 — Integração da página VSL publicada
 
-Status: em execução em 16/09/2026.
+Status: código publicado pelo PR #14 em 16/09/2026; frete e limites por produto conferidos na VSL-031. Checkout legado de quatro frascos e ativação recorrente da atividade permanecem pendentes.
 
 ## Solicitação e limites
 
@@ -11,7 +11,7 @@ Integrar a oferta publicada de 1, 2 e 3 frascos ao Cartpanda, confirmar parcelam
 - [x] Conferir código, credencial local e identidade da loja pela API autenticada.
 - [x] Atualizar e reler os preços das variantes 211742450, 211742746 e 212751381: R$ 79,90, R$ 154,80 e R$ 199,90.
 - [x] Conferir peso de 0,5 kg e embalagem 23 × 8 × 8 cm no kit de 3.
-- [ ] Configurar e verificar frete grátis nos kits de 2 e 3; manter frete pago no avulso.
+- [x] Configurar e verificar frete grátis nos kits de 2 e 3; manter frete pago no avulso. Concluído e homologado na [VSL-031](VSL-031-parcelamento-e-frete.md).
 - [ ] Conferir limite de quantidade e descontinuação do kit de 4 no checkout.
 - [x] Confirmar limite de parcelas e juros no checkout: até 12× com acréscimo; não inserir valores nos cards.
 - [x] Implementar e testar exportação pela CLI de pedidos pagos reais para o contrato público de atividade, com autorização de publicação e exclusão de testes.
