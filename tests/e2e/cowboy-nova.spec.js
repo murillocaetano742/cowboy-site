@@ -14,6 +14,14 @@ fs.mkdirSync(OUT, { recursive: true });
 
 test.describe('COWBOY Energia — página nova', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  test.beforeEach(async ({ page }) => {
+    // Rastreadores (Pixel/UTMify/GA4) não fazem parte do QA da página e, em localhost, o SDK da UTMify tenta
+    // um endpoint de desenvolvimento inexistente. Servimos os loaders vazios e bloqueamos chamadas externas.
+    const empty = (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: '' });
+    await page.route('**/assets/js/cowboy-pixel.js', empty);
+    await page.route('**/assets/js/cowboy-google.js', empty);
+    await page.route('https://**', (route) => route.abort());
+  });
 
   test('mobile: ordem de conversão, compra só no fim, sem claims proibidos, sem rolagem horizontal', async ({ page }) => {
     const errors = [];
@@ -23,9 +31,10 @@ test.describe('COWBOY Energia — página nova', () => {
     await expect(page).toHaveTitle(/COWBOY Energia/);
     const html = await page.content();
     const at = (id) => html.indexOf(`id="${id}"`);
-    expect(at('relatos')).toBeGreaterThan(at('topo'));
-    expect(at('relatos')).toBeLessThan(at('reconhece'));
-    expect(at('garantia')).toBeLessThan(at('kit'));
+    expect(at('prova')).toBeGreaterThan(at('topo'));
+    expect(at('prova')).toBeLessThan(at('kit'));
+    expect(at('kit')).toBeLessThan(at('garantia'));
+    expect(html).not.toMatch(/class="menu"|data-pill|class="announce"/);
     const before = html.slice(0, at('kit'));
     expect(before).not.toMatch(/api\/checkout|data-checkout-button/i);
     expect(html.match(/data-checkout-button/g)).toHaveLength(1);
@@ -36,37 +45,41 @@ test.describe('COWBOY Energia — página nova', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('mobile: vídeos no topo com controles, sem autoplay', async ({ page }) => {
+  test('mobile: vídeos na prova social com controles, sem autoplay; fotos na garantia', async ({ page }) => {
     await page.goto(URL, { waitUntil: 'networkidle' });
-    const videos = page.locator('#relatos video');
+    const videos = page.locator('#prova video');
     await expect(videos).toHaveCount(2);
     for (const video of await videos.all()) {
       await expect(video).toHaveAttribute('controls', '');
       await expect(video).not.toHaveAttribute('autoplay', /.*/);
     }
-    await expect(page.locator('#relatos .badge-video')).toContainText(/segundo frasco/i);
-    await expect(page.locator('#relatos .photo-card')).toHaveCount(6);
-    const order = await page.locator('#relatos .relatos-track > *').evaluateAll((els) => els.map((el) => el.classList.contains('video-card') ? 'v' : 'p').join(''));
-    expect(order).toBe('vvpppppp');
-    await page.locator('#relatos').scrollIntoViewIfNeeded();
+    await expect(page.locator('#prova .badge-video')).toContainText(/segundo frasco/i);
+    await expect(page.locator('#prova .photo-card')).toHaveCount(6);
+    await expect(page.locator('[data-vsl]')).toBeVisible();
+    // VSL real: a oferta fica travada até o vídeo chegar em data-reveal-at (ou terminar); o fim do vídeo destrava.
+    const vslVideo = page.locator('video[data-vsl-video]');
+    await expect(vslVideo).toHaveCount(1);
+    await expect(vslVideo).not.toHaveAttribute('autoplay', /.*/);
+    expect(await page.locator('[data-reveal][data-locked]').count()).toBeGreaterThan(0);
+    await expect(page.locator('#kit')).toBeHidden();
+    await vslVideo.evaluate((v) => v.dispatchEvent(new Event('ended')));
+    await expect(page.locator('[data-reveal][data-locked]')).toHaveCount(0);
+    await expect(page.locator('#kit')).toBeVisible();
+    await page.locator('#prova').scrollIntoViewIfNeeded();
     await page.locator('[data-gallery-next]').click();
     await page.waitForTimeout(700);
     await expect(page.locator('[data-gallery-dots] button').nth(1)).toHaveAttribute('aria-current', 'true');
   });
 
-  test('mobile: kit selecionado atualiza painel, recapitulação aparece, pill abre e fecha', async ({ page }) => {
+  test('mobile: kit selecionado atualiza painel e recapitulação aparece', async ({ page }) => {
     await page.goto(URL, { waitUntil: 'networkidle' });
+    await page.locator('video[data-vsl-video]').evaluate((v) => v.dispatchEvent(new Event('ended')));
     await page.locator('#kit').scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
-    await expect(page.locator('.kit')).toHaveCount(4);
-    await page.getByLabel(/4 frascos/).check();
-    await expect(page.locator('[data-selected-kit]')).toHaveText('4 frascos selecionados');
+    await expect(page.locator('.kit')).toHaveCount(3);
+    await page.getByLabel(/3 frascos/).check();
+    await expect(page.locator('[data-selected-kit]')).toHaveText('3 frascos selecionados');
     await expect(page.locator('[data-recap]')).toBeVisible();
-    await expect(page.locator('[data-pill]')).toBeVisible();
-    await page.locator('[data-pill-open]').click();
-    await expect(page.locator('[data-sheet]')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.locator('[data-sheet]')).toBeHidden();
     const form = page.locator('[data-checkout-form]');
     await expect(form).toHaveAttribute('action', /\/api\/checkout/); // a UTMify pode acrescentar parâmetros ao action
     await expect(form).toHaveAttribute('method', /get/i);

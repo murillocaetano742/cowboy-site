@@ -3,7 +3,7 @@
 const { checkoutUrlFor, missingShippingConfiguration } = require('#commerce');
 
 const report = {
-  checkout: [1, 2, 4].map((quantity) => ({ quantity, configured: Boolean(checkoutUrlFor(quantity)) })),
+  checkout: [1, 2, 3].map((quantity) => ({ quantity, configured: Boolean(checkoutUrlFor(quantity)) })),
   shipping: { configured: missingShippingConfiguration().length === 0, missing: missingShippingConfiguration() },
 };
 

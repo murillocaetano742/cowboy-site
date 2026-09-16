@@ -1,6 +1,9 @@
 'use strict';
 
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs');
+// 16/09/2026: as versões 1.1/1.2 saíram do build (a página VSL é a raiz). Estes testes só rodam se elas voltarem ao dist.
+test.skip(!fs.existsSync(require('node:path').resolve('dist', 'v1-2.html')), 'v1.1/v1.2 fora do build desde 16/09/2026');
 const path = require('node:path');
 const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4180';
 const OUT = process.env.E2E_OUT || path.resolve('.local', 'cta-027-evidence');
@@ -14,7 +17,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
       await page.route('https://**/*', (route) => route.abort());
     });
 
-    for (const quantity of [1, 2, 3, 4]) {
+    for (const quantity of [1, 2, 3]) {
       test(`floating checkout submits kit ${quantity} and attribution`, async ({ page }) => {
         const query = 'utm_source=validacao&utm_campaign=CTA_027&cid=76324699889';
         await page.goto(`${BASE}/v1-1?${query}`);
@@ -51,7 +54,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
       await page.goto(`${BASE}/v1-0`);
       await expect(page.locator('[data-floating-checkout]')).toHaveCount(0);
       await expect(page.locator('[data-checkout-button]')).toHaveCount(1);
-      await expect(page.locator('.kit')).toHaveCount(4);
+      await expect(page.locator('.kit')).toHaveCount(3);
       await expect(page.locator('#relatos video')).toHaveCount(2);
     });
 

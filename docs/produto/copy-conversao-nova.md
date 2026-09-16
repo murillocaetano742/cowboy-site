@@ -134,3 +134,112 @@ Regra: nenhuma imagem com pessoa apresentada como cliente ou médico. Pessoas s�
 4. **Embalagem discreta e rastreio:** confirma que é assim que a operação funciona hoje?
 
 Com essas quatro respostas, monto a página nova no mesmo visual (preto e dourado, mobile primeiro) com essa copy, e ela fica pronta para testar contra a versão publicada.
+
+## Promessa aplicada na página em 10/09/2026 (versão dura, dentro do que pode ir ao ar)
+
+- **Hero:** `TESTE POR 30 DIAS. SE NÃO FIZER SENTIDO, O DINHEIRO VOLTA.` + `Você usa o COWBOY Energia por 30 dias. Se em 10 dias quiser desistir, manda uma mensagem e o valor dos produtos volta, sem justificativa. O risco é nosso. A decisão é sua.` Selos: `Desistiu em 10 dias? Devolvemos na hora` · `Rótulo aberto` · `Fabricante identificado`. Frete de R$ 25 declarado já no hero (era a surpresa do checkout).
+- **Garantia:** `Você não compra um suplemento. Você faz um teste de 30 dias.` Saída em 10 dias sem justificativa. Anti-garantia termina com `Qual é a sua desculpa?`.
+- **Oferta:** `Seu teste de 30 dias começa com 2 frascos` · `Segundo frasco por R$ 30 a mais` · kit de 2 com selo `Teste completo` · pilha de valor com frete de R$ 25 declarado · `Cada mês adiando custa mais caro do que isso.` Botão: `Quero meu teste de 30 dias`.
+- **Botão flutuante** `Quero meu teste de 30 dias` aparece depois que o visitante passa pela garantia e some enquanto a seção de kits está na tela (compra continua só no fim; o botão só encurta o caminho de volta).
+- **Fechamento:** `Ou você começa hoje, ou daqui a um mês está aqui de novo, de madrugada, lendo isso.`
+- **Fora, em qualquer versão:** alegação de tratar disfunção erétil ou ejaculação precoce, percentuais ou minutos de efeito, "comprimido não funciona", médico garantindo resultado, spray/maca (o produto é gotas e a fórmula tem boro).
+- **Pendente do proprietário:** condições da garantia nos Termos (30 dias, saída em 10, o que é devolvido, frasco aberto) e decisão de embutir o frete no preço.
+
+## Página modelada na VSL (11/09/2026)
+
+Ordem da página = ordem dos blocos da VSL do Dr. Durval. O vídeo fica no topo (espaço reservado, poster e botão de play, até o arquivo existir). Em cada bloco há um **espaço da copy** (caixa tracejada dourada) onde entram as falas do Dr. Durval que ficam por conta do proprietário.
+
+| Bloco da VSL | Seção da página | O que já está | Espaço da copy |
+|---|---|---|---|
+| 1 Gancho | Hero + VSL | "Se você já tentou e não foi o que prometeram, o problema nunca foi você." + player | Duas primeiras frases do Dr. Durval |
+| 2 Dor | `#dor` | Citação do Dr. Durval sobre os homens 55+, seis cartões de identificação | Trecho completo dele |
+| 3 Mecanismo | `#mecanismo` | Título e lugar da animação | Explicação do mecanismo, por conta do proprietário |
+| 4 Virada | `#virada` | "Foi vendo isso repetir que eu decidi fazer diferente", seis componentes, tabela, B6 | Fala dele sobre a fórmula |
+| 5 Prova 1 | `#prova` | Dois vídeos reais | Frase dele após o depoimento |
+| 6 Oferta | `#kit` | "Esse protocolo se chama COWBOY Energia", gotas, só aqui, kits, frete R$ 25 | Apresentação do produto e preço na voz dele |
+| 7 Garantia + prova 2 | `#garantia` | 10 dias para desistir, 30 de teste, selo 10 DIAS, seis fotos de clientes | Garantia na voz dele |
+| 8 CTA final | `#fim` | "Você tem duas opções agora" + botão | Fechamento dele |
+
+Correções de fato aplicadas em relação ao roteiro recebido: o produto é gotas (não spray) e a fórmula tem boro (não maca). Números de efeito, alegações de tratar disfunção erétil ou ejaculação precoce e "comprimido não funciona" ficam fora do que eu escrevo; os espaços da copy existem para o que o proprietário decidir, por conta dele.
+
+## Site como complemento da VSL (11/09/2026, versão atual)
+
+Pesquisa (Swipe Pages, Verlua, Vidico, ClickFunnels): título acima do vídeo, player sem distrações (sem menu), 3 a 5 linhas escaneáveis, botão que pode ser revelado no minuto da oferta para tráfego frio, e abaixo a versão escrita curta do argumento para quem não assiste, prova, oferta, garantia como remoção de risco, FAQ, CTAs repetidos com texto que evolui. "O vídeo vende o resultado; a página remove o risco."
+
+Estrutura da página `cowboy-nova.html`:
+
+1. **Hero:** "Assista antes de decidir · 6 minutos" · "O que ninguém te contou na farmácia. E o desafio de 30 dias do Dr. Durval." · player (poster e play; o arquivo do vídeo entra como `<video data-vsl-video>`) · 3 linhas do que ele vai ver · botão "Quero meu teste de 30 dias" · frete R$ 25 declarado.
+2. **Transição:** "O vídeo mostra o caminho. Aqui embaixo está o que você precisa para decidir."
+3. **Prova:** 2 vídeos + 6 fotos reais em rolagem lateral · botão "Ver os kits e o preço".
+4. **Para quem não vai assistir:** versão escrita curta (o problema nunca foi você; gotas; seis componentes; rótulo aberto; só aqui) + composição em bloco recolhível.
+5. **Dr. Durval:** citação e credenciais (foto, CRM e tempo de consultório após liberação).
+6. **Oferta:** kits 1/2/3/4, kit de 2 como "Teste completo", pilha de valor, frete R$ 25, botão.
+7. **Garantia:** selo 10 dias, "use por 10 dias, quer desistir? o dinheiro volta na hora", 30 dias de teste, anti-garantia, botão.
+8. **FAQ** (8 objeções, incluindo frete e "onde mais encontro").
+9. **Decisão:** "Você tem duas opções agora" + botão.
+
+Revelação atrasada: os botões marcados `data-reveal` ficam travados até o vídeo chegar ao segundo definido em `data-reveal-at` (290 s, o minuto da oferta na VSL) ou terminar; um link "Já assistiu? Ir direto para a oferta" aparece após 45 s de reprodução. Sem arquivo de vídeo, nada fica travado. Botão flutuante aparece depois da garantia.
+
+Velocidade: sem menu, sem pill, sem fontes externas, poster do vídeo em 720 px para celular, imagens abaixo da dobra em carregamento preguiçoso. Lighthouse mobile após a mudança registrado em `docs/qa/nova/relatorio-qa-nova.md`.
+
+
+## Rodada de 14/09/2026 (tarde): auditoria de concorrentes aplicada + nova oferta
+
+Base: `docs/produto/auditoria-concorrentes-2026-09-14.md`. O proprietário aprovou todos os ajustes propostos e definiu a oferta nova. Aplicado em `cowboy-nova.html`, `assets/css/cowboy-nova.css`, `assets/js/cowboy-nova.js`, `config/commerce.js`, `api/config.js`, `assets/js/cowboy-store.js`, `termos.html`, `assets/data/atividade.json`.
+
+**Oferta (decisão do proprietário):**
+
+| Kit | Preço | Frete | Por dia | Economia mostrada |
+|---|---|---|---|---|
+| 1 frasco | R$ 79,90 | por conta do cliente | R$ 2,66 | — |
+| 2 frascos (Teste completo, padrão) | R$ 154,80 | grátis | R$ 2,58 | R$ 30 com o frete |
+| 3 frascos (Melhor preço) | R$ 199,90 | grátis | R$ 2,22 | R$ 64,80 (R$ 39,80 + frete) |
+
+Kit de 4 descontinuado (`DISPLAY_VARIANT_QUANTITIES = [1, 2, 3]`, `MAX_CART_QUANTITY = 3`). **O Cartpanda ainda cobra os preços antigos (54,76 / 84,76 / 127,14 + frete R$ 25): o proprietário precisa atualizar as variantes 211742450, 211742746 e 212751381 e configurar frete grátis nos kits de 2 e 3 antes de publicar.** Parcelamento aparece como "em até 12x no cartão" sem valor de parcela até confirmar as regras de parcelamento do checkout.
+
+**Blocos novos ou alterados, na ordem da página:**
+
+1. Hero: nota "Frete grátis a partir de 2 frascos".
+2. `#argumento`: faixa de números (6 · 12 · 30 · 0), card "O Bloqueio da Primeira Passagem" (curiosidade que aponta para o vídeo, sem alegação), composição em 6 cards visíveis + alegação da B6 + tabela do rótulo recolhida, âncora "Ver a oferta do vídeo".
+3. `#pra-quem` (nova seção): "É para você se…" (5 itens) e "Não é para você se…" (4 itens), lado a lado no desktop.
+4. `#kit`: bloco de urgência com prazo real (`data-deadline`, hoje 30/09/2026 23:59 BRT; some sozinho quando passa; `data-stock` opcional para estoque real), contagem regressiva, "máximo de 3 frascos por pedido"; 3 kits com flags comparativas (teste de 30 dias, meses de rotina, frete ✓/✗), "ou em até 12x no cartão", economia; pilha de valor atualizada; bloco "Como chega" (prazo pelo CEP, rastreio, embalagem discreta, pagamento); painel de checkout e selos com frete grátis a partir de 2.
+5. `#garantia`: certificado de garantia (30 dias de teste · saída em 10, link para os Termos), passo a passo em 3 etapas, fechamento "Qual é a sua desculpa?".
+6. `#perguntas`: +5 perguntas (funciona no mesmo dia, parcelar, envio discreto, quem é o Dr. Durval, mais de 3 frascos), frete atualizado, bloco de WhatsApp (oculto até o número entrar em `<body data-whatsapp>`), aviso anti-marketplace.
+7. `#fim`: eco da urgência com a data.
+8. Botão flutuante aparece depois da prova (não mais depois da garantia) e respeita a trava da VSL.
+9. Avisos de atividade (toast no topo): lidos de `assets/data/atividade.json`. `pedidos` (vazio; só pedidos reais, preenchidos pelo proprietário ou por webhook do Cartpanda) e `relatos` (os 8 clientes reais da galeria). Aparece após 9 s, a cada 16 s, no máximo 6 por visita, não aparece com o vídeo tocando, fechável. **Nenhum nome ou compra é inventado.**
+10. Medição: eventos `vsl_start`, `vsl_progress` (25/50/75) e `vsl_complete` para GA4 e Meta quando o vídeo existir; Pixel e GA4 herdados da `main`.
+11. Termos: parágrafo da saída em 10 dias e da oferta/frete.
+
+**QA:** unitários 36/36, Playwright + axe 6/6 (rastreadores servidos vazios no teste), build 51 arquivos, check-build ok.
+
+
+## Rodada de 14/09/2026 (noite): promessa no nível dos concorrentes
+
+O proprietário comparou o bloco "é para você" com Libidrol e Farmafine e pediu promessa mais forte que a deles, reafirmando por escrito que a responsabilidade é dele. Reescrita aplicada em `cowboy-nova.html`:
+
+- **Título e descrição**: "Você não perdeu a potência. Ela está bloqueada." + linha do desafio ("Não sentiu diferença em 10 dias? O dinheiro volta").
+- **Hero**: tag "Assista antes de tomar mais um comprimido"; 3 linhas nomeando a dor (ereção que falha mesmo com vontade; Bloqueio da Primeira Passagem; desafio de 30 dias).
+- **Transição**: "O vídeo mostra por que você travou. Aqui embaixo, o que faz você destravar."
+- **Prova**: "Homens que pararam de dar desculpa. Com o frasco na mão."
+- **Argumento**: "Você não perdeu. Você foi bloqueado." com a dor nomeada (ereção que não vem ou não fica, acabar antes da hora, vontade que sumiu); mecanismo "por que ele fez o COWBOY em gotas e não em cápsula".
+- **Dr. Durval**: citação nova ("não vi homem acabado; vi homem tomando a coisa errada… coloco o meu nome no desafio"). Fatos "eu fiz o COWBOY" e tempo de consultório seguem pendentes de confirmação com ele.
+- **É para você se…**: 6 dores explícitas (ereção, acabar antes da hora, evitar, "ela parou de pedir", já tomou de tudo, voltar a ser o homem que ela conheceu). **Não é para você se…**: "só a noite de hoje", "já decidiu que é a idade", "vai parar no terceiro dia".
+- **Oferta**: "30 dias para voltar a ser o homem que ela conheceu."; "cada noite que você adia custa mais caro".
+- **Garantia** reenquadrada como garantia de resultado: "Não sentiu diferença em 10 dias? O dinheiro volta na hora." em título, selos, painel de checkout, FAQ e botão flutuante. "O Dr. Durval coloca o nome dele nisso."
+- **Fechamento**: "continuar fingindo cansaço… ou deixar ela perceber a diferença".
+- Três marcações `<!-- ESPAÇO SEU -->` em comentário HTML (hero, "é para você", garantia) para o proprietário inserir a frase que decidir; invisíveis ao visitante.
+
+Linha mantida (dita uma vez ao proprietário): sem "cura/trata disfunção erétil ou ejaculação precoce", sem número de eficácia inventado, sem comparação com medicamento. Tudo o mais foi escrito no tom pedido.
+
+
+## Rodada de 14/09/2026 (noite, 3): imagens v5 alinhadas à promessa, fundos com paralaxe, kits sem corte
+
+Auditoria de alinhamento em `docs/produto/auditoria-alinhamento-2026-09-14.md`; briefing em `docs/criacao/briefing-imagens-v5-2026-09-14.md`. Oito imagens geradas pelo Codex em `imagens/v5/` (poster de consultório sem rosto, gotas douradas, quarto à noite, casal na varanda, macro do conta-gotas, textura de couro, caixa discreta, mãos de médico com o frasco) e três kits montados com o packshot real (`kit-1..3`, frasco inteiro, fundo preto/dourado). Fundos com paralaxe leve (`[data-bg] > .bg-layer`, 6% desktop / 3% celular, desligado com movimento reduzido), frasco flutuante na oferta, card do kit com `object-fit: contain` e caixa de 6,6 rem. Versão anterior preservada: `imagens/v4/` intacta e página anterior em `docs/versoes/cowboy-nova-2026-09-14-promessa-forte.*`. QA: E2E + axe 6/6, Lighthouse celular 91/100/96/100 (LCP 3,2 s, 967 KB).
+
+
+## 15/09/2026: VSL real ligada na página
+
+Arquivo recebido: `C:/Users/User/Downloads/0915 (7).mp4` (HEVC 720×1280 50 fps, 283 MB, 4 min 36 s). Convertido para `videos/vsl/vsl-dr-durval-720.mp4` (H.264 720×1280 30 fps, ~900 kbps, AAC 80 kbps, faststart, 31 MB). Poster: frame do médico aos 22 s (`imagens/v5/vsl-poster-frame.webp`). Player em `[data-vsl]` com overlay de play (um toque, com som; controles nativos depois), `data-reveal-at="200"` (a oferta começa aos 3:25 no vídeo; kit de 2 e "R$ 154,80 frete grátis" aparecem aos ~3:35). A oferta, o botão flutuante e as âncoras ficam travados até esse segundo ou o fim do vídeo; link "Já assistiu?" aparece 45 s após o play ou 60 s na página. Schema VideoObject. Eventos vsl_start/progress/complete ativos. Legendas já vêm queimadas no vídeo.
+
+Observações para o proprietário: (1) o vídeo tem cenas de nudez explícita (~2:00, ~4:05 e 4:15–4:35); anúncios do Meta que levam a uma página com esse conteúdo derrubam a conta, e processadores/hospedagem podem bloquear; recomendação: cortar essas cenas e manter só as setas sobre o médico. (2) Legenda "maca zinco e" aos ~2:00: a fórmula não tem maca (tem boro). (3) O médico do vídeo é outro homem, não o "Dr. Durval" descrito no roteiro; conferir nome, CRM e liberação. QA: E2E + axe 6/6 (a suíte simula o fim do vídeo para destravar a oferta).

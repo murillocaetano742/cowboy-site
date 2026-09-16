@@ -5,13 +5,10 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT = path.join(ROOT, 'dist');
-// Version 1.2 is current; preserve both approved prior pages and their assets.
-const PAGES = ['cowboy-nova.html', 'cowboy-v1-1.html', 'cowboy-v1-2.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
+// 16/09/2026: a página VSL (cowboy-nova.html) é a raiz do site. As versões 1.1/1.2 ficam no repositório, fora do build.
+const PAGES = ['cowboy-nova.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
 const OUTPUT_ALIASES = [
-  { source: 'cowboy-v1-2.html', destination: 'index.html' },
-  { source: 'cowboy-nova.html', destination: 'v1-0.html' },
-  { source: 'cowboy-v1-1.html', destination: 'v1-1.html' },
-  { source: 'cowboy-v1-2.html', destination: 'v1-2.html' },
+  { source: 'cowboy-nova.html', destination: 'index.html' },
 ];
 const ASSETS = [
   // Página nova (cowboy-nova.html): estilos, scripts, fontes auto-hospedadas e imagens próprias.
@@ -23,6 +20,7 @@ const ASSETS = [
   'assets/js/cowboy-floating-checkout-v1-2.js',
   'assets/js/cowboy-pixel.js',
   'assets/js/cowboy-google.js',
+  'assets/data/atividade.json',
   'assets/fonts/oswald-latin-wght-normal.woff2',
   'assets/fonts/manrope-latin-wght-normal.woff2',
   'assets/fonts/LICENSES.txt',
@@ -35,9 +33,24 @@ const ASSETS = [
   'imagens/kits/kit-3.jpg',
   'imagens/kits/kit-4.jpg',
   'imagens/v4/hero-varanda.webp',
+  'imagens/v4/hero-varanda-720.webp',
   'imagens/v4/mesa-de-cabeceira.webp',
   'imagens/v4/casal-cozinha.webp',
   'imagens/v4/rotina-manha.webp',
+  'imagens/v5/kit-1.webp',
+  'imagens/v5/kit-2.webp',
+  'imagens/v5/kit-3.webp',
+  'imagens/v5/vsl-poster-consultorio.webp',
+  'imagens/v5/vsl-poster-consultorio-720.webp',
+  'imagens/v5/vsl-poster-frame.webp',
+  'videos/vsl/vsl-dr-durval-720.mp4',
+  'imagens/v5/fundo-hero-gotas.webp',
+  'imagens/v5/fundo-quarto-noite.webp',
+  'imagens/v5/casal-varanda.webp',
+  'imagens/v5/fundo-conta-gotas.webp',
+  'imagens/v5/fundo-textura-couro.webp',
+  'imagens/v5/caixa-discreta.webp',
+  'imagens/v5/medico-maos-frasco.webp',
   'imagens/homem-confiante.jpg',
   'imagens/clientes/cliente-01.webp',
   'imagens/clientes/cliente-02.webp',

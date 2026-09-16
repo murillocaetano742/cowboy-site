@@ -1,6 +1,9 @@
 'use strict';
 
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs');
+// 16/09/2026: as versões 1.1/1.2 saíram do build (a página VSL é a raiz). Estes testes só rodam se elas voltarem ao dist.
+test.skip(!fs.existsSync(require('node:path').resolve('dist', 'v1-2.html')), 'v1.1/v1.2 fora do build desde 16/09/2026');
 const path = require('node:path');
 const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4198';
 const OUT = process.env.E2E_OUT || path.resolve('.local', 'cta-028-evidence');
@@ -59,7 +62,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
       if (viewport.width < 900) await expect(menu).toBeVisible();
     });
 
-    for (const quantity of [1, 2, 3, 4]) {
+    for (const quantity of [1, 2, 3]) {
       test(`submits kit ${quantity} and attribution through the native form`, async ({ page }) => {
         await page.goto(`${BASE}/v1-2?utm_source=validacao&utm_campaign=CTA_028&cid=76324699889`);
         await page.locator('.kit').filter({ has: page.locator(`input[value="${quantity}"]`) }).click();
@@ -103,7 +106,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
       await page.route('**/api/config', async route => {
         const response = await route.fetch();
         const config = await response.json();
-        config.variants = config.variants.map(variant => ({ ...variant, checkoutAvailable: variant.quantity !== 4 }));
+        config.variants = config.variants.map(variant => ({ ...variant, checkoutAvailable: variant.quantity !== 3 }));
         await route.fulfill({ response, json: config });
       });
       await page.goto(`${BASE}/v1-2`);
@@ -114,10 +117,10 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
       await expect(page.locator('[data-floating-checkout]')).toBeVisible();
       await page.setViewportSize({ width: viewport.width, height: viewport.height - 150 });
       await expect(page.locator('[data-floating-checkout]')).toBeVisible();
-      await page.locator('.kit').filter({ has: page.locator('input[value="4"]') }).click();
+      await page.locator('.kit').filter({ has: page.locator('input[value="3"]') }).click();
       await expect(page.locator('[data-checkout-button]')).toBeDisabled();
       await expect(page.locator('[data-floating-checkout]')).toBeHidden();
-      await page.locator('.kit').filter({ has: page.locator('input[value="3"]') }).click();
+      await page.locator('.kit').filter({ has: page.locator('input[value="2"]') }).click();
       await expect(page.locator('[data-floating-checkout]')).toBeVisible();
     });
 

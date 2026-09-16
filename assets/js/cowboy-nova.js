@@ -53,8 +53,8 @@
     });
     if (recapTitle) {
       recapTitle.textContent = done.length === keys.length
-        ? 'Você conferiu os ' + keys.length + ' capítulos. Boa escolha.'
-        : 'Você já conferiu ' + done.length + ' de ' + keys.length + ' capítulos. Faltam:';
+        ? 'Você conferiu os ' + keys.length + ' blocos. Boa escolha.'
+        : 'Você já conferiu ' + done.length + ' de ' + keys.length + ' blocos. Faltam:';
     }
     recap.hidden = false;
   }
@@ -168,6 +168,186 @@
       }
     });
   }).catch(function () {});
+
+  // VSL delayed reveal: when a real video is present, offer CTAs stay locked until the video reaches data-reveal-at
+  // seconds (or ends). A 'skip' link appears after 45 s so warm traffic is never trapped. Without a video, nothing is locked.
+  var vsl = document.querySelector('[data-vsl]');
+  var vslVideo = vsl && vsl.querySelector('video[data-vsl-video]');
+  var reveals = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
+  var skip = document.querySelector('[data-vsl-skip]');
+  function unlock() { reveals.forEach(function (el) { el.removeAttribute('data-locked'); }); if (skip) skip.hidden = true; }
+  if (vsl && vslVideo && reveals.length) {
+    var at = Number(vsl.dataset.revealAt) || 0;
+    reveals.forEach(function (el) { el.setAttribute('data-locked', ''); });
+    var started = false;
+    function showSkip() { if (skip && skip.hidden && reveals.some(function (el) { return el.hasAttribute('data-locked'); })) skip.hidden = false; }
+    vslVideo.addEventListener('play', function () { if (!started) { started = true; window.setTimeout(showSkip, 45000); } });
+    // Warm traffic that never presses play still gets a way to the offer after 60 s on the page.
+    window.setTimeout(showSkip, 60000);
+    vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= at) unlock(); });
+    vslVideo.addEventListener('ended', unlock);
+    if (skip) skip.addEventListener('click', unlock);
+
+    // Play overlay: one tap starts the video with sound; native controls take over after that.
+    var frame = vslVideo.closest('.vsl-frame');
+    var playButton = vsl.querySelector('[data-vsl-play]');
+    function startVideo() {
+      vslVideo.muted = false;
+      var p = vslVideo.play();
+      if (p && p.catch) p.catch(function () { vslVideo.muted = true; vslVideo.play().catch(function () {}); });
+    }
+    if (playButton) playButton.addEventListener('click', startVideo);
+    vslVideo.addEventListener('play', function () { if (frame) frame.setAttribute('data-playing', ''); vslVideo.setAttribute('controls', ''); });
+    vslVideo.addEventListener('ended', function () { if (frame) frame.removeAttribute('data-playing'); });
+  }
+
+  // Sticky CTA: shows after the visitor passes the proof block (or the guarantee, if the page has no proof block),
+  // hides while the kit section is on screen. Respects the VSL lock: [data-reveal] rules apply to it too.
+  var sticky = document.querySelector('[data-sticky-cta]');
+  var stickyTrigger = document.getElementById('prova') || document.getElementById('garantia');
+  var kitSection = document.getElementById('kit');
+  if (sticky && stickyTrigger && kitSection) {
+    var passedTrigger = false;
+    var kitVisible = false;
+    function paintSticky() { var show = passedTrigger && !kitVisible && !sticky.hasAttribute('data-locked'); sticky.hidden = !show; if (show) document.body.setAttribute('data-sticky', ''); else document.body.removeAttribute('data-sticky'); }
+    window.addEventListener('scroll', function () { if (!passedTrigger && stickyTrigger.getBoundingClientRect().bottom < window.innerHeight * 0.6) { passedTrigger = true; paintSticky(); } }, { passive: true });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { kitVisible = entries.some(function (e) { return e.isIntersecting; }); paintSticky(); }, { threshold: 0.05 }).observe(kitSection);
+    sticky.setAttribute('data-reveal', '');
+    if (vsl && vslVideo) { sticky.setAttribute('data-locked', ''); vslVideo.addEventListener('timeupdate', function () { if (vslVideo.currentTime >= (Number(vsl.dataset.revealAt) || 0)) { sticky.removeAttribute('data-locked'); paintSticky(); } }); vslVideo.addEventListener('ended', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); if (skip) skip.addEventListener('click', function () { sticky.removeAttribute('data-locked'); paintSticky(); }); }
+  }
+
+  // VSL measurement: play and 25/50/75/100 % progress to GA4 (gtag) and Meta (fbq) when those loaders exist.
+  if (vslVideo) {
+    var marks = { 25: false, 50: false, 75: false, 100: false };
+    function track(name, params) {
+      try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch (e) {}
+      try { if (typeof window.fbq === 'function') window.fbq('trackCustom', name, params || {}); } catch (e) {}
+    }
+    vslVideo.addEventListener('play', function () { if (!vslVideo.dataset.started) { vslVideo.dataset.started = '1'; track('vsl_start', { video_title: 'VSL Dr. Durval' }); } });
+    vslVideo.addEventListener('timeupdate', function () {
+      if (!vslVideo.duration) return;
+      var pct = Math.floor((vslVideo.currentTime / vslVideo.duration) * 100);
+      [25, 50, 75].forEach(function (m) { if (pct >= m && !marks[m]) { marks[m] = true; track('vsl_progress', { percent: m }); } });
+    });
+    vslVideo.addEventListener('ended', function () { if (!marks[100]) { marks[100] = true; track('vsl_complete', { percent: 100 }); } });
+  }
+
+  // WhatsApp: the number lives in <body data-whatsapp>. Empty number keeps every WhatsApp block hidden.
+  var waNumber = (document.body.dataset.whatsapp || '').replace(/\D/g, '');
+  if (waNumber) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-whatsapp]'), function (link) {
+      link.href = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(link.dataset.whatsappText || 'Olá! Vi a página do COWBOY Energia.');
+      link.target = '_blank'; link.rel = 'noopener';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-whatsapp-block]'), function (block) { block.hidden = false; });
+  }
+
+  // Urgency: one real deadline set by the owner in data-deadline (ISO). Shows only while the deadline is in the future;
+  // hides itself after it passes. No rolling dates. Optional data-stock shows a real remaining count.
+  var urgency = document.querySelector('[data-urgency]');
+  if (urgency) {
+    var deadline = new Date(urgency.dataset.deadline || '');
+    var echo = document.querySelector('[data-urgency-echo]');
+    if (!isNaN(deadline.getTime()) && deadline.getTime() > Date.now()) {
+      var months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+      var label = deadline.getDate() + ' de ' + months[deadline.getMonth()];
+      Array.prototype.forEach.call(document.querySelectorAll('[data-deadline-text]'), function (el) { el.textContent = label; });
+      var stock = parseInt(urgency.dataset.stock, 10);
+      var stockNote = urgency.querySelector('[data-stock-note]');
+      var stockCount = urgency.querySelector('[data-stock-count]');
+      if (stockNote && stockCount && stock > 0) { stockCount.textContent = String(stock); stockNote.hidden = false; }
+      var cells = {};
+      Array.prototype.forEach.call(urgency.querySelectorAll('[data-cd]'), function (el) { cells[el.dataset.cd] = el; });
+      function pad(n) { return (n < 10 ? '0' : '') + n; }
+      function tick() {
+        var left = deadline.getTime() - Date.now();
+        if (left <= 0) { urgency.hidden = true; if (echo) echo.hidden = true; return; }
+        var s = Math.floor(left / 1000);
+        if (cells.d) cells.d.textContent = pad(Math.floor(s / 86400));
+        if (cells.h) cells.h.textContent = pad(Math.floor((s % 86400) / 3600));
+        if (cells.m) cells.m.textContent = pad(Math.floor((s % 3600) / 60));
+        if (cells.s) cells.s.textContent = pad(s % 60);
+        window.setTimeout(tick, 1000);
+      }
+      urgency.hidden = false;
+      if (echo) echo.hidden = false;
+      tick();
+    }
+  }
+
+  // Activity notices: real orders and real customer relatos from assets/data/atividade.json. Nothing is generated.
+  var toast = document.querySelector('[data-toast]');
+  if (toast && window.fetch && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches && false)) {
+    var toastTitle = toast.querySelector('[data-toast-title]');
+    var toastText = toast.querySelector('[data-toast-text]');
+    var toastMeta = toast.querySelector('[data-toast-meta]');
+    var toastClose = toast.querySelector('[data-toast-close]');
+    var dismissed = false;
+    var hideTimer = null;
+    if (toastClose) toastClose.addEventListener('click', function () { dismissed = true; toast.removeAttribute('data-show'); window.setTimeout(function () { toast.hidden = true; }, 350); });
+    function relative(iso) {
+      var t = new Date(iso).getTime();
+      if (isNaN(t)) return '';
+      var mins = Math.round((Date.now() - t) / 60000);
+      if (mins < 1) return 'agora há pouco';
+      if (mins < 60) return 'há ' + mins + ' min';
+      var hours = Math.round(mins / 60);
+      if (hours < 48) return 'há ' + hours + ' h';
+      var d = new Date(t);
+      return 'em ' + pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
+    }
+    function pad2(n) { return (n < 10 ? '0' : '') + n; }
+    function kitLabel(k) { k = Number(k); return k > 1 ? k + ' frascos' : '1 frasco'; }
+    function show(item) {
+      if (dismissed || document.hidden) return;
+      if (vslVideo && !vslVideo.paused) return;
+      toastTitle.textContent = item.title; toastText.textContent = item.text; toastMeta.textContent = item.meta;
+      toast.hidden = false;
+      window.requestAnimationFrame(function () { toast.setAttribute('data-show', ''); });
+      window.clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(function () { toast.removeAttribute('data-show'); window.setTimeout(function () { if (!toast.hasAttribute('data-show')) toast.hidden = true; }, 350); }, 6500);
+    }
+    fetch('assets/data/atividade.json', { headers: { Accept: 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+      if (!data) return;
+      var queue = [];
+      (data.pedidos || []).slice().sort(function (a, b) { return new Date(b.quando) - new Date(a.quando); }).slice(0, 12).forEach(function (p) {
+        if (!p || !p.nome || !p.kit) return;
+        queue.push({ title: p.nome + (p.cidade ? ', de ' + p.cidade : ''), text: 'garantiu o kit de ' + kitLabel(p.kit) + (p.quando ? ' ' + relative(p.quando) : ''), meta: 'Pedido real · nome como o cliente autorizou' });
+      });
+      (data.relatos || []).forEach(function (r) {
+        if (!r || !r.nome || !r.texto) return;
+        queue.push({ title: 'Cliente ' + r.nome, text: r.texto, meta: 'Relato real · nomes alterados para preservar a privacidade' });
+      });
+      if (!queue.length) return;
+      var index = 0, shown = 0;
+      function next() {
+        if (dismissed || shown >= 6) return;
+        show(queue[index % queue.length]); index += 1; shown += 1;
+        window.setTimeout(next, 16000);
+      }
+      window.setTimeout(next, 9000);
+    }).catch(function () {});
+  }
+
+  // Background parallax: each [data-bg] section moves its .bg-layer a little against the scroll (6 % desktop, 3 % mobile).
+  var bgLayers = Array.prototype.slice.call(document.querySelectorAll('[data-bg] > .bg-layer'));
+  if (bgLayers.length && !reduceMotion) {
+    var bgTick = false;
+    function paintBg() {
+      bgTick = false;
+      var vh = window.innerHeight;
+      var factor = window.innerWidth < 640 ? 0.03 : 0.06;
+      bgLayers.forEach(function (layer) {
+        var rect = layer.parentNode.getBoundingClientRect();
+        if (rect.bottom < -vh || rect.top > vh * 2) return;
+        var offset = (rect.top + rect.height / 2 - vh / 2) * -factor;
+        layer.style.transform = 'translate3d(0,' + offset.toFixed(1) + 'px,0)';
+      });
+    }
+    window.addEventListener('scroll', function () { if (!bgTick) { bgTick = true; window.requestAnimationFrame(paintBg); } }, { passive: true });
+    window.addEventListener('resize', paintBg);
+    paintBg();
+  }
 
   // One authored moment: hero product settles into place on load.
   var heroArt = document.querySelector('.hero-art img');

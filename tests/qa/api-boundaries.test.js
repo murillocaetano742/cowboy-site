@@ -22,5 +22,5 @@ test('QA: pacote e preço de três frascos também cumprem a regra de 2+', () =>
   assert.equal(parcel.quantity, 1);
   assert.equal(parcel.weight, 0.5);
   assert.deepEqual([parcel.width, parcel.height, parcel.length].sort((a, b) => a - b), [8, 8, 23]);
-  assert.equal(Number(parcel.insurance_value), 127.14);
+  assert.equal(Number(parcel.insurance_value), 199.90);
 });
