@@ -36,15 +36,17 @@ test('atividade publica somente primeiro nome, cidade/UF, quantidade e data com 
 
 test('pedido pago só é público com autorização privada e testes continuam proibidos', () => {
   assert.equal(publicOrder(order(), { now: NOW }).reason, 'publication_not_authorized');
-  const approved = configuration({ ...ENV, CARTPANDA_ACTIVITY_APPROVED_ORDER_IDS: '1,51915653' });
+  const approved = configuration({ ...ENV, CARTPANDA_ACTIVITY_APPROVED_ORDER_IDS: '1,51915653,51921061,51980506' });
   assert.ok(publicOrder(order(), { ...approved, now: NOW }).value);
-  assert.equal(publicOrder(order({ id: 51915653 }), { ...approved, now: NOW }).reason, 'known_test');
+  for (const id of [51915653, 51921061, 51980506]) {
+    assert.equal(publicOrder(order({ id }), { ...approved, now: NOW }).reason, 'known_test');
+  }
   assert.equal(selectActivity([order()], { ...configuration({ ...ENV, CARTPANDA_ACTIVITY_APPROVED_ORDER_IDS: '' }), now: NOW }).pedidos.length, 0);
   assert.throws(() => configuration({ ...ENV, CARTPANDA_ACTIVITY_APPROVED_ORDER_IDS: 'not-an-id' }), /numeric IDs/);
 });
 
 test('atividade exclui testes pagos de produção e todos os estados não elegíveis', () => {
-  for (const id of [51915653, 51921061]) assert.equal(publicOrder(order({ id }), { approvedIds: configuration(ENV).approvedIds, now: NOW }).reason, 'known_test');
+  for (const id of [51915653, 51921061, 51980506]) assert.equal(publicOrder(order({ id }), { approvedIds: configuration(ENV).approvedIds, now: NOW }).reason, 'known_test');
   for (const overrides of [
     { test: 1 }, { is_cartx_test: '1' }, { tags: 'teste' }, { order_comment: 'compra de teste' },
     { test: undefined }, { payment_status: 1 }, { payment_status: 4 },

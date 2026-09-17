@@ -1,14 +1,5 @@
 {
-  "_como_preencher": "Avisos exibidos na página. 'pedidos': só pedidos reais (primeiro nome, cidade/UF, kit em frascos, data-hora ISO com fuso, ex.: 2026-09-14T10:20:00-03:00). 'relatos': os clientes reais da galeria. Nada aqui é inventado; a página mostra primeiro os pedidos mais recentes e depois os relatos.",
+  "_como_preencher": "Avisos de compras: somente pedidos reais pagos, elegíveis e autorizados, exportados pela CLI (primeiro nome, cidade/UF, kit de 1 a 3 frascos e data-hora ISO com fuso). Os 12 mais recentes aparecem uma vez por visita. Sem pedidos, nenhum aviso. 'relatos' é um campo legado mantido vazio e não exibido nos avisos; a galeria permanece separada. Não incluir testes nem inventar compradores.",
   "pedidos": [],
-  "relatos": [
-    { "nome": "Marcos", "texto": "mandou a foto com o kit em casa", "kit": 2 },
-    { "nome": "Ricardo", "texto": "mandou a foto com o frasco na viagem", "kit": 1 },
-    { "nome": "Fernando", "texto": "mandou a foto com o frasco na mão", "kit": 1 },
-    { "nome": "Paulo", "texto": "mandou a foto com o frasco", "kit": 1 },
-    { "nome": "André", "texto": "mandou a foto com o frasco", "kit": 1 },
-    { "nome": "Sérgio", "texto": "mandou a foto com o frasco", "kit": 1 },
-    { "nome": "do vídeo 1", "texto": "gravou o próprio vídeo: “tem duas semanas que eu tô tomando”", "kit": 1 },
-    { "nome": "do vídeo 2", "texto": "voltou para o segundo frasco e gravou o vídeo", "kit": 2 }
-  ]
+  "relatos": []
 }

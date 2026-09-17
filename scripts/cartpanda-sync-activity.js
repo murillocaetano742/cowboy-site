@@ -12,8 +12,9 @@ const SHOP_SLUG = 'cowboy-energia';
 const MAX_PAGES = 100;
 const MAX_PUBLIC_ORDERS = 12;
 // Production payments made for operational tests, despite test=0 in Cartpanda.
-// Evidence: docs/integracoes/prontidao-campanhas-2026-09-10.md.
-const KNOWN_TEST_ORDER_IDS = Object.freeze(['51915653', '51921061']);
+// Evidence: docs/integracoes/prontidao-campanhas-2026-09-10.md and
+// docs/stories/VSL-034-entrada-atividade.md.
+const KNOWN_TEST_ORDER_IDS = Object.freeze(['51915653', '51921061', '51980506']);
 const BRAZIL_STATES = new Set('AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' '));
 const ALLOWED_ORDER_STATUSES = new Set(['1', '2', '3', '7', 'new', 'open', 'fulfilled', 'bankpaid']);
 const FALSE_FLAGS = new Set([0, '0', false]);

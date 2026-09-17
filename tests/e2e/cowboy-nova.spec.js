@@ -9,6 +9,8 @@ const path = require('node:path');
 
 const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4180';
 const URL = `${BASE}/cowboy-nova`;
+const ROOT_URL = `${BASE}/`;
+const ACTIVITY_NOW = new Date('2026-09-17T15:00:00Z');
 const OUT = process.env.E2E_OUT || path.resolve('docs/qa/nova');
 fs.mkdirSync(OUT, { recursive: true });
 
@@ -19,6 +21,20 @@ async function isolateTracking(context) {
   await context.route('**/assets/js/cowboy-pixel.js', empty);
   await context.route('**/assets/js/cowboy-google.js', empty);
   await context.route('https://cdn.utmify.com.br/scripts/utms/latest.js', empty);
+}
+
+async function openWithActivity(page, data) {
+  // Dados exclusivamente de teste, interceptados em localhost; nada é publicado no feed.
+  await page.clock.install({ time: new Date(ACTIVITY_NOW.getTime() - 60000) });
+  await page.clock.pauseAt(ACTIVITY_NOW);
+  await page.route('**/assets/data/atividade.json', (route) => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify(data),
+  }));
+  await page.goto(ROOT_URL, { waitUntil: 'networkidle' });
+}
+
+async function expectAtTop(page) {
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThanOrEqual(1);
 }
 
 test.describe('COWBOY Energia — página nova', () => {
@@ -88,6 +104,127 @@ test.describe('COWBOY Energia — página nova', () => {
     const form = page.locator('[data-checkout-form]');
     await expect(form).toHaveAttribute('action', /\/api\/checkout/); // a UTMify pode acrescentar parâmetros ao action
     await expect(form).toHaveAttribute('method', /get/i);
+  });
+
+  test('entrada: raiz e link externo #kit começam no topo e preservam atribuição', async ({ page }) => {
+    const query = '?utm_source=qa-local&utm_campaign=entrada&cid=fixture-034';
+    for (const entry of [ROOT_URL, `${ROOT_URL}${query}#kit`, `${URL}${query}#kit`]) {
+      await page.goto(entry, { waitUntil: 'networkidle' });
+      await expectAtTop(page);
+      const address = new global.URL(page.url());
+      expect(address.hash).toBe('');
+      expect(address.search).toBe(new global.URL(entry).search);
+      expect(address.pathname).toBe(new global.URL(entry).pathname);
+    }
+  });
+
+  test('entrada: CTA interno alcança os kits; recarregar volta ao topo sem perder UTM', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const query = '?utm_source=qa-local&utm_content=reload';
+    await page.goto(`${ROOT_URL}${query}`, { waitUntil: 'networkidle' });
+    await expectAtTop(page);
+    await page.getByRole('link', { name: 'Ver os kits e o preço', exact: false }).click();
+    await expect(page).toHaveURL(new RegExp('#kit$'));
+    await expect(page.locator('#kit')).toBeInViewport();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+    await page.reload({ waitUntil: 'networkidle' });
+    await expectAtTop(page);
+    expect(new global.URL(page.url()).hash).toBe('');
+    expect(new global.URL(page.url()).search).toBe(query);
+    // Rolagem manual também não deve ser restaurada pelo navegador após reload.
+    await page.locator('#kit').scrollIntoViewIfNeeded();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+    expect(new global.URL(page.url()).hash).toBe('');
+    await page.reload({ waitUntil: 'networkidle' });
+    await expectAtTop(page);
+    expect(new global.URL(page.url()).search).toBe(query);
+  });
+
+  test('atividade: relatos sem pedidos não exibem aviso de compra', async ({ page }) => {
+    await openWithActivity(page, {
+      pedidos: [],
+      relatos: [{ nome: 'Relato fixture', texto: 'Relato de teste que não é uma compra', kit: 2 }],
+    });
+    const toast = page.locator('[data-toast]');
+    await page.clock.runFor(9050);
+    await expect(toast).toBeHidden();
+    await page.clock.runFor(96000);
+    await expect(toast).toBeHidden();
+    await expect(toast).not.toHaveAttribute('data-show', '');
+  });
+
+  test('atividade: pedido do feed aparece uma vez, sem foto e sem reciclar relato', async ({ page }) => {
+    await openWithActivity(page, {
+      pedidos: [{ nome: 'Comprador fixture', cidade: 'Cidade teste/UF', kit: 2, quando: '2026-09-17T14:55:00Z', foto: '/foto-nao-publicar.jpg' }],
+      relatos: [{ nome: 'Relato fixture', texto: 'Não entra na fila de compras', kit: 1 }],
+    });
+    const toast = page.locator('[data-toast]');
+    await expect(toast).toBeHidden();
+    await page.clock.runFor(9050);
+    await expect(toast).toBeVisible();
+    await expect(toast.locator('[data-toast-title]')).toHaveText('Comprador fixture, de Cidade teste/UF');
+    await expect(toast.locator('[data-toast-text]')).toContainText('garantiu o kit de 2 frascos');
+    await expect(toast.locator('[data-toast-meta]')).toContainText('Pedido real');
+    await expect(toast.locator('img, picture, video')).toHaveCount(0);
+    await page.clock.runFor(16000);
+    await expect(toast).toBeHidden();
+    await expect(toast).not.toHaveAttribute('data-show', '');
+    await page.clock.runFor(96000);
+    await expect(toast).toBeHidden();
+    await expect(toast.locator('[data-toast-title]')).toHaveText('Comprador fixture, de Cidade teste/UF');
+  });
+
+  test('atividade: exibe só os 12 pedidos válidos mais recentes, em ordem e sem repetir', async ({ page }) => {
+    const pedidos = Array.from({ length: 14 }, (_, index) => ({
+      nome: `Fixture ${index + 1}`, kit: index % 3 + 1,
+      quando: new Date(ACTIVITY_NOW.getTime() - (14 - index) * 60000).toISOString(),
+    }));
+    pedidos.push(
+      { nome: 'Kit inválido', kit: 4, quando: '2026-09-17T14:59:59Z' },
+      { nome: 'Pedido futuro', kit: 1, quando: '2026-09-18T15:00:00Z' },
+      { nome: 'Data inválida', kit: 1, quando: 'sem-data' },
+      { nome: '', kit: 1, quando: '2026-09-17T14:59:58Z' },
+    );
+    await openWithActivity(page, { pedidos, relatos: [] });
+    const toast = page.locator('[data-toast]');
+    await page.clock.runFor(9050);
+    for (let index = 0; index < 12; index += 1) {
+      if (index > 0) await page.clock.runFor(16000);
+      await expect(toast).toBeVisible();
+      await expect(toast.locator('[data-toast-title]')).toHaveText(`Fixture ${14 - index}`);
+    }
+    await page.clock.runFor(16000);
+    await expect(toast).toBeHidden();
+    await page.clock.runFor(96000);
+    await expect(toast).toBeHidden();
+    await expect(toast.locator('[data-toast-title]')).toHaveText('Fixture 3');
+  });
+
+  test('atividade: vídeo e aba oculta pausam a fila; horário atualiza e fechar encerra os avisos', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openWithActivity(page, { pedidos: [
+      { nome: 'Primeiro fixture', kit: 1, quando: '2026-09-17T14:59:00Z' },
+      { nome: 'Segundo fixture', kit: 2, quando: '2026-09-17T14:58:00Z' },
+    ], relatos: [] });
+    const toast = page.locator('[data-toast]');
+    const video = page.locator('video[data-vsl-video]');
+    // Estados de navegador simulados localmente, sem reproduzir mídia ou emitir eventos externos.
+    await video.evaluate((element) => Object.defineProperty(element, 'paused', { configurable: true, value: false }));
+    await page.clock.runFor(65000);
+    await expect(toast).toBeHidden();
+    await video.evaluate((element) => { delete element.paused; });
+    await page.evaluate(() => Object.defineProperty(document, 'hidden', { configurable: true, value: true }));
+    await page.clock.runFor(16000);
+    await expect(toast).toBeHidden();
+    await page.evaluate(() => { delete document.hidden; });
+    await page.clock.runFor(8050);
+    await expect(toast).toBeVisible();
+    await expect(toast.locator('[data-toast-title]')).toHaveText('Primeiro fixture');
+    await expect(toast.locator('[data-toast-text]')).toContainText('há 2 min');
+    await toast.getByRole('button', { name: 'Fechar aviso', exact: true }).click();
+    await page.clock.runFor(16000);
+    await expect(toast).toBeHidden();
+    await expect(toast.locator('[data-toast-title]')).toHaveText('Primeiro fixture');
   });
 
   test('mobile: acessibilidade (axe-core, WCAG 2.1 AA)', async ({ page }) => {
