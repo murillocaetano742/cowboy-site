@@ -349,37 +349,6 @@
     }).catch(function () {});
   }
 
-  // Lot counter (17/09, owner): starts at data-stock-initial units and subtracts the bottles of every real paid order
-  // recorded in assets/data/atividade.json since data-stock-since. No simulated decrements.
-  var stockBox = document.querySelector('[data-stock-box]');
-  if (stockBox && window.fetch) {
-    var stockInitial = parseInt(stockBox.dataset.stockInitial, 10);
-    var stockSince = Date.parse(stockBox.dataset.stockSince || '') || 0;
-    var stockLeftEls = Array.prototype.slice.call(stockBox.querySelectorAll('[data-stock-left]'));
-    var stockFill = stockBox.querySelector('[data-stock-fill]');
-    function paintStock(left) {
-      stockLeftEls.forEach(function (el) { el.textContent = String(left); });
-      if (stockFill && stockInitial > 0) stockFill.style.width = Math.max(4, Math.round((left / stockInitial) * 100)) + '%';
-      if (left <= 0) stockBox.setAttribute('data-sold-out', '');
-    }
-    if (stockInitial > 0) {
-      paintStock(stockInitial);
-      fetch('assets/data/atividade.json', { headers: { Accept: 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
-        if (!data || !Array.isArray(data.pedidos)) return;
-        var sold = 0;
-        data.pedidos.forEach(function (p) {
-          if (!p || !Number.isInteger(p.kit) || p.kit < 1 || p.kit > 3 || typeof p.quando !== 'string') return;
-          var t = Date.parse(p.quando);
-          if (!Number.isFinite(t) || t < stockSince || t > Date.now()) return;
-          sold += p.kit;
-        });
-        paintStock(Math.max(0, stockInitial - sold));
-      }).catch(function () {});
-    } else {
-      stockBox.hidden = true;
-    }
-  }
-
   // Background parallax: each [data-bg] section moves its .bg-layer a little against the scroll (6 % desktop, 3 % mobile).
   var bgLayers = Array.prototype.slice.call(document.querySelectorAll('[data-bg] > .bg-layer'));
   if (bgLayers.length && !reduceMotion) {
