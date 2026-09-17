@@ -20,6 +20,9 @@ const ASSETS = [
   'assets/js/cowboy-floating-checkout-v1-2.js',
   'assets/js/cowboy-pixel.js',
   'assets/js/cowboy-google.js',
+  // Tema carregado somente pelo checkout Appmax, sem inclusão na página VSL.
+  'assets/css/cowboy-appmax.css',
+  'assets/js/cowboy-appmax.js',
   'assets/data/atividade.json',
   'assets/fonts/oswald-latin-wght-normal.woff2',
   'assets/fonts/manrope-latin-wght-normal.woff2',
