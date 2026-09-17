@@ -90,7 +90,21 @@ test('QA: atribuição permitida sobrevive à navegação interna na mesma sess�
   assert.deepEqual(fields, { utm_source: 'meta', utm_content: 'C03' });
 });
 
-test('QA: modelo Google chega do formulário à Cartpanda após navegação interna', async () => {
+test('QA: modelo Google chega do formulário à Appmax após navegação interna', async (t) => {
+  // Synthetic Appmax destination; the handler is mocked at the HTTP boundary.
+  const environment = {
+    CHECKOUT_PROVIDER: 'appmax',
+    APPMAX_CHECKOUT_ALLOWED_HOSTS: 'checkout.example.test',
+    APPMAX_CHECKOUT_2_URL: 'https://checkout.example.test/kit-2',
+  };
+  const retained = Object.fromEntries(Object.keys(environment).map((key) => [key, process.env[key]]));
+  t.after(() => {
+    for (const [key, value] of Object.entries(retained)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+  Object.assign(process.env, environment);
   const expected = {
     utm_source: 'google', utm_campaign: 'teste_campaign', utm_medium: 'teste_group',
     utm_content: 'teste_ad', utm_term: 'teste_placement::palavra com espaço',
@@ -112,7 +126,7 @@ test('QA: modelo Google chega do formulário à Cartpanda após navegação inte
   }, response);
   assert.equal(response.status, 302);
   const destination = new URL(response.url);
-  assert.equal(destination.hostname, 'cowboy-energia.mycartpanda.com');
+  assert.equal(destination.origin + destination.pathname, environment.APPMAX_CHECKOUT_2_URL);
   assert.deepEqual(Object.fromEntries(destination.searchParams), expected);
 });
 

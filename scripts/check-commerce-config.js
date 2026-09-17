@@ -1,10 +1,19 @@
 'use strict';
 
-const { checkoutUrlFor, missingShippingConfiguration } = require('#commerce');
+const { APPMAX_FIXED_SHIPPING_CENTS, DISPLAY_VARIANT_QUANTITIES, checkoutProvider, checkoutUrlFor, missingShippingConfiguration } = require('#commerce');
+
+const provider = checkoutProvider();
+const missingShipping = provider === 'appmax' ? [] : provider === 'cartpanda' ? missingShippingConfiguration() : ['CHECKOUT_PROVIDER(valid:appmax|cartpanda)'];
 
 const report = {
-  checkout: [1, 2, 3].map((quantity) => ({ quantity, configured: Boolean(checkoutUrlFor(quantity)) })),
-  shipping: { configured: missingShippingConfiguration().length === 0, missing: missingShippingConfiguration() },
+  provider,
+  checkout: DISPLAY_VARIANT_QUANTITIES.map((quantity) => ({ quantity, configured: Boolean(checkoutUrlFor(quantity)) })),
+  shipping: {
+    mode: provider === 'appmax' ? 'checkout_fixed' : provider === 'cartpanda' ? 'melhor_envio_quote' : null,
+    configured: missingShipping.length === 0,
+    missing: missingShipping,
+    ...(provider === 'appmax' ? { currency: 'BRL', pricesCents: APPMAX_FIXED_SHIPPING_CENTS } : {}),
+  },
 };
 
 console.log(JSON.stringify(report, null, 2));
