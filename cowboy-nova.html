@@ -276,6 +276,13 @@
           </div>
           <p class="urgency-limit">Máximo de 3 frascos por pedido nesta condição.<span data-stock-note hidden> Restam <b data-stock-count></b> kits neste lote.</span></p>
         </div>
+        <div class="stock" data-stock-box data-stock-initial="446" data-stock-since="2026-09-17T00:00:00-03:00" role="status" aria-live="polite">
+          <!-- data-stock-initial: unidades (frascos) do lote informadas pelo proprietário em 17/09/2026. data-stock-since: início do lote.
+               O contador desconta as unidades dos pedidos pagos reais que o exportador do Codex grava em assets/data/atividade.json. -->
+          <div class="stock-head"><span class="stock-label"><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg>Lote atual</span><b class="stock-count"><span data-stock-left>446</span> unidades</b></div>
+          <div class="stock-bar" aria-hidden="true"><span class="stock-fill" data-stock-fill style="width:100%"></span></div>
+          <p class="stock-note">Restam <b data-stock-left>446</b> frascos neste lote com o preço de lançamento. Cada pedido pago desconta daqui.</p>
+        </div>
         <form id="cowboy-checkout" action="/api/checkout" method="get" data-checkout-form>
           <div class="kits" role="radiogroup" aria-label="Escolha um kit">
             <label class="kit">
