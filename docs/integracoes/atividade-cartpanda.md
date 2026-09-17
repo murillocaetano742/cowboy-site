@@ -1,10 +1,12 @@
 # Pedidos reais no feed de atividade
 
-Implementação da story VSL-030, em 16/09/2026. O comando exporta pedidos reais pela API Cartpanda para o contrato já consumido pela página, sem alterar HTML, CSS ou JavaScript público.
+Exportador implementado na story VSL-030, em 16/09/2026. A VSL-034, em 17/09, limita os avisos da página a compras reais; relatos de fotos e vídeos permanecem somente na galeria.
 
 ## Estado verificado
 
-Consulta autenticada somente leitura: HTTP 200, quatro pedidos, zero elegíveis. Dois são compras operacionais pagas documentadas em `prontidao-campanhas-2026-09-10.md`; outro tem indicação de teste e o restante está cancelado. As duas compras operacionais têm `test=0` na API e estão excluídas explicitamente pelo ID. Nenhum comprador foi publicado. O feed existente continua com `pedidos: []` e os relatos preservados.
+Consulta autenticada somente leitura em 17/09/2026, às 10:27:19 BRT: HTTP 200, cinco pedidos, quatro pagos e zero elegíveis. Três são compras operacionais pagas: `51915653`, `51921061` e `51980506`, documentadas em `prontidao-campanhas-2026-09-10.md` e `docs/stories/VSL-034-entrada-atividade.md`; outro pedido tem indicação de teste e o restante está cancelado. As compras operacionais têm `test=0` na API e estão excluídas explicitamente pelo ID, mesmo se autorizadas por engano. Nenhum pedido novo além desses cinco foi encontrado; nenhum comprador foi publicado. A lista de autorizações está vazia e o fuso dos timestamps ainda não foi confirmado.
+
+O feed desta revisão mantém `pedidos: []` e esvazia `relatos: []`, preservando o contrato do exportador. O navegador ignora relatos e mostra somente compras com nome, kit inteiro de 1 a 3 e data ISO com fuso válida e não futura, em ordem das mais recentes, limitadas a 12. Cada entrada aparece uma vez por visita; o fim da fila não reinicia os mesmos pedidos. Página oculta ou VSL reproduzindo adiam a apresentação sem consumir a compra. Fechar o aviso encerra a sequência. Sem compras elegíveis, nenhum aviso aparece. A galeria não foi alterada.
 
 O script está disponível e testado. **Não há agendamento nem sincronização contínua ativados.** A publicação estática precisa de uma nova exportação, build e deploy para receber alterações. Um webhook escrevendo no filesystem de uma função Vercel não atualizaria o arquivo estático já publicado.
 
@@ -17,7 +19,7 @@ Configure em `.env.local` ou no ambiente secreto do executor, nunca em código p
 | `CARTPANDA_API_TOKEN` | Credencial somente no servidor/CLI. Já disponível no ambiente local. |
 | `CARTPANDA_SHOP_SLUG` | Deve ser `cowboy-energia`; o script também confere a loja de cada pedido retornado. |
 | `CARTPANDA_ACTIVITY_APPROVED_ORDER_IDS` | IDs separados por vírgula dos pedidos com autorização registrada para exibir primeiro nome e cidade/UF. Vazio publica zero pedidos. Não incluir dados pessoais nessa lista. |
-| `CARTPANDA_ACTIVITY_EXCLUDE_ORDER_IDS` | IDs adicionais de testes, compras internas ou pedidos a retirar do feed. As duas compras operacionais já conhecidas são sempre excluídas, mesmo se constarem da lista de autorizados. |
+| `CARTPANDA_ACTIVITY_EXCLUDE_ORDER_IDS` | IDs adicionais de testes, compras internas ou pedidos a retirar do feed. As três compras operacionais já conhecidas são sempre excluídas, mesmo se constarem da lista de autorizados. |
 | `CARTPANDA_ORDER_TIMEZONE` | Fuso IANA confirmado para os timestamps sem offset retornados pela API. Não inferir pelo computador ou pela localização do cliente. |
 
 A página afirma “nome como o cliente autorizou”; por isso pagamento aprovado sozinho não autoriza publicação. Registre a autorização fora do repositório antes de incluir o ID. Para revogar, retire-o da lista e execute exportação, build e deploy.
@@ -33,7 +35,7 @@ npm run build
 npm run check:build
 ```
 
-`activity:check` consulta a API e mostra apenas contagens e motivos agregados; não escreve arquivos e não imprime compradores, pedidos brutos ou credencial. `activity:sync` faz nova consulta completa e substitui apenas `pedidos` em `assets/data/atividade.json`, preservando `relatos` e os demais campos. A escrita é atômica e, se o conteúdo já for igual, preserva o arquivo sem mudança. Uma retirada ou reembolso é refletido na próxima exportação bem-sucedida e publicação.
+`activity:check` consulta a API e mostra apenas contagens e motivos agregados; não escreve arquivos e não imprime compradores, pedidos brutos ou credencial. `activity:sync` faz nova consulta completa e substitui apenas `pedidos` em `assets/data/atividade.json`, preservando o campo legado `relatos` vazio e os demais campos. O navegador não usa esse campo nos avisos. A escrita é atômica e, se o conteúdo já for igual, preserva o arquivo sem mudança. Uma retirada ou reembolso é refletido na próxima exportação bem-sucedida e publicação.
 
 Depois desses comandos, o responsável `@devops` publica o build pelo fluxo do projeto e confere `/assets/data/atividade.json` no domínio. Executar apenas a sincronização local não altera produção. Se uma consulta falhar, a paginação mudar ou estiver incompleta, ou a data de um candidato autorizado não puder ser verificada, a gravação falha e o feed existente permanece intacto; o executor deve interromper o build/deploy e alertar o operador.
 

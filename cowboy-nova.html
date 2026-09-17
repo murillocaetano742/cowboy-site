@@ -2,6 +2,18 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
+  <script>
+    // Set the entry position before the browser can jump to an old kit link.
+    (function () {
+      if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+      if (window.location.hash === '#kit') {
+        window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+      }
+      window.addEventListener('pageshow', function () {
+        if (!window.location.hash) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      });
+    })();
+  </script>
   <script src="/assets/js/cowboy-google.js" defer></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>COWBOY Energia | Você não perdeu a potência. Ela está bloqueada.</title>

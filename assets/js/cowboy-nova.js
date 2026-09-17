@@ -289,7 +289,7 @@
     }
   }
 
-  // Activity notices: real orders and real customer relatos from assets/data/atividade.json. Nothing is generated.
+  // Activity notices: only real, authorized orders from assets/data/atividade.json.
   var toast = document.querySelector('[data-toast]');
   if (toast && window.fetch && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches && false)) {
     var toastTitle = toast.querySelector('[data-toast-title]');
@@ -298,7 +298,8 @@
     var toastClose = toast.querySelector('[data-toast-close]');
     var dismissed = false;
     var hideTimer = null;
-    if (toastClose) toastClose.addEventListener('click', function () { dismissed = true; toast.removeAttribute('data-show'); window.setTimeout(function () { toast.hidden = true; }, 350); });
+    var nextTimer = null;
+    if (toastClose) toastClose.addEventListener('click', function () { dismissed = true; window.clearTimeout(nextTimer); window.clearTimeout(hideTimer); toast.removeAttribute('data-show'); window.setTimeout(function () { toast.hidden = true; }, 350); });
     function relative(iso) {
       var t = new Date(iso).getTime();
       if (isNaN(t)) return '';
@@ -312,34 +313,39 @@
     }
     function pad2(n) { return (n < 10 ? '0' : '') + n; }
     function kitLabel(k) { k = Number(k); return k > 1 ? k + ' frascos' : '1 frasco'; }
+    function validOrder(p) {
+      if (!p || typeof p.nome !== 'string' || !p.nome.trim() || !Number.isInteger(p.kit) || p.kit < 1 || p.kit > 3 || typeof p.quando !== 'string') return false;
+      var iso = p.quando.match(/^(\d{4}-\d{2}-\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?(?:Z|[+-](?:0\d|1[0-3]):[0-5]\d|[+-]14:00)$/);
+      if (!iso) return false;
+      var day = new Date(iso[1] + 'T00:00:00Z');
+      var time = Date.parse(p.quando);
+      return Number.isFinite(time) && time <= Date.now() && Number.isFinite(day.getTime()) && day.toISOString().slice(0, 10) === iso[1];
+    }
     function show(item) {
-      if (dismissed || document.hidden) return;
-      if (vslVideo && !vslVideo.paused) return;
-      toastTitle.textContent = item.title; toastText.textContent = item.text; toastMeta.textContent = item.meta;
+      if (dismissed || document.hidden) return false;
+      if (vslVideo && !vslVideo.paused) return false;
+      toastTitle.textContent = item.title; toastText.textContent = item.text + ' ' + relative(item.quando); toastMeta.textContent = item.meta;
       toast.hidden = false;
-      window.requestAnimationFrame(function () { toast.setAttribute('data-show', ''); });
+      window.requestAnimationFrame(function () { if (!dismissed) toast.setAttribute('data-show', ''); });
       window.clearTimeout(hideTimer);
       hideTimer = window.setTimeout(function () { toast.removeAttribute('data-show'); window.setTimeout(function () { if (!toast.hasAttribute('data-show')) toast.hidden = true; }, 350); }, 6500);
+      return true;
     }
     fetch('assets/data/atividade.json', { headers: { Accept: 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
       if (!data) return;
       var queue = [];
-      (data.pedidos || []).slice().sort(function (a, b) { return new Date(b.quando) - new Date(a.quando); }).slice(0, 12).forEach(function (p) {
-        if (!p || !p.nome || !p.kit) return;
-        queue.push({ title: p.nome + (p.cidade ? ', de ' + p.cidade : ''), text: 'garantiu o kit de ' + kitLabel(p.kit) + (p.quando ? ' ' + relative(p.quando) : ''), meta: 'Pedido real · nome como o cliente autorizou' });
-      });
-      (data.relatos || []).forEach(function (r) {
-        if (!r || !r.nome || !r.texto) return;
-        queue.push({ title: 'Cliente ' + r.nome, text: r.texto, meta: 'Relato real · nomes alterados para preservar a privacidade' });
+      (Array.isArray(data.pedidos) ? data.pedidos : []).filter(validOrder).sort(function (a, b) { return new Date(b.quando) - new Date(a.quando); }).slice(0, 12).forEach(function (p) {
+        var city = typeof p.cidade === 'string' ? p.cidade.trim() : '';
+        queue.push({ title: p.nome.trim() + (city ? ', de ' + city : ''), text: 'garantiu o kit de ' + kitLabel(p.kit), quando: p.quando, meta: 'Pedido real · nome como o cliente autorizou' });
       });
       if (!queue.length) return;
-      var index = 0, shown = 0;
+      var index = 0;
       function next() {
-        if (dismissed || shown >= 6) return;
-        show(queue[index % queue.length]); index += 1; shown += 1;
-        window.setTimeout(next, 16000);
+        if (dismissed || index >= queue.length) return;
+        if (show(queue[index])) index += 1;
+        if (index < queue.length) nextTimer = window.setTimeout(next, 16000);
       }
-      window.setTimeout(next, 9000);
+      nextTimer = window.setTimeout(next, 9000);
     }).catch(function () {});
   }
 
