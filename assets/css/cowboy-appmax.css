@@ -1,0 +1,189 @@
+/* COM-036: scoped AppCheckout presentation; native payment behavior is unchanged. */
+@font-face {
+  font-family: 'Cowboy Checkout Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('https://cowboyenergiamasculina.com.br/assets/fonts/manrope-latin-wght-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cowboy Checkout Oswald';
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url('https://cowboyenergiamasculina.com.br/assets/fonts/oswald-latin-wght-normal.woff2') format('woff2');
+}
+
+body.cowboy-appmax {
+  --cowboy-black: #0a0a0a;
+  --cowboy-gold: #c9943a;
+  --cowboy-light-gold: #e8bf6a;
+  --cowboy-ink: #242424;
+  --cowboy-border: #d7d4ce;
+  margin: 0;
+  background: var(--cowboy-black);
+  /* AppCheckout's native .bg-light uses !important. Keep that class intact. */
+  background-color: var(--cowboy-black) !important;
+  color: #f0eae0;
+  font-family: 'Cowboy Checkout Manrope', 'Segoe UI', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.cowboy-appmax #cowboy-appmax-header {
+  padding: 24px 20px 22px;
+  border-bottom: 1px solid #44351d;
+}
+.cowboy-appmax .cowboy-appmax-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.cowboy-appmax .cowboy-appmax-brand {
+  margin: 0;
+  font: 500 30px/1.2 'Cowboy Checkout Oswald', Impact, sans-serif;
+  letter-spacing: .015em;
+  color: #f0eae0;
+}
+.cowboy-appmax .cowboy-appmax-brand strong { font-weight: 500; color: var(--cowboy-light-gold); }
+.cowboy-appmax .cowboy-appmax-secure { margin: 0; font-size: 14px; color: #ded4c1; }
+.cowboy-appmax > .container-fluid { width: 100%; max-width: 1120px; padding-right: 20px; padding-left: 20px; }
+
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4,
+.cowboy-appmax #form-container > .row > .col-md-6 > .card {
+  color: var(--cowboy-ink);
+  background: #fff;
+  border: 1px solid var(--cowboy-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 10%);
+}
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 { margin-top: 24px !important; margin-bottom: 24px !important; border-top: 3px solid var(--cowboy-gold); }
+.cowboy-appmax .card-header {
+  padding: 18px 22px;
+  color: var(--cowboy-ink);
+  background: #faf9f6;
+  border-bottom: 1px solid #e6e3de;
+  border-radius: 11px 11px 0 0;
+}
+.cowboy-appmax .card-header h4 {
+  margin: 0;
+  font: 500 23px/1.3 'Cowboy Checkout Oswald', 'Arial Narrow', sans-serif;
+  overflow-wrap: anywhere;
+}
+.cowboy-appmax .card-body { padding: 22px; }
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 > .card-body > .row {
+  align-items: center;
+  gap: 20px;
+  margin: 0;
+}
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 > .card-body > .row > .col-md-4 {
+  flex: 0 0 128px;
+  max-width: 128px;
+  padding: 0;
+}
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 > .card-body > .row > .col-md-8 {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  overflow-wrap: anywhere;
+}
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 .card-body > .row > .col-md-4 > img {
+  width: 128px;
+  height: 128px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 p { margin-bottom: 8px; }
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 strong { font-weight: 800; }
+.cowboy-appmax > .container-fluid > .card.mt-4.mb-4 .no-wrap { white-space: nowrap; }
+.cowboy-appmax #form-container > .row { margin-right: -10px; margin-left: -10px; }
+.cowboy-appmax #form-container > .row > .col-12 { min-width: 0; padding-right: 10px; padding-left: 10px; }
+.cowboy-appmax #form-container > .row > .col-md-6 { flex: 0 0 100%; max-width: 100%; margin-bottom: 20px; }
+.cowboy-appmax #form-container label { color: #303030; font-size: 16px; font-weight: 700; }
+.cowboy-appmax #form-container .form-group { margin-bottom: 18px; }
+.cowboy-appmax #form-container .form-control {
+  min-height: 48px;
+  height: auto;
+  padding: 10px 12px;
+  border: 1px solid #94918b;
+  border-radius: 6px;
+  color: var(--cowboy-ink);
+  background-color: #fff;
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.5;
+}
+.cowboy-appmax #form-container .form-control::placeholder { color: #686868; opacity: 1; }
+.cowboy-appmax #form-container .form-control:disabled,
+.cowboy-appmax #form-container .form-control[readonly] { color: #5b5b5b; background-color: #f0efec; }
+.cowboy-appmax #form-container .form-control.is-invalid { border-color: #b52d38; }
+.cowboy-appmax #form-container .invalid-feedback { color: #a51f2a; font-size: 14px; }
+.cowboy-appmax #form-container .text-muted,
+.cowboy-appmax #form-container .text-black-50 { color: #606060 !important; }
+.cowboy-appmax #form-container > .row > .col-md-6 > .text-black-50 { color: #ded4c1 !important; }
+.cowboy-appmax #form-container .form-text,
+.cowboy-appmax #form-container h6 > small { font-size: 14px; line-height: 1.5; }
+.cowboy-appmax #form-container a:not(.btn):not(.nav-link) { color: #705017; text-decoration: underline; text-underline-offset: 3px; }
+.cowboy-appmax #payment-tabs { flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--cowboy-border); }
+.cowboy-appmax #payment-tabs .nav-item { flex: 1 1 auto; }
+.cowboy-appmax #payment-tabs .nav-link {
+  min-height: 48px;
+  padding: 11px 12px;
+  color: #454545;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 6px 6px 0 0;
+}
+.cowboy-appmax #payment-tabs .nav-link.active { color: #4b3610 !important; background-color: #fff5dd; border-color: #e1cca0 #e1cca0 var(--cowboy-gold); }
+.cowboy-appmax #payment-tabs .nav-link:focus,
+.cowboy-appmax #payment-tabs .nav-link:hover { color: #4b3610 !important; }
+.cowboy-appmax #payment-contents { padding-top: 20px; }
+.cowboy-appmax #form-container input.submit-button.btn.btn-success,
+.cowboy-appmax #form-container button#getQrCode {
+  width: 100%;
+  min-height: 54px;
+  padding: 13px 16px;
+  color: #171410;
+  background: var(--cowboy-gold);
+  border: 1px solid #ad792b;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.4;
+  white-space: normal;
+}
+.cowboy-appmax #form-container input.submit-button.btn.btn-success:hover:not(:disabled),
+.cowboy-appmax #form-container button#getQrCode:hover:not(:disabled) { background: var(--cowboy-light-gold); }
+.cowboy-appmax #form-container .card-footer { padding: 18px 22px; color: var(--cowboy-ink); border-top-color: #e6e3de; }
+.cowboy-appmax :focus-visible { outline: 3px solid #9b691b; outline-offset: 3px; }
+.cowboy-appmax #form-container .form-control:focus { border-color: #9b691b; box-shadow: 0 0 0 3px rgb(201 148 58 / 20%); }
+.cowboy-appmax #cowboy-appmax-support { max-width: 1080px; margin: 4px auto 28px; padding: 0 20px; text-align: center; }
+.cowboy-appmax #cowboy-appmax-support p { margin: 0 0 4px; color: #ded4c1; }
+.cowboy-appmax #cowboy-appmax-support a { display: inline-block; padding: 8px 0; color: var(--cowboy-light-gold); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+.cowboy-appmax > .container-fluid > .footer { padding: 20px; margin-bottom: 24px; color: #454545; background: #fff; border-radius: 10px; }
+
+@media (min-width: 1000px) {
+  .cowboy-appmax #form-container > .row > .col-md-6 { flex-basis: 50%; max-width: 50%; }
+}
+@media (max-width: 599px) {
+  .cowboy-appmax #cowboy-appmax-header { padding: 20px 16px; }
+  .cowboy-appmax .cowboy-appmax-header-inner { flex-wrap: wrap; gap: 6px 16px; }
+  .cowboy-appmax .cowboy-appmax-brand { font-size: 27px; }
+  .cowboy-appmax > .container-fluid { padding-right: 12px; padding-left: 12px; }
+  .cowboy-appmax .card-header { padding: 16px; }
+  .cowboy-appmax .card-header h4 { font-size: 22px; }
+  .cowboy-appmax .card-body { padding: 16px; }
+  .cowboy-appmax > .container-fluid > .card.mt-4.mb-4 > .card-body > .row { gap: 14px; }
+  .cowboy-appmax > .container-fluid > .card.mt-4.mb-4 > .card-body > .row > .col-md-4 { flex-basis: 96px; max-width: 96px; }
+  .cowboy-appmax > .container-fluid > .card.mt-4.mb-4 .card-body > .row > .col-md-4 > img { width: 96px; height: 96px; }
+  .cowboy-appmax #payment-tabs .nav-link { padding: 10px 8px; }
+  .cowboy-appmax #form-container .card-footer { padding: 16px; }
+  .cowboy-appmax #cowboy-appmax-support { padding-right: 16px; padding-left: 16px; }
+}
