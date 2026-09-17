@@ -2,6 +2,7 @@
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const { spawnSync } = require('node:child_process');
 const test = require('node:test');
 
 const commerce = require('#commerce');
@@ -15,6 +16,31 @@ const configuredEnvironment = Object.freeze({
   MELHOR_ENVIO_TOKEN: 'server-only-token',
   MELHOR_ENVIO_USER_AGENT: 'Cowboy Energia (suporte@example.com)',
 });
+
+// Synthetic routing fixture only; these URLs are never fetched.
+const appmaxEnvironment = Object.freeze({
+  CHECKOUT_PROVIDER: 'appmax',
+  APPMAX_CHECKOUT_ALLOWED_HOSTS: 'checkout.example.test',
+  APPMAX_CHECKOUT_1_URL: 'https://checkout.example.test/kit-1',
+  APPMAX_CHECKOUT_2_URL: 'https://checkout.example.test/kit-2?existing=value',
+  APPMAX_CHECKOUT_3_URL: 'https://checkout.example.test/kit-3',
+});
+
+function withCheckoutEnvironment(overrides, run) {
+  const keys = ['CHECKOUT_PROVIDER', 'APPMAX_CHECKOUT_ALLOWED_HOSTS', 'CARTPANDA_CHECKOUT_ALLOWED_HOSTS'];
+  for (const quantity of [1, 2, 3]) keys.push(`APPMAX_CHECKOUT_${quantity}_URL`, `CARTPANDA_CHECKOUT_${quantity}_URL`);
+  const retained = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  try {
+    for (const key of keys) delete process.env[key];
+    Object.assign(process.env, overrides);
+    return run();
+  } finally {
+    for (const [key, value] of Object.entries(retained)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
 
 function mockResponse() {
   const result = { headers: {}, statusCode: null, body: null, redirectUrl: null };
@@ -106,67 +132,125 @@ test('falha e timeout do fornecedor não geram valor de frete inventado', async 
 });
 
 test('checkout preserva somente atribuição permitida e não tem URL inventada', () => {
-  const previous = process.env.CARTPANDA_CHECKOUT_2_URL;
-  const previousHosts = process.env.CARTPANDA_CHECKOUT_ALLOWED_HOSTS;
-  process.env.CARTPANDA_CHECKOUT_2_URL = 'https://checkout.exemplo.test/kit-2?existing=value';
-  process.env.CARTPANDA_CHECKOUT_ALLOWED_HOSTS = 'checkout.exemplo.test';
-  const response = mockResponse();
-  checkoutHandler({ method: 'GET', query: { quantity: '2' }, url: '/api/checkout?quantity=2&utm_source=meta&utm_content=C02&email=nao-permitido&diagnostico=nao' }, response);
-  const redirect = new URL(response.result.redirectUrl);
-  assert.equal(response.result.statusCode, 302);
-  assert.equal(redirect.searchParams.get('utm_source'), 'meta');
-  assert.equal(redirect.searchParams.get('utm_content'), 'C02');
-  assert.equal(redirect.searchParams.get('email'), null);
-  assert.equal(redirect.searchParams.get('diagnostico'), null);
-  if (previous === undefined) delete process.env.CARTPANDA_CHECKOUT_2_URL;
-  else process.env.CARTPANDA_CHECKOUT_2_URL = previous;
-  if (previousHosts === undefined) delete process.env.CARTPANDA_CHECKOUT_ALLOWED_HOSTS;
-  else process.env.CARTPANDA_CHECKOUT_ALLOWED_HOSTS = previousHosts;
+  withCheckoutEnvironment(appmaxEnvironment, () => {
+    const response = mockResponse();
+    checkoutHandler({ method: 'GET', query: { quantity: '2' }, url: '/api/checkout?quantity=2&utm_source=meta&utm_content=C02&email=nao-permitido&diagnostico=nao' }, response);
+    const redirect = new URL(response.result.redirectUrl);
+    assert.equal(response.result.statusCode, 302);
+    assert.equal(redirect.origin, 'https://checkout.example.test');
+    assert.equal(redirect.searchParams.get('existing'), 'value');
+    assert.equal(redirect.searchParams.get('utm_source'), 'meta');
+    assert.equal(redirect.searchParams.get('utm_content'), 'C02');
+    assert.equal(redirect.searchParams.get('email'), null);
+    assert.equal(redirect.searchParams.get('diagnostico'), null);
+  });
 
-  // Indisponibilidade simulada: override inválido (http) para o kit 3 anula o link público.
-  const previous3 = process.env.CARTPANDA_CHECKOUT_3_URL;
-  process.env.CARTPANDA_CHECKOUT_3_URL = 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1';
-  const unavailable = mockResponse();
-  checkoutHandler({ method: 'GET', query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailable);
-  assert.equal(unavailable.result.statusCode, 503);
-  assert.equal(unavailable.result.body.error, 'checkout_unavailable');
-  if (previous3 === undefined) delete process.env.CARTPANDA_CHECKOUT_3_URL;
-  else process.env.CARTPANDA_CHECKOUT_3_URL = previous3;
+  withCheckoutEnvironment({ ...appmaxEnvironment, APPMAX_CHECKOUT_3_URL: 'http://checkout.example.test/kit-3' }, () => {
+    const unavailable = mockResponse();
+    checkoutHandler({ method: 'GET', query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailable);
+    assert.equal(unavailable.result.statusCode, 503);
+    assert.equal(unavailable.result.body.error, 'checkout_unavailable');
+  });
 });
 
-test('checkout exige HTTPS e host Cartpanda ou domínio customizado explicitamente permitido', () => {
-  assert.equal(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'http://loja.mycartpanda.com/checkout/1' }), null);
-  assert.equal(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'https://falsa-mycartpanda.com/checkout/1' }), null);
-  assert.ok(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'https://loja.mycartpanda.com/checkout/1' }));
-  assert.equal(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'https://checkout.sualoja.com/1' }), null);
-  assert.ok(commerce.checkoutUrlFor(1, {
-    CARTPANDA_CHECKOUT_1_URL: 'https://checkout.sualoja.com/1',
-    CARTPANDA_CHECKOUT_ALLOWED_HOSTS: 'checkout.sualoja.com',
-  }));
+test('Appmax exige HTTPS sem credenciais e hostname permitido por igualdade exata', () => {
+  for (const quantity of [1, 2, 3]) {
+    assert.equal(commerce.checkoutUrlFor(quantity, appmaxEnvironment).toString(), appmaxEnvironment[`APPMAX_CHECKOUT_${quantity}_URL`]);
+  }
+  for (const candidate of [
+    'http://checkout.example.test/kit-1',
+    'https://checkout.example.test.evil.test/kit-1',
+    'https://other.checkout.example.test/kit-1',
+    'https://checkout.example.test@evil.test/kit-1',
+    'https://user:password@checkout.example.test/kit-1',
+    'https://user@checkout.example.test/kit-1',
+    'https://cowboyenergia.carrinho.app.evil.test/kit-1',
+    'https://another.carrinho.app/kit-1',
+    'javascript:alert(1)',
+    'not-a-url',
+  ]) assert.equal(commerce.checkoutUrlFor(1, { ...appmaxEnvironment, APPMAX_CHECKOUT_1_URL: candidate }), null, candidate);
+  assert.equal(commerce.checkoutUrlFor(1, { APPMAX_CHECKOUT_1_URL: appmaxEnvironment.APPMAX_CHECKOUT_1_URL }), null);
+  assert.equal(commerce.checkoutUrlFor(1, { ...appmaxEnvironment, APPMAX_CHECKOUT_ALLOWED_HOSTS: '*.example.test' }), null);
+  assert.equal(commerce.checkoutUrlFor(1, { ...appmaxEnvironment, APPMAX_CHECKOUT_ALLOWED_HOSTS: 'https://checkout.example.test' }), null);
+  assert.ok(commerce.checkoutUrlFor(1, { ...appmaxEnvironment, APPMAX_CHECKOUT_ALLOWED_HOSTS: 'another.example.test, CHECKOUT.EXAMPLE.TEST ' }));
+  assert.equal(commerce.checkoutUrlFor(4, appmaxEnvironment), null);
 });
 
-test('checkout usa somente os links públicos Cartpanda confirmados quando não há override', () => {
+test('Appmax é padrão e usa os três links confirmados sem fallback aos links legados Cartpanda', () => {
+  assert.equal(commerce.DEFAULT_CHECKOUT_PROVIDER, 'appmax');
+  assert.equal(commerce.checkoutProvider({}), 'appmax');
+  const expected = {
+    1: 'https://cowboyenergia.carrinho.app/one-checkout/ocmdf/38251476',
+    2: 'https://cowboyenergia.carrinho.app/one-checkout/ocmdf/38251410',
+    3: 'https://cowboyenergia.carrinho.app/one-checkout/ocmdf/38251519',
+  };
+  assert.deepEqual(commerce.APPMAX_PUBLIC_CHECKOUT_URLS, expected);
+  for (const quantity of [1, 2, 3]) {
+    assert.equal(commerce.checkoutUrlFor(quantity, {}).toString(), expected[quantity]);
+    assert.equal(commerce.checkoutUrlFor(quantity, { CHECKOUT_PROVIDER: 'appmax', [`CARTPANDA_CHECKOUT_${quantity}_URL`]: commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS[quantity] }).toString(), expected[quantity]);
+    assert.equal(commerce.checkoutUrlFor(quantity, { [`APPMAX_CHECKOUT_${quantity}_URL`]: 'https://unlisted.example.test/unavailable' }), null);
+  }
+  for (const provider of ['', 'invalid', 'APPMAX', 'cartpanda ']) {
+    assert.equal(commerce.checkoutProvider({ CHECKOUT_PROVIDER: provider }), null);
+    assert.equal(commerce.checkoutUrlFor(1, { ...appmaxEnvironment, CHECKOUT_PROVIDER: provider }), null);
+  }
+  withCheckoutEnvironment(Object.fromEntries([1, 2, 3].map((quantity) => [`APPMAX_CHECKOUT_${quantity}_URL`, 'https://unlisted.example.test/unavailable'])), () => {
+    const response = mockResponse();
+    checkoutHandler({ method: 'GET', query: { quantity: '1' }, url: '/api/checkout?quantity=1' }, response);
+    assert.equal(response.result.statusCode, 503);
+    assert.deepEqual(response.result.body, { error: 'checkout_unavailable' });
+    const config = mockResponse();
+    configHandler({ method: 'GET' }, config);
+    assert.ok(config.result.body.variants.every((variant) => variant.checkoutAvailable === false));
+  });
+});
+
+test('Cartpanda só usa os links históricos se o provedor for explicitamente selecionado', () => {
+  const legacy = { CHECKOUT_PROVIDER: 'cartpanda' };
   assert.deepEqual(Object.keys(commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS), ['1', '2', '3']);
-  assert.equal(commerce.checkoutUrlFor(3, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/212751381:1');
-  assert.equal(commerce.checkoutUrlFor(1, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742450:1');
-  assert.equal(commerce.checkoutUrlFor(2, {}).toString(), 'https://cowboy-energia.mycartpanda.com/checkout/211742746:1');
-  assert.equal(commerce.checkoutUrlFor(4, {}), null);
-  assert.equal(commerce.checkoutUrlFor(3, { CARTPANDA_CHECKOUT_3_URL: 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1' }), null);
-  assert.equal(commerce.checkoutUrlFor(1, { CARTPANDA_CHECKOUT_1_URL: 'https://example.com/checkout/1' }), null);
+  for (const quantity of [1, 2, 3]) assert.equal(commerce.checkoutUrlFor(quantity, legacy).toString(), commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS[quantity]);
+  assert.equal(commerce.checkoutUrlFor(4, legacy), null);
+  for (const candidate of ['http://loja.mycartpanda.com/checkout/1', 'https://falsa-mycartpanda.com/checkout/1', 'https://user:password@loja.mycartpanda.com/checkout/1', 'https://checkout.example.test/1']) {
+    assert.equal(commerce.checkoutUrlFor(1, { ...legacy, CARTPANDA_CHECKOUT_1_URL: candidate }), null);
+  }
+  assert.ok(commerce.checkoutUrlFor(1, { ...legacy, CARTPANDA_CHECKOUT_1_URL: 'https://checkout.example.test/1', CARTPANDA_CHECKOUT_ALLOWED_HOSTS: 'checkout.example.test' }));
+  assert.equal(commerce.checkoutUrlFor(1, { ...legacy, APPMAX_CHECKOUT_1_URL: appmaxEnvironment.APPMAX_CHECKOUT_1_URL }).toString(), commerce.CARTPANDA_PUBLIC_CHECKOUT_URLS[1]);
 });
 
-test('pagina aprovada carrega o encaminhamento UTMify para Cartpanda sem segredo embutido', () => {
+test('check commerce aceita frete fixo Appmax sem Melhor Envio e mantém legado e provedor inválido fechados', () => {
+  const environment = { ...process.env, ...appmaxEnvironment, MELHOR_ENVIO_ENV: '', MELHOR_ENVIO_TOKEN: '', MELHOR_ENVIO_USER_AGENT: '' };
+  const execute = (overrides = {}) => {
+    const result = spawnSync(process.execPath, ['scripts/check-commerce-config.js'], { env: { ...environment, ...overrides }, encoding: 'utf8' });
+    assert.ifError(result.error);
+    return { status: result.status, report: JSON.parse(result.stdout) };
+  };
+  const appmax = execute();
+  assert.equal(appmax.status, 0);
+  assert.equal(appmax.report.provider, 'appmax');
+  assert.ok(appmax.report.checkout.every((kit) => kit.configured));
+  assert.deepEqual(appmax.report.shipping, { mode: 'checkout_fixed', configured: true, missing: [], currency: 'BRL', pricesCents: { 1: 2675, 2: 0, 3: 0 } });
+  const legacy = execute({ CHECKOUT_PROVIDER: 'cartpanda' });
+  assert.equal(legacy.status, 1);
+  assert.equal(legacy.report.shipping.mode, 'melhor_envio_quote');
+  assert.ok(legacy.report.shipping.missing.includes('MELHOR_ENVIO_TOKEN'));
+  const invalid = execute({ CHECKOUT_PROVIDER: 'invalid' });
+  assert.equal(invalid.status, 1);
+  assert.equal(invalid.report.provider, null);
+  assert.equal(invalid.report.shipping.configured, false);
+  assert.ok(invalid.report.checkout.every((kit) => kit.configured === false));
+});
+
+test('pagina aprovada carrega o encaminhamento UTMify sem segredo embutido', () => {
   const html = fs.readFileSync('cowboy-nova.html', 'utf8');
   assert.match(html, /src="https:\/\/cdn\.utmify\.com\.br\/scripts\/utms\/latest\.js"/);
   for (const attribute of [
     'data-utmify-prevent-xcod-sck',
     'data-utmify-prevent-subids',
-    'data-utmify-ignore-iframe',
-    'data-utmify-is-cartpanda',
     'async',
     'defer',
   ]) assert.match(html, new RegExp(`\\b${attribute}\\b`));
-  assert.doesNotMatch(html, /CARTPANDA_API_TOKEN|MELHOR_ENVIO_TOKEN/);
+  assert.doesNotMatch(html, /cartpanda|data-utmify-ignore-iframe/i);
+  assert.doesNotMatch(html, /APPMAX_CLIENT_SECRET|APPMAX_API_TOKEN|CARTPANDA_API_TOKEN|MELHOR_ENVIO_TOKEN/);
 });
 
 test('configuração pública expõe oferta inicial e disponibilidade sem segredos', () => {
@@ -175,26 +259,23 @@ test('configuração pública expõe oferta inicial e disponibilidade sem segred
     retained[key] = process.env[key];
     process.env[key] = value;
   }
-  const checkoutRetained = process.env.CARTPANDA_CHECKOUT_2_URL;
-  process.env.CARTPANDA_CHECKOUT_2_URL = 'https://loja.mycartpanda.com/checkout/kit-2';
-  const response = mockResponse();
-  configHandler({ method: 'GET' }, response);
-  assert.equal(response.result.statusCode, 200);
-  assert.deepEqual(response.result.body.variants.map((variant) => variant.quantity), [1, 2, 3]);
-  assert.equal(response.result.body.freeShippingFromQuantity, 2);
-  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 1).freeShipping, false);
-  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).freeShipping, true);
-  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 2).checkoutAvailable, true);
-  // Kit de 3 criado no Cartpanda em 08/09/2026 (produto 29892228, variante 212751381).
-  assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).checkoutAvailable, true);
-  assert.equal(response.result.body.shippingAvailable, true);
-  assert.equal(JSON.stringify(response.result.body).includes('server-only-token'), false);
+  withCheckoutEnvironment(appmaxEnvironment, () => {
+    const response = mockResponse();
+    configHandler({ method: 'GET' }, response);
+    assert.equal(response.result.statusCode, 200);
+    assert.deepEqual(response.result.body.variants.map((variant) => variant.quantity), [1, 2, 3]);
+    assert.equal(response.result.body.freeShippingFromQuantity, 2);
+    assert.equal(response.result.body.variants.find((variant) => variant.quantity === 1).freeShipping, false);
+    assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).freeShipping, true);
+    assert.equal(response.result.body.variants.find((variant) => variant.quantity === 2).checkoutAvailable, true);
+    assert.equal(response.result.body.variants.find((variant) => variant.quantity === 3).checkoutAvailable, true);
+    assert.equal(response.result.body.shippingAvailable, true);
+    assert.equal(JSON.stringify(response.result.body).includes('server-only-token'), false);
+  });
   for (const [key, previous] of Object.entries(retained)) {
     if (previous === undefined) delete process.env[key];
     else process.env[key] = previous;
   }
-  if (checkoutRetained === undefined) delete process.env.CARTPANDA_CHECKOUT_2_URL;
-  else process.env.CARTPANDA_CHECKOUT_2_URL = checkoutRetained;
 });
 
 test('pacote de 1 a 3 frascos mantém peso e dimensões totais e muda apenas seguro', () => {
@@ -277,21 +358,16 @@ test('checkout apresenta erro amigável em navegação HTML e mantém JSON para 
   assert.match(invalidHtml.result.body, /contato@cowboyenergiamasculina\.com\.br/);
   assert.doesNotMatch(invalidHtml.result.body, /alert\(1\)/);
 
-  const previous3 = process.env.CARTPANDA_CHECKOUT_3_URL;
-  process.env.CARTPANDA_CHECKOUT_3_URL = 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1';
-  const unavailableHtml = mockResponse();
-  checkoutHandler({ method: 'GET', headers: { accept: 'text/html' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailableHtml);
-  if (previous3 === undefined) delete process.env.CARTPANDA_CHECKOUT_3_URL;
-  else process.env.CARTPANDA_CHECKOUT_3_URL = previous3;
-  assert.equal(unavailableHtml.result.statusCode, 503);
-  assert.match(unavailableHtml.result.body, /Pagamento indisponível agora/);
-  assert.doesNotMatch(unavailableHtml.result.body, /configurado/);
+  withCheckoutEnvironment({ ...appmaxEnvironment, APPMAX_CHECKOUT_3_URL: 'http://checkout.example.test/kit-3' }, () => {
+    const unavailableHtml = mockResponse();
+    checkoutHandler({ method: 'GET', headers: { accept: 'text/html' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, unavailableHtml);
+    assert.equal(unavailableHtml.result.statusCode, 503);
+    assert.match(unavailableHtml.result.body, /Pagamento indisponível agora/);
+    assert.doesNotMatch(unavailableHtml.result.body, /configurado/);
 
-  process.env.CARTPANDA_CHECKOUT_3_URL = 'http://cowboy-energia.mycartpanda.com/checkout/212751381:1';
-  const apiError = mockResponse();
-  checkoutHandler({ method: 'GET', headers: { accept: 'application/json' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, apiError);
-  if (previous3 === undefined) delete process.env.CARTPANDA_CHECKOUT_3_URL;
-  else process.env.CARTPANDA_CHECKOUT_3_URL = previous3;
-  assert.equal(apiError.result.statusCode, 503);
-  assert.deepEqual(apiError.result.body, { error: 'checkout_unavailable' });
+    const apiError = mockResponse();
+    checkoutHandler({ method: 'GET', headers: { accept: 'application/json' }, query: { quantity: '3' }, url: '/api/checkout?quantity=3' }, apiError);
+    assert.equal(apiError.result.statusCode, 503);
+    assert.deepEqual(apiError.result.body, { error: 'checkout_unavailable' });
+  });
 });

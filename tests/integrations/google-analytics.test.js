@@ -25,7 +25,7 @@ test('GA4 mantém a fila, configura a propriedade uma vez e não simula page_vie
   assert.equal(page.window.dataLayer[0].event, 'existing-event');
   assert.deepEqual(Array.from(page.window.dataLayer[1]).slice(0, 2), ['set', 'linker']);
   const linker = page.window.dataLayer[1][2];
-  assert.deepEqual(Array.from(linker.domains), ['cowboyenergiamasculina.com.br', 'www.cowboyenergiamasculina.com.br', 'cowboy-energia.mycartpanda.com']);
+  assert.deepEqual(Array.from(linker.domains), ['cowboyenergiamasculina.com.br', 'www.cowboyenergiamasculina.com.br', 'cowboyenergia.carrinho.app']);
   assert.equal(linker.decorate_forms, true);
   assert.equal(linker.accept_incoming, true);
   assert.equal(page.window.dataLayer[2][0], 'js');

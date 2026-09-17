@@ -2,13 +2,28 @@
 
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { safeAttribution, CARTPANDA_PUBLIC_CHECKOUT_URLS } = require('#commerce');
+const { safeAttribution } = require('#commerce');
 const checkoutHandler = require('#api/checkout');
 
 // Synthetic routing fixture only; never sent to an analytics endpoint.
 const LINKER = '1*validation*_ga*' + 'A'.repeat(300) + '*_ga_VYR2542XCN*fixture';
 
-test('redirecionamento dos quatro kits preserva linker longo e UTMs sem liberar campos arbitrários', () => {
+test('redirecionamento dos três kits Appmax preserva linker longo e UTMs sem liberar campos arbitrários', (t) => {
+  const fixture = {
+    CHECKOUT_PROVIDER: 'appmax',
+    APPMAX_CHECKOUT_ALLOWED_HOSTS: 'checkout.example.test',
+    APPMAX_CHECKOUT_1_URL: 'https://checkout.example.test/kit-1',
+    APPMAX_CHECKOUT_2_URL: 'https://checkout.example.test/kit-2',
+    APPMAX_CHECKOUT_3_URL: 'https://checkout.example.test/kit-3',
+  };
+  const retained = Object.fromEntries(Object.keys(fixture).map((key) => [key, process.env[key]]));
+  t.after(() => {
+    for (const [key, value] of Object.entries(retained)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+  Object.assign(process.env, fixture);
   for (const quantity of [1, 2, 3]) {
     const params = new URLSearchParams({ quantity: String(quantity), _gl: LINKER, utm_source: 'organic', cid: 'validation', email: 'excluded@example.com', redirect: 'https://example.com' });
     const result = {};
@@ -18,7 +33,7 @@ test('redirecionamento dos quatro kits preserva linker longo e UTMs sem liberar 
     };
     checkoutHandler({ method: 'GET', query: { quantity: String(quantity) }, url: '/api/checkout?' + params }, response);
     assert.equal(result.status, 302);
-    assert.equal(result.url.origin + result.url.pathname, CARTPANDA_PUBLIC_CHECKOUT_URLS[quantity]);
+    assert.equal(result.url.origin + result.url.pathname, fixture[`APPMAX_CHECKOUT_${quantity}_URL`]);
     assert.equal(result.url.searchParams.get('_gl'), LINKER);
     assert.equal(result.url.searchParams.get('utm_source'), 'organic');
     assert.equal(result.url.searchParams.get('cid'), 'validation');

@@ -13,7 +13,7 @@
   // checkout redirect, so Google's linker can decorate it on submission.
   // Never cache or manufacture _gl: Google generates this short-lived value.
   window.gtag('set', 'linker', {
-    domains: ['cowboyenergiamasculina.com.br', 'www.cowboyenergiamasculina.com.br', 'cowboy-energia.mycartpanda.com'],
+    domains: ['cowboyenergiamasculina.com.br', 'www.cowboyenergiamasculina.com.br', 'cowboyenergia.carrinho.app'],
     decorate_forms: true,
     accept_incoming: true
   });
