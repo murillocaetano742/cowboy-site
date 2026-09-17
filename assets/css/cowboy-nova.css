@@ -653,3 +653,16 @@ html, body { overflow-x: hidden; overflow-x: clip; }
 .page { overflow-x: hidden; overflow-x: clip; }
 img, video, svg { max-width: 100%; }
 .vsl-note { justify-content: center; text-align: center; }
+
+/* 17/09: contador do lote acima dos kits (desconta pedidos reais do feed) */
+.stock { margin: 1.2rem 0 0; padding: .95rem 1.1rem; border-radius: var(--radius); border: 1px solid var(--line-strong); background: linear-gradient(180deg, #171512, #0f0f0f); display: grid; gap: .55rem; }
+.stock-head { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+.stock-label { display: inline-flex; align-items: center; gap: .4rem; font: 600 .72rem/1 var(--head); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-2); }
+.stock-label .icon { width: 1rem; height: 1rem; }
+.stock-count { font: 700 1.35rem/1 var(--head); letter-spacing: .02em; text-transform: uppercase; color: #fff; font-variant-numeric: tabular-nums; }
+.stock-count [data-stock-left] { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 1.7rem; }
+.stock-bar { height: .55rem; border-radius: 999px; background: rgba(255, 255, 255, .08); overflow: hidden; border: 1px solid var(--line); }
+.stock-fill { display: block; height: 100%; border-radius: 999px; background: var(--grad); box-shadow: 0 0 14px rgba(201, 148, 58, .45); transition: width .8s var(--ease); }
+.stock-note { font-size: .86rem; color: var(--muted); }
+.stock-note b { color: #fff; }
+.stock[data-sold-out] .stock-note::after { content: ' Lote esgotado: o próximo entra com o preço cheio.'; color: #ffb08a; }
