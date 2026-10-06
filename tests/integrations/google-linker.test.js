@@ -25,7 +25,8 @@ test('redirecionamento dos três kits Appmax preserva linker longo e UTMs sem li
   });
   Object.assign(process.env, fixture);
   for (const quantity of [1, 2, 3]) {
-    const params = new URLSearchParams({ quantity: String(quantity), _gl: LINKER, utm_source: 'organic', cid: 'validation', email: 'excluded@example.com', redirect: 'https://example.com' });
+    const clickIds = { utm_id: 'campaign-37', gbraid: 'gbraid-fixture', wbraid: 'wbraid-fixture', dclid: 'dclid-fixture' };
+    const params = new URLSearchParams({ quantity: String(quantity), _gl: LINKER, utm_source: 'organic', cid: 'validation', ...clickIds, email: 'excluded@example.com', health_answer: 'excluded', redirect: 'https://example.com' });
     const result = {};
     const response = {
       setHeader(name, value) { result[name] = value; },
@@ -37,6 +38,8 @@ test('redirecionamento dos três kits Appmax preserva linker longo e UTMs sem li
     assert.equal(result.url.searchParams.get('_gl'), LINKER);
     assert.equal(result.url.searchParams.get('utm_source'), 'organic');
     assert.equal(result.url.searchParams.get('cid'), 'validation');
+    for (const [name, value] of Object.entries(clickIds)) assert.equal(result.url.searchParams.get(name), value);
+    assert.equal(result.url.searchParams.has('health_answer'), false);
     assert.equal(result.url.searchParams.has('email'), false);
     assert.equal(result.url.searchParams.has('redirect'), false);
     assert.equal(result['Cache-Control'], 'no-store, max-age=0');

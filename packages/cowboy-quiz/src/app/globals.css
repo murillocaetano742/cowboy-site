@@ -1,0 +1,9 @@
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+.ruler-arrow-left { animation: ruler-left 1.5s ease-in-out infinite; }
+.ruler-arrow-right { animation: ruler-right 1.5s ease-in-out infinite; }
+@keyframes ruler-left { 50% { transform: translateX(-6px); } }
+@keyframes ruler-right { 50% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .ruler-arrow-left, .ruler-arrow-right { animation: none; }
+}

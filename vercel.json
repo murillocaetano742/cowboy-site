@@ -2,6 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "buildCommand": "node scripts/build-site.js",
+  "installCommand": "npm ci && npm --prefix packages/cowboy-quiz ci",
   "outputDirectory": "dist",
   "functions": {
     "api/*.js": {
@@ -11,6 +12,7 @@
   },
   "cleanUrls": true,
   "redirects": [
+    { "source": "/quiz", "destination": "/quiz/v1-direto/", "permanent": false },
     { "source": "/loja", "destination": "/", "permanent": true },
     { "source": "/loja.html", "destination": "/", "permanent": true }
   ],

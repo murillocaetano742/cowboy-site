@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
+const { buildQuiz, quizPublicFiles, QUIZ_OUTPUT } = require(path.join(ROOT, 'scripts', 'build-quiz.js'));
 const OUTPUT = path.join(ROOT, 'dist');
 // 16/09/2026: a página VSL (cowboy-nova.html) é a raiz do site. As versões 1.1/1.2 ficam no repositório, fora do build.
 const PAGES = ['cowboy-nova.html', 'privacidade.html', 'termos.html', 'robots.txt', 'sitemap.xml'];
@@ -73,6 +74,7 @@ const ASSETS = [
 
 // Build an explicit allowlist. A new repository file is never public by default.
 function buildSite() {
+  const quizFiles = quizPublicFiles();
   if (path.dirname(OUTPUT) !== ROOT || path.basename(OUTPUT) !== 'dist') {
     throw new Error('Unsafe build output path');
   }
@@ -95,8 +97,16 @@ function buildSite() {
   for (const { source, destination } of OUTPUT_ALIASES) {
     fs.copyFileSync(path.join(ROOT, source), path.join(OUTPUT, destination));
   }
-  console.log(`Public build: ${PAGES.length + ASSETS.length + OUTPUT_ALIASES.length} files in dist/`);
+  for (const relative of quizFiles) {
+    const destination = path.join(OUTPUT, relative);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.copyFileSync(path.join(QUIZ_OUTPUT, relative), destination);
+  }
+  console.log(`Public build: ${PAGES.length + ASSETS.length + OUTPUT_ALIASES.length + quizFiles.length} files in dist/ (quiz included; VSL homepage preserved)`);
 }
 
-if (require.main === module) buildSite();
+if (require.main === module) {
+  buildQuiz();
+  buildSite();
+}
 module.exports = { buildSite, ROOT, OUTPUT, PAGES, ASSETS, OUTPUT_ALIASES };

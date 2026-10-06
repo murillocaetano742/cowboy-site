@@ -6,6 +6,7 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const { buildSite, OUTPUT, PAGES, ASSETS, OUTPUT_ALIASES } = require(path.join(ROOT, 'scripts', 'build-site.js'));
+const { quizPublicFiles } = require(path.join(ROOT, 'scripts', 'build-quiz.js'));
 
 buildSite();
 function listFiles(directory) {
@@ -15,13 +16,18 @@ function listFiles(directory) {
     return entry.isDirectory() ? listFiles(absolute) : [path.relative(OUTPUT, absolute).replaceAll(path.sep, '/')];
   });
 }
-const expected = [...PAGES, ...ASSETS, ...OUTPUT_ALIASES.map(({ destination }) => destination)].sort();
+const expected = [...PAGES, ...ASSETS, ...OUTPUT_ALIASES.map(({ destination }) => destination), ...quizPublicFiles()].sort();
 const actual = listFiles(OUTPUT).sort();
 assert.deepEqual(actual, expected, 'Public output must match the explicit allowlist');
 assert.ok(actual.every((name) => !/^(?:docs|api|config|tests|scripts|node_modules|\.)\//.test(name)));
 const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
 assert.equal(vercel.outputDirectory, 'dist');
 assert.equal(vercel.buildCommand, 'node scripts/build-site.js');
+assert.equal(fs.readFileSync(path.join(OUTPUT, 'index.html'), 'utf8'), fs.readFileSync(path.join(ROOT, 'cowboy-nova.html'), 'utf8'), 'Quiz must not replace the VSL homepage');
+const quizHtml = fs.readFileSync(path.join(OUTPUT, 'quiz/v1-direto/index.html'), 'utf8');
+for (const match of quizHtml.matchAll(/(?:src|href)=["'](\/(?:_next|sites)\/[^"'?#]+)[^"']*["']/g)) {
+  assert.ok(fs.existsSync(path.join(OUTPUT, match[1])), `Quiz missing public asset: ${match[1]}`);
+}
 for (const page of PAGES.filter((name) => name.endsWith('.html'))) {
   const html = fs.readFileSync(path.join(OUTPUT, page), 'utf8');
   for (const match of html.matchAll(/(src|href|srcset|imagesrcset)=["']([^"']+)["']/g)) {
