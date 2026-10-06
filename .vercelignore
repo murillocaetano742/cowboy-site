@@ -9,6 +9,11 @@ tests
 .local
 node_modules
 dist
+packages/cowboy-quiz/.next
+packages/cowboy-quiz/out
+packages/cowboy-quiz/node_modules
+packages/cowboy-quiz/docs
+packages/cowboy-quiz/*.tsbuildinfo
 *.log
 .env
 .env.*

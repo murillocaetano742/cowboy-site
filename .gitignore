@@ -10,6 +10,8 @@ DPTHIAGO.mp4
 dist/
 .local/
 node_modules/
+packages/cowboy-quiz/.next/
+packages/cowboy-quiz/out/
 
 # Claude Code (config local, não faz parte do site)
 .claude/

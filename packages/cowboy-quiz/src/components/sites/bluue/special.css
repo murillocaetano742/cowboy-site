@@ -1,0 +1,35 @@
+.bluue-slide-up {
+  animation: bluue-slide-up 0.6s ease-out both;
+}
+.bluue-shimmer {
+  animation: bluue-shimmer 1.5s ease-in-out infinite;
+}
+.bluue-consent-overlay {
+  animation: bluue-consent-fade 0.2s ease-out;
+}
+@keyframes bluue-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes bluue-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+@keyframes bluue-consent-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

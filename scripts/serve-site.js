@@ -27,6 +27,7 @@ const server = http.createServer(async (request, rawResponse) => {
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('Cache-Control', 'no-store');
   const url = new URL(request.url, `http://127.0.0.1:${PORT}`);
+  if (url.pathname === '/quiz' || url.pathname === '/quiz/') return response.redirect(307, `/quiz/v1-direto/${url.search}`);
   const handler = HANDLERS[url.pathname];
   if (handler) {
     const chunks = [];
@@ -58,7 +59,8 @@ const server = http.createServer(async (request, rawResponse) => {
   const filename = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   let absolute = path.resolve(OUTPUT, filename);
   if (!absolute.startsWith(`${OUTPUT}${path.sep}`)) return response.status(404).send('Not found');
-  if (!path.extname(absolute)) absolute += '.html';
+  if (fs.existsSync(absolute) && fs.statSync(absolute).isDirectory()) absolute = path.join(absolute, 'index.html');
+  else if (!path.extname(absolute)) absolute += '.html';
   if (!fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) return response.status(404).send('Not found');
   response.setHeader('Content-Type', TYPES[path.extname(absolute)] || 'application/octet-stream');
   if (request.method === 'HEAD') return response.end();
