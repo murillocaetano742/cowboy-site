@@ -3,16 +3,17 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useReducer, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { intro, questions, type Question } from "./data";
-import { initialState, progressFor, quizReducer } from "./machine";
+import { intro, questions, RECOMMENDED_KIT, type Question } from "@/components/sites/bluue/data";
+import { initialState, progressFor, quizReducer } from "@/components/sites/bluue/machine";
+import { trackOfferView, trackQuizComplete, trackQuizStart, trackQuizStep } from "@/lib/quiz-tracking";
 import {
   Explanation,
   Testimonials,
   Analyzing,
   ConsentModal,
-} from "./SpecialScreens";
-import { PreCheckout } from "./PreCheckout";
-import { Logo } from "./Logo";
+} from "@/components/sites/bluue/SpecialScreens";
+import { PreCheckout } from "@/components/sites/bluue/PreCheckout";
+import { Logo } from "@/components/sites/bluue/Logo";
 
 const panel =
   "flex flex-col items-center px-4 py-4 max-w-lg mx-auto h-[100dvh] overflow-hidden";
@@ -446,10 +447,22 @@ export function Quiz() {
   const question = questions[questionIndex];
   const next = () => dispatch({ type: "NEXT" });
   const back = () => dispatch({ type: "BACK" });
-  const answer = (id: string, value: string) =>
+  const answer = (id: string, value: string) => {
+    trackQuizStart();
     dispatch({ type: "ANSWER", id, value });
+  };
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Only an ordinal crosses the analytics boundary; answer/state objects never do.
+    const questionSteps = [5, 7, 8, 11, 12, 13, 14, 15] as const;
+    const otherSteps = { explanation: 4, weight_kg: 6, testimonials: 9, weight: 10, analyzing: 16, precheckout: 17 } as const;
+    const stepIndex = stage === "intro" ? introIndex + 1
+      : stage === "quiz" ? questionSteps[questionIndex] : otherSteps[stage];
+    trackQuizStep(stepIndex);
+    if (stage === "precheckout") {
+      trackQuizComplete();
+      trackOfferView(RECOMMENDED_KIT);
+    }
   }, [stage, introIndex, questionIndex]);
   return (
     <main

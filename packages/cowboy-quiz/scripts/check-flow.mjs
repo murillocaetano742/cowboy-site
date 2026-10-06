@@ -183,7 +183,7 @@ test("COWBOY: severity follows the score (moderada, alta, muito alta)", () => {
 
 test("COWBOY: checkout link carries the kit and only allowlisted tracking parameters", () => {
   const href = new URL(checkoutHref(3, "?utm_source=fb&utm_campaign=quiz&fbclid=abc&src=RB&email=x%40y.com"));
-  assert.equal(href.origin + href.pathname, "https://cowboyenergiamasculina.com.br/api/checkout");
+  assert.equal(href.origin + href.pathname, "https://www.cowboyenergiamasculina.com.br/api/checkout");
   assert.equal(href.searchParams.get("quantity"), "3");
   assert.equal(href.searchParams.get("utm_source"), "fb");
   assert.equal(href.searchParams.get("utm_campaign"), "quiz");

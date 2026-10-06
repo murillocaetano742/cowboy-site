@@ -14,7 +14,7 @@
     "check:build": "node scripts/check-build.js",
     "lint": "node scripts/check-syntax.js && npm --prefix packages/cowboy-quiz run lint",
     "typecheck": "npm --prefix packages/cowboy-quiz run typecheck",
-    "test:quiz": "npm --prefix packages/cowboy-quiz run test:flow",
+    "test:quiz": "npm --prefix packages/cowboy-quiz run test:flow && npm --prefix packages/cowboy-quiz run test:tracking",
     "test": "node --test tests/integrations/*.test.js tests/qa/*.test.js && npm run test:quiz",
     "test:e2e": "playwright test tests/e2e",
     "test:integrations": "node --test tests/integrations/*.test.js",

@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description:
     "Responda em 1 minuto e veja o kit de COWBOY Energia em gotas indicado para a sua rotina. Teste de 30 dias: não sentiu diferença em 10, o dinheiro volta.",
   robots: { index: false, follow: false },
+  referrer: "origin",
   icons: { icon: "/sites/cowboy/favicon.svg" },
 };
 

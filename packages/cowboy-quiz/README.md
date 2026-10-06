@@ -50,9 +50,21 @@ Os nomes internos (`sites/bluue`, classes `bluue-*`) foram mantidos para não me
 
 ## Checkout
 
-O botão leva para `https://cowboyenergiamasculina.com.br/api/checkout?quantity=N` (o mesmo endpoint dos kits do site, que redireciona para a Appmax). Para servir o quiz no mesmo domínio do site, gere com `NEXT_PUBLIC_CHECKOUT_URL=/api/checkout npm run build`.
+O botão leva para `/api/checkout?quantity=N` no hostname de produção alternativo (`www` quando o quiz está no domínio principal; sem `www` no caminho inverso). Esse endpoint encaminha para o kit correspondente na Appmax. O salto entre hostnames permite que o Google gere `_gl` no clique. O link nativo já contém a atribuição e não é reescrito no clique, preservando a decoração Google/UTMify. Em desenvolvimento, `NEXT_PUBLIC_CHECKOUT_URL=/api/checkout` continua usando a API local.
 
-As respostas ficam só na memória da aba; nada é enviado. O quiz não tem Meta Pixel nem GA4.
+No clique simples, a navegação espera o callback de `begin_checkout` (timeout Google de 700 ms), com fallback independente de 800 ms se o SDK estiver bloqueado. O destino é capturado após a propagação do clique, preservando o `_gl` recém-gerado e o kit escolhido. Ctrl/Cmd, Shift, Alt e links para outra aba mantêm a navegação nativa.
+
+As respostas e o resultado ficam somente na memória da aba. A instrumentação recebe apenas o número ordinal da tela e o kit selecionado; não recebe respostas, saúde, idade, peso, gravidade, títulos das perguntas ou o objeto de estado.
+
+## Rastreamento
+
+- GA4 `G-VYR2542XCN`: `page_view`, `quiz_start`, `quiz_step_view`, `quiz_complete`, `view_item`, `select_item` e `begin_checkout`. Parâmetros personalizados: `quiz_id=cowboy_v1_direto` e `step_index` numérico de 1 a 17. O valor comercial corresponde ao kit inteiro, com `items[].quantity=1`, evitando arredondar o preço por frasco. `item_name` e `item_variant` identificam a oferta; não foi inventado um SKU.
+- Meta `1006075098894986`: `PageView`, `ViewContent` e `InitiateCheckout`, enviados manualmente com `autoConfig=false` antes da inicialização. Não há correspondência avançada configurada pelo código nem captura de cliques por texto.
+- UTMify: somente `scripts/utms/latest.js` para atribuição. O SDK de pixel UTMify, que inspeciona formulários e botões, não é carregado dentro do questionário. A integração existente do checkout/webhook continua responsável pelos eventos de compra; o quiz nunca emite `Purchase` nem `Lead`.
+
+`src/instrumentation-client.ts` inicializa antes da hidratação, removendo parâmetros fora da allowlist e fragmentos da URL antes dos scripts externos. `cowboy_attribution` em `sessionStorage` guarda somente UTMs e identificadores de campanha permitidos. O `_gl` recebido pode ser consumido pelo Google na página atual, mas nunca é armazenado nem reutilizado no link de saída. O referrer enviado ao GA4 contém somente a origem.
+
+GPC e `window['ga-disable-G-VYR2542XCN']=true`, quando definidos antes da inicialização, impedem todos os scripts de marketing e o armazenamento da atribuição. Eventos manuais consultam novamente esses sinais. Falhas de storage, bloqueadores e erros dos fornecedores não impedem a navegação ou o checkout. Marcos de funil, telas e cliques por kit são deduplicados durante a abertura da página, inclusive sob StrictMode e ao voltar telas. O recarregamento inicia uma nova visita.
 
 ## Verificar
 
@@ -61,6 +73,8 @@ npm run check
 ```
 
 Roda ESLint, TypeScript, os testes do fluxo (incluindo a gravidade por resposta e o repasse de UTMs) e o build.
+
+`node scripts/check-tracking.mjs` verifica inicialização única, limites de payload, deduplicação, preços, GPC, opt-out GA, storage restrito, sanitização pré-carregamento e troca do hostname de checkout. Os testes isolam os fornecedores e não geram conversões reais.
 
 ## Publicar
 

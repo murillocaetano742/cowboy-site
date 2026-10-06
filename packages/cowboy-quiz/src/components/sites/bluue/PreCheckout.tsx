@@ -4,8 +4,10 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, CircleCheck, Lock, ShieldCheck, Star, TriangleAlert, Truck } from "lucide-react";
-import { caseResult, RECOMMENDED_KIT, type KitQuantity } from "./data";
-import { checkoutHref } from "./checkout";
+import { caseResult, RECOMMENDED_KIT, type KitQuantity } from "@/components/sites/bluue/data";
+import { checkoutHref, readAttribution } from "@/components/sites/bluue/checkout";
+import { handleCheckoutClick } from "@/lib/checkout-navigation";
+import { trackKitSelection } from "@/lib/quiz-tracking";
 
 const ASSETS = "/sites/cowboy/";
 const SITE = "https://cowboyenergiamasculina.com.br";
@@ -134,7 +136,7 @@ export function PreCheckout({ answers }: { answers: Record<string, string> }) {
 
       <div className="w-full space-y-3 mb-4" role="group" aria-label="Kits disponíveis">
         {plans.map((item) => (
-          <button type="button" key={item.quantity} onClick={() => setSelectedPlan(item.quantity)} aria-pressed={selectedPlan === item.quantity} className={`w-full rounded-2xl border-2 p-3.5 text-left transition-all duration-200 ${selectedPlan === item.quantity ? "cb-option-selected" : "cb-option"}`}>
+          <button type="button" key={item.quantity} onClick={() => { if (selectedPlan !== item.quantity) trackKitSelection(item.quantity); setSelectedPlan(item.quantity); }} aria-pressed={selectedPlan === item.quantity} className={`w-full rounded-2xl border-2 p-3.5 text-left transition-all duration-200 ${selectedPlan === item.quantity ? "cb-option-selected" : "cb-option"}`}>
             <div className="flex items-center gap-3">
               <img src={`${ASSETS}${item.image}`} alt="" className="cb-plan-img" loading="lazy" />
               <div className="flex-1 min-w-0">
@@ -168,8 +170,8 @@ export function PreCheckout({ answers }: { answers: Record<string, string> }) {
             : `No cartão, com juros. Total do produto ${plan.installmentTotal}. Com frete: 12x de R$ 11,54 ou R$ 106,65 à vista.`}
         </p>
       </div>
-      {/* Tracking parameters of the quiz URL (utm_*, fbclid, src...) go on to the checkout. */}
-      <a href={checkoutHref(plan.quantity)} onClick={(event) => { event.currentTarget.href = checkoutHref(plan.quantity, window.location.search); }} className="bluue-finish-button cb-btn w-full h-14 px-8 rounded-full text-base font-bold mb-6">{plan.quantity === RECOMMENDED_KIT ? "Quero o protocolo completo »" : "Quero começar agora »"}</a>
+      {/* Preserve SDK link decoration and give analytics a bounded opportunity to flush. */}
+      <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={(event) => handleCheckoutClick(event, plan.quantity)} className="bluue-finish-button cb-btn w-full h-14 px-8 rounded-full text-base font-bold mb-6">{plan.quantity === RECOMMENDED_KIT ? "Quero o protocolo completo »" : "Quero começar agora »"}</a>
 
       <div className="w-full rounded-2xl overflow-hidden mb-4 relative" aria-label="COWBOY Energia">
         <div className="relative w-full">

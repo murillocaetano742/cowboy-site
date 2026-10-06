@@ -13,9 +13,10 @@
     "start": "node scripts/serve.mjs",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run test:flow && npm run build",
+    "check": "npm run lint && npm run typecheck && npm run test:flow && npm run test:tracking && npm run build",
     "preview": "node scripts/serve.mjs",
-    "test:flow": "node --experimental-strip-types scripts/check-flow.mjs"
+    "test:flow": "node --experimental-strip-types scripts/check-flow.mjs",
+    "test:tracking": "node scripts/check-tracking.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
