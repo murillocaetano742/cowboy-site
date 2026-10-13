@@ -41,4 +41,3 @@ A revisão independente identificou que `onVolumeChange` deveria espelhar soment
 - `packages/cowboy-quiz/src/components/sites/bluue/quiz-vsl.tsx`
 - `packages/cowboy-quiz/src/components/sites/bluue/quiz-vsl.module.css`
 - `tests/e2e/cowboy-quiz-vsl.spec.js`
-
