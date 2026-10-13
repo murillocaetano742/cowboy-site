@@ -22,7 +22,9 @@ O atalho `/quiz` continua levando à v1. A homepage VSL e os checkouts Appmax ex
 
 ## Comportamento e mensuração
 
-Player vertical responsivo, reprodução por ação do visitante, controles nativos e `playsInline`. `preload="none"` evita carregar o vídeo antes de solicitado. Os kits e o checkout permanecem disponíveis sem obrigatoriedade de assistir.
+Player vertical responsivo, controles nativos e `playsInline`. A atualização [QUIZ-039](../stories/QUIZ-039-vsl-autoplay.md) usa `IntersectionObserver` para tentar iniciar a reprodução quando pelo menos 50% do player estiver visível. A primeira tentativa é sem som; o botão **Ativar som** habilita o áudio por gesto explícito. Sem atributo `autoplay`, `preload="none"` mantém a mídia sem download até essa entrada em tela ou uma ação manual anterior. Os kits e o checkout permanecem disponíveis sem obrigatoriedade de assistir.
+
+A tentativa automática ocorre uma única vez por montagem. Depois de uma reprodução ou pausa manual, sair e voltar pela rolagem não reinicia o vídeo. Se `play()` for bloqueado, aparece **Reproduzir vídeo com som**, junto de uma instrução para tocar; os controles nativos continuam disponíveis. A falha da mídia mantém a mensagem própria de recuperação e o acesso aos kits. A escolha de iniciar sem som e liberar o áudio no clique segue as políticas documentadas de [Chrome](https://developer.chrome.com/blog/autoplay/) e [WebKit/iOS](https://webkit.org/blog/6784/new-video-policies-for-ios/).
 
 GA4 continua na propriedade `553376813`, medição `G-VYR2542XCN`. O campo `quiz_id` diferencia as duas rotas desde a abertura. Os eventos de navegação e checkout existentes são preservados.
 
@@ -30,9 +32,11 @@ Em 13/10/2026, a listagem oficial de definições personalizadas confirmou `Quiz
 
 | Evento adicional na v2 | Significado |
 | --- | --- |
-| `vsl_start` | Início da reprodução |
+| `vsl_start` | Reprodução confirmada pelo evento `playing`, inclusive início automático sem som |
 | `vsl_progress` | Cobertura reproduzida de 25%, 50% e 75%, sem repetição |
 | `vsl_complete` | Fim da reprodução após cobertura praticamente integral |
+
+Esses eventos medem reprodução, inclusive sem som; não comprovam atenção do visitante ou áudio ativado. Rejeitar a tentativa automática não dispara `vsl_start`. Não foram adicionados novos eventos nem parâmetros na QUIZ-039.
 
 A nomenclatura acompanha os eventos já usados na homepage. Trata-se de instrumentação explícita do player HTML5: a [medição automática de vídeo do GA4](https://support.google.com/analytics/answer/9216061?hl=pt-BR) é descrita pelo Google para vídeos YouTube com suporte à API. Nenhum novo SDK é necessário.
 
@@ -56,4 +60,11 @@ Foi corrigido durante a QA um limite de altura ausente: este pacote usa utilitie
 
 Evidências locais de QA: `test-results/cowboy-quiz-vsl-v2-mobile--9166a--checkout-com-SDK-bloqueado/v2-player-375.png` e `real-playback.json`. Os arquivos de teste são locais/ignorados; não contêm confirmação de recebimento de novos eventos em produção. Nenhum pedido, pagamento ou Purchase foi criado.
 
-Publicação liberada pela QA e revisão root; registrar deployment e verificação pública no fechamento da story.
+Publicação concluída pelo [PR #22](https://github.com/murillocaetano742/cowboy-site/pull/22), merge `b9de4a924a574d6d21d7f9f8c10339fb4ba4cf50`, em 13/10/2026. Deployment Git automático `dpl_BWrdNT4w7WRKBi3Fog5wXQ2cRPWm`, READY/Production, sem deploy manual adicional.
+
+- [Nova versão com VSL](https://cowboyenergiamasculina.com.br/quiz/v2-vsl/).
+- [Versão atual preservada](https://cowboyenergiamasculina.com.br/quiz/v1-direto/).
+
+Às 13h15min35s UTC, ambas as rotas responderam HTTP 200 e corresponderam por SHA-256 ao conteúdo da implantação autenticada. O hash HTML da v2 é `2d0fdcc7db7ce14a8a3a1395ec129957890f6c8bcba557ed73f4b60dc7b9151c`. Os 14 assets referenciados responderam 200; a homepage não mudou; `/quiz` continua redirecionando para v1 com a query íntegra. A VSL respondeu 206 `video/mp4` com suporte ao Range solicitado e o poster manteve o hash do arquivo existente. A consulta de logs de erro da implantação na janela de 15 minutos retornou zero entradas.
+
+Essa verificação comprova publicação, recursos e preservação das duas versões. Os eventos de vídeo foram validados na QA interceptada; não houve nova sessão completa de mensuração, pedido, pagamento ou Purchase em produção nesta entrega. Evidência privada `.local/quiz-038-final-http.json`; rollback para `dpl_7JQkBpnN9Ag1LyxWCjg8JHhCQ2G2`. O servidor de QA 4398 foi encerrado e suas evidências locais preservadas. O fechamento documental é local e não gera novo deploy.

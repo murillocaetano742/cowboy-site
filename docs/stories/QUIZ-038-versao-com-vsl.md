@@ -1,6 +1,6 @@
 # QUIZ-038 — Versão separada do quiz com VSL
 
-Status: implementação e QA aprovadas; publicação autorizada.
+Status: concluída — nova versão publicada e verificada em produção.
 
 ## Pedido e base
 
@@ -10,13 +10,13 @@ Base confirmada após fetch: `59ca420f206f3b3d54c21a5854921b905dd1b27f`, produç
 
 ## Critérios de aceite
 
-- [ ] Publicar `/quiz/v2-vsl/` com a sequência quiz → resultado → VSL → kits.
+- [x] Publicar `/quiz/v2-vsl/` com a sequência quiz → resultado → VSL → kits.
 - [x] Preservar integralmente o fluxo atual em `/quiz/v1-direto/` e o destino do atalho `/quiz`.
 - [x] Usar o vídeo existente confirmado pela QA, com controles utilizáveis no celular e sem impedir acesso ao checkout em caso de falha de mídia.
 - [x] Preservar preços, kits, checkout, atribuição e proteções de privacidade; identificar a versão nos eventos sem enviar respostas ou condições de saúde.
 - [x] Incluir somente as duas rotas aprovadas no export público, mantendo a homepage e os assets existentes.
 - [x] Executar lint, TypeScript, testes pertinentes, build e QA de navegação/vídeo/checkout nas duas versões.
-- [ ] Publicar após GO root/QA e confirmar deployment, conteúdo das rotas, recursos HTTP/MIME e disponibilidade da versão anterior.
+- [x] Publicar após GO root/QA e confirmar deployment, conteúdo das rotas, recursos HTTP/MIME e disponibilidade da versão anterior.
 
 ## Coordenação
 
@@ -38,6 +38,17 @@ A primeira QA detectou que a classe Tailwind arbitrária de altura não tinha ef
 QA funcional final: três casos Playwright aprovados em 20,8 segundos, com coleta externa interceptada. V1 e atalho preservaram as 17 etapas sem baixar a VSL; v2 em 375 px decodificou áudio e vídeo reais, respeitou 70svh e manteve marcos neutros/deduplicação e os três kits; v2 em 390 px exibiu fallback para vídeo 404, preservou linker/client ID/session ID até a API e não carregou SDKs sob GPC. Nenhum pedido ou Purchase foi enviado. O root inspecionou `v2-player-375.png`, confirmou imagem e legendas completas, controles e início dos kits visíveis, e autorizou a publicação pelo fluxo Git.
 
 Projeto de destino: Vercel `murillo-digital/cowboy-site`. Produção anterior conhecida: `dpl_7JQkBpnN9Ag1LyxWCjg8JHhCQ2G2`, sujeita a releitura antes de publicar. Sem alterações de domínio ou infraestrutura previstas.
+
+### Publicação concluída
+
+PR [#22](https://github.com/murillocaetano742/cowboy-site/pull/22), head `71f3ef0d8655a8515f87bb3301811c5ae5c1013e`, aprovado pelos checks Vercel e Vercel Preview Comments. O head exato foi reconferido antes do merge. Merge `b9de4a924a574d6d21d7f9f8c10339fb4ba4cf50` em 13/10/2026 às 13h13min10s UTC. O deploy Git automático, sem publicação manual duplicada, gerou `dpl_BWrdNT4w7WRKBi3Fog5wXQ2cRPWm`, **READY / Production**, URL `https://cowboy-site-2x5xs47zt-murillo-digital.vercel.app`, com aliases principal e www confirmados.
+
+- Nova versão: `https://cowboyenergiamasculina.com.br/quiz/v2-vsl/`.
+- Versão atual preservada: `https://cowboyenergiamasculina.com.br/quiz/v1-direto/`.
+
+Verificação HTTP de 13/10/2026 às 13h15min35s UTC: ambas as rotas responderam 200 e seus arquivos foram idênticos aos da implantação imutável obtidos por `vercel curl` autenticado. SHA-256 v2: `2d0fdcc7db7ce14a8a3a1395ec129957890f6c8bcba557ed73f4b60dc7b9151c`; v1: `a7c1c8c522000f12f5558da3a0d4bbf6578b2e7faa8a68d58e2173c1f25112d6`. Os 14 assets referenciados responderam 200, incluindo o bundle com `cowboy_v2_vsl`. O atalho `/quiz` manteve 307 para v1 com query preservada; a homepage permaneceu idêntica à base. O MP4 respondeu 206 `video/mp4` para Range 0–1023 de 30.576.839 bytes, e o poster 200 com hash igual ao arquivo original.
+
+Evidência privada preservada em `.local/quiz-038-final-http.json`; a consulta de logs de erro da implantação na janela de 15 minutos retornou zero entradas. O servidor local 4398 foi encerrado e a ausência de listener foi conferida. As evidências QA locais foram preservadas. Rollback disponível para `dpl_7JQkBpnN9Ag1LyxWCjg8JHhCQ2G2`. O fechamento documental fica em commit local, sem redeploy apenas por documentação.
 
 ## File List
 
