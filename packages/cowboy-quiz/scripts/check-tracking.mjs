@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 
 // Exercise the real TypeScript modules with isolated browser/storage fixtures.
 // No vendor scripts or conversion requests are executed by these tests.
-function fixture({ search = "", stored = "{}", gpc = false, disabled = false, storageBlocked = false, checkoutUrl, hostname = "cowboyenergiamasculina.com.br" } = {}) {
+function fixture({ search = "", stored = "{}", gpc = false, disabled = false, storageBlocked = false, checkoutUrl, hostname = "cowboyenergiamasculina.com.br", pathname = "/quiz/v1-direto/" } = {}) {
   const storage = new Map([["cowboy_attribution", stored]]);
   const scripts = [];
   const navigations = [];
@@ -38,7 +38,7 @@ function fixture({ search = "", stored = "{}", gpc = false, disabled = false, st
   const window = {
     navigator: { globalPrivacyControl: gpc },
     "ga-disable-G-VYR2542XCN": disabled,
-    location: location(`https://${hostname}/quiz/v1-direto/${search}`),
+    location: location(`https://${hostname}${pathname}${search}`),
     setTimeout(callback, delay = 0) { const id = ++nextTimer; timers.set(id, { at: clock + delay, callback }); return id; },
     clearTimeout(id) { timers.delete(id); },
     sessionStorage: {
@@ -68,9 +68,11 @@ function fixture({ search = "", stored = "{}", gpc = false, disabled = false, st
   const tracking = load("src/lib/quiz-tracking.ts");
   const checkout = load("src/components/sites/bluue/checkout.ts");
   const navigation = load("src/lib/checkout-navigation.ts");
+  const variants = load("src/lib/quiz-variant.ts");
+  const vsl = load("src/lib/vsl-playback.ts");
   const commands = () => (window.dataLayer ?? []).map((command) => Array.from(command));
   const events = () => commands().filter(([command]) => command === "event");
-  return { tracking, checkout, navigation, window, scripts, storage, commands, events, advanceTimers, navigations };
+  return { tracking, checkout, navigation, variants, vsl, window, scripts, storage, commands, events, advanceTimers, navigations };
 }
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -329,4 +331,134 @@ test("modified clicks, other targets and downloads retain native navigation", ()
     const params = page.events().find(([, name]) => name === "begin_checkout")[2];
     assert.equal(params.event_callback, undefined);
   }
+});
+
+test("the canonical route identifies every event before hydration, preserving v1's ID", () => {
+  for (const [pathname, id] of [["/quiz/v1-direto/", "cowboy_v1_direto"], ["/quiz/v2-vsl/", "cowboy_v2_vsl"]]) {
+    const page = fixture({ pathname });
+    page.tracking.initializeQuizTracking();
+    page.tracking.trackQuizStart();
+    page.tracking.trackQuizStep(1);
+    page.tracking.trackQuizComplete();
+    page.tracking.trackOfferView(3);
+    page.tracking.trackKitSelection(2);
+    page.tracking.trackBeginCheckout(2);
+    assert.equal(page.events().length, 7);
+    assert.ok(page.events().every(([, , params]) => params.quiz_id === id));
+    assert.equal(page.events()[0][1], "page_view");
+  }
+  const { variants } = fixture();
+  assert.equal(variants.quizVariantForPath("/quiz/v2-vsl"), "v2-vsl");
+  for (const path of ["/", "/quiz/v1-direto/", "/quiz/v2-vsl/private", "/quiz/?variant=v2-vsl", "/quiz/SENSITIVE/"]) {
+    assert.equal(variants.quizVariantForPath(path), "v1-direto");
+  }
+});
+
+test("deduplication is isolated per quiz variant while repeated events stay deduplicated", () => {
+  const page = fixture();
+  page.tracking.initializeQuizTracking();
+  for (let repeat = 0; repeat < 2; repeat++) {
+    for (const variant of ["v1-direto", "v2-vsl"]) {
+      page.tracking.trackQuizStart(variant);
+      page.tracking.trackQuizStep(1, variant);
+      page.tracking.trackBeginCheckout(3, undefined, variant);
+    }
+  }
+  for (const name of ["quiz_start", "quiz_step_view", "begin_checkout"]) {
+    const ids = page.events().filter(([, event]) => event === name).map(([, , params]) => params.quiz_id);
+    assert.deepEqual(plain(ids), ["cowboy_v1_direto", "cowboy_v2_vsl"]);
+  }
+});
+
+function mediaPlayback(ranges = [], duration = 100, ended = false) {
+  return {
+    duration, ended,
+    played: { length: ranges.length, start: (index) => ranges[index][0], end: (index) => ranges[index][1] },
+    // Deliberately present but never read or transmitted by the implementation.
+    title: "SENSITIVE", answers: { age: "PRIVATE" }, currentTime: 99,
+  };
+}
+
+test("native playback milestones use watched coverage, deduplicate replay and emit only neutral GA fields", () => {
+  const page = fixture({ pathname: "/quiz/v2-vsl/" });
+  page.tracking.initializeQuizTracking();
+  const metaBefore = page.window.fbq.queue.length;
+  page.vsl.recordVslPlayback("playing", mediaPlayback(), "v2-vsl");
+  page.vsl.recordVslPlayback("playing", mediaPlayback(), "v2-vsl");
+  for (const ranges of [[[0, 24]], [[0, 25]], [[0, 25]], [[0, 25], [50, 75]], [[0, 75]]]) {
+    page.vsl.recordVslPlayback("timeupdate", mediaPlayback(ranges), "v2-vsl");
+  }
+  for (let repeat = 0; repeat < 2; repeat++) page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 100]], 100, true), "v2-vsl");
+  const events = page.events().filter(([, name]) => name.startsWith("vsl_"));
+  assert.deepEqual(plain(events.map(([, name, params]) => [name, params.percent ?? 0])), [
+    ["vsl_start", 0], ["vsl_progress", 25], ["vsl_progress", 50], ["vsl_progress", 75], ["vsl_complete", 100],
+  ]);
+  for (const [, name, params] of events) {
+    assert.equal(params.quiz_id, "cowboy_v2_vsl");
+    assert.equal(params.video_id, "cowboy_vsl");
+    assert.deepEqual(Object.keys(params).sort(), (name === "vsl_start"
+      ? ["quiz_id", "send_to", "video_id"] : ["percent", "quiz_id", "send_to", "video_id"]));
+  }
+  assert.doesNotMatch(JSON.stringify(events), /SENSITIVE|PRIVATE|answers|title|currentTime|duration/);
+  assert.equal(page.window.fbq.queue.length, metaBefore, "VSL does not add Meta events");
+});
+
+test("seeking to the ending cannot invent progress or completion", () => {
+  const page = fixture({ pathname: "/quiz/v2-vsl/" });
+  page.tracking.initializeQuizTracking();
+  page.vsl.recordVslPlayback("playing", mediaPlayback(), "v2-vsl");
+  page.vsl.recordVslPlayback("timeupdate", mediaPlayback([], 100), "v2-vsl");
+  page.vsl.recordVslPlayback("timeupdate", mediaPlayback([[99, 100]], 100), "v2-vsl");
+  page.vsl.recordVslPlayback("ended", mediaPlayback([[99, 100]], 100, true), "v2-vsl");
+  assert.deepEqual(plain(page.events().filter(([, name]) => name.startsWith("vsl_")).map(([, name]) => name)), ["vsl_start"]);
+  assert.equal(page.vsl.playedSeconds(mediaPlayback([[0, 25], [50, 75]])), 50);
+});
+
+test("completion requires ended and near-total coverage; invalid metadata/ranges are ignored", () => {
+  const page = fixture({ pathname: "/quiz/v2-vsl/" });
+  page.tracking.initializeQuizTracking();
+  for (const duration of [0, NaN, Infinity, -1]) {
+    page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 100]], duration, true), "v2-vsl");
+  }
+  const broken = mediaPlayback([[0, 100]], 100, true);
+  broken.played.start = () => { throw new Error("range unavailable"); };
+  assert.doesNotThrow(() => page.vsl.recordVslPlayback("timeupdate", broken, "v2-vsl"));
+  assert.equal(page.events().length, 1);
+  page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 98.9]], 100, true), "v2-vsl");
+  page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 99]], 100, false), "v2-vsl");
+  assert.equal(page.events().filter(([, name]) => name === "vsl_complete").length, 0);
+  page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 99]], 100, true), "v2-vsl");
+  assert.equal(page.events().filter(([, name]) => name === "vsl_complete").length, 1);
+});
+
+test("video telemetry cannot emit in v1, through privacy opt-out, or with arbitrary milestones", () => {
+  for (const options of [{ pathname: "/quiz/v1-direto/" }, { pathname: "/quiz/v2-vsl/", gpc: true }, { pathname: "/quiz/v2-vsl/", disabled: true }]) {
+    const page = fixture(options);
+    page.tracking.initializeQuizTracking();
+    const variant = page.variants.quizVariantForPath(options.pathname);
+    page.vsl.recordVslPlayback("playing", mediaPlayback(), variant);
+    page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 100]], 100, true), variant);
+    assert.equal(page.events().filter(([, name]) => name.startsWith("vsl_")).length, 0);
+  }
+  const page = fixture({ pathname: "/quiz/v2-vsl/" });
+  page.tracking.initializeQuizTracking();
+  for (const value of ["PRIVATE", 12, 99, -1, NaN, { answers: "SENSITIVE" }]) page.tracking.trackVslMilestone(value);
+  page.window.navigator.globalPrivacyControl = true;
+  page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 100]], 100, true), "v2-vsl");
+  assert.equal(page.events().length, 1);
+});
+
+test("v2 checkout preserves the existing callback deadline and decorated destination", () => {
+  const page = fixture({ pathname: "/quiz/v2-vsl/" });
+  page.tracking.initializeQuizTracking();
+  const event = checkoutClick();
+  page.navigation.handleCheckoutClick(event, 3, "v2-vsl");
+  event.currentTarget.href += "&_gl=vendor-decoration";
+  const params = page.events().find(([, name]) => name === "begin_checkout")[2];
+  assert.equal(params.quiz_id, "cowboy_v2_vsl");
+  assert.equal(params.event_timeout, 700);
+  page.advanceTimers(799);
+  assert.equal(page.navigations.length, 0);
+  page.advanceTimers(1);
+  assert.deepEqual(page.navigations, [event.currentTarget.href]);
 });

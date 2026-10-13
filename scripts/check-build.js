@@ -6,7 +6,7 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const { buildSite, OUTPUT, PAGES, ASSETS, OUTPUT_ALIASES } = require(path.join(ROOT, 'scripts', 'build-site.js'));
-const { quizPublicFiles } = require(path.join(ROOT, 'scripts', 'build-quiz.js'));
+const { quizPublicFiles, PUBLIC_QUIZ_ROUTES } = require(path.join(ROOT, 'scripts', 'build-quiz.js'));
 
 buildSite();
 function listFiles(directory) {
@@ -24,10 +24,16 @@ const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'
 assert.equal(vercel.outputDirectory, 'dist');
 assert.equal(vercel.buildCommand, 'node scripts/build-site.js');
 assert.equal(fs.readFileSync(path.join(OUTPUT, 'index.html'), 'utf8'), fs.readFileSync(path.join(ROOT, 'cowboy-nova.html'), 'utf8'), 'Quiz must not replace the VSL homepage');
-const quizHtml = fs.readFileSync(path.join(OUTPUT, 'quiz/v1-direto/index.html'), 'utf8');
-for (const match of quizHtml.matchAll(/(?:src|href)=["'](\/(?:_next|sites)\/[^"'?#]+)[^"']*["']/g)) {
-  assert.ok(fs.existsSync(path.join(OUTPUT, match[1])), `Quiz missing public asset: ${match[1]}`);
+assert.deepEqual(vercel.redirects.find(({ source }) => source === '/quiz'), { source: '/quiz', destination: '/quiz/v1-direto/', permanent: false }, 'The existing quiz shortcut must remain on v1');
+for (const route of PUBLIC_QUIZ_ROUTES) {
+  const quizHtml = fs.readFileSync(path.join(OUTPUT, route, 'index.html'), 'utf8');
+  for (const match of quizHtml.matchAll(/(?:src|href)=["'](\/(?:_next|sites)\/[^"'?#]+)[^"']*["']/g)) {
+    assert.ok(fs.existsSync(path.join(OUTPUT, match[1])), `${route}: missing public asset ${match[1]}`);
+  }
 }
+const vslAsset = 'videos/vsl/vsl-dr-durval-720.mp4';
+assert.ok(ASSETS.includes(vslAsset), 'The existing VSL must be included in the public allowlist');
+assert.ok(fs.readFileSync(path.join(OUTPUT, vslAsset)).equals(fs.readFileSync(path.join(ROOT, vslAsset))), 'The published VSL must match the existing source video');
 for (const page of PAGES.filter((name) => name.endsWith('.html'))) {
   const html = fs.readFileSync(path.join(OUTPUT, page), 'utf8');
   for (const match of html.matchAll(/(src|href|srcset|imagesrcset)=["']([^"']+)["']/g)) {

@@ -1,0 +1,10 @@
+.player {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  max-height: 70svh;
+  border-radius: 1rem;
+  background: #000;
+  object-fit: contain;
+}

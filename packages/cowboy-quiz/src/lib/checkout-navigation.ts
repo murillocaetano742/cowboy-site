@@ -1,16 +1,17 @@
 import type { MouseEvent } from "react";
 import type { KitQuantity } from "@/components/sites/bluue/data";
 import { trackBeginCheckout } from "@/lib/quiz-tracking";
+import type { QuizVariant } from "@/lib/quiz-variant";
 
 const pendingLinks = new WeakSet<HTMLAnchorElement>();
 
 /** Keep native link semantics while allowing GA to flush before same-tab exit. */
-export function handleCheckoutClick(event: MouseEvent<HTMLAnchorElement>, quantity: KitQuantity) {
+export function handleCheckoutClick(event: MouseEvent<HTMLAnchorElement>, quantity: KitQuantity, variant?: QuizVariant) {
   if (event.defaultPrevented) return;
   const anchor = event.currentTarget;
   if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey
     || (anchor.target && anchor.target !== "_self") || anchor.hasAttribute("download")) {
-    trackBeginCheckout(quantity);
+    trackBeginCheckout(quantity, undefined, variant);
     return;
   }
 
@@ -36,5 +37,5 @@ export function handleCheckoutClick(event: MouseEvent<HTMLAnchorElement>, quanti
   trackBeginCheckout(quantity, () => {
     ready = true;
     navigate();
-  });
+  }, variant);
 }

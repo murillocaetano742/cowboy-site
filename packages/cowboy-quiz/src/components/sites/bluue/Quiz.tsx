@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { intro, questions, RECOMMENDED_KIT, type Question } from "@/components/sites/bluue/data";
 import { initialState, progressFor, quizReducer } from "@/components/sites/bluue/machine";
 import { trackOfferView, trackQuizComplete, trackQuizStart, trackQuizStep } from "@/lib/quiz-tracking";
+import type { QuizVariant } from "@/lib/quiz-variant";
 import {
   Explanation,
   Testimonials,
@@ -441,14 +442,18 @@ function WeightScreen({
   );
 }
 
-export function Quiz() {
+interface QuizProps {
+  variant?: QuizVariant;
+}
+
+export function Quiz({ variant = "v1-direto" }: QuizProps) {
   const [state, dispatch] = useReducer(quizReducer, initialState);
   const { stage, introIndex, questionIndex } = state;
   const question = questions[questionIndex];
   const next = () => dispatch({ type: "NEXT" });
   const back = () => dispatch({ type: "BACK" });
   const answer = (id: string, value: string) => {
-    trackQuizStart();
+    trackQuizStart(variant);
     dispatch({ type: "ANSWER", id, value });
   };
   useEffect(() => {
@@ -458,12 +463,12 @@ export function Quiz() {
     const otherSteps = { explanation: 4, weight_kg: 6, testimonials: 9, weight: 10, analyzing: 16, precheckout: 17 } as const;
     const stepIndex = stage === "intro" ? introIndex + 1
       : stage === "quiz" ? questionSteps[questionIndex] : otherSteps[stage];
-    trackQuizStep(stepIndex);
+    trackQuizStep(stepIndex, variant);
     if (stage === "precheckout") {
-      trackQuizComplete();
-      trackOfferView(RECOMMENDED_KIT);
+      trackQuizComplete(variant);
+      trackOfferView(RECOMMENDED_KIT, variant);
     }
-  }, [stage, introIndex, questionIndex]);
+  }, [stage, introIndex, questionIndex, variant]);
   return (
     <main
       className="min-h-screen cb-bg"
@@ -503,7 +508,7 @@ export function Quiz() {
       )}
       {stage === "testimonials" && <Testimonials onNext={next} onBack={back} />}
       {stage === "analyzing" && <Analyzing onNext={next} />}
-      {stage === "precheckout" && <PreCheckout answers={state.answers} />}
+      {stage === "precheckout" && <PreCheckout answers={state.answers} variant={variant} />}
     </main>
   );
 }

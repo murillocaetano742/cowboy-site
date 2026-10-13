@@ -8,6 +8,8 @@ import { caseResult, RECOMMENDED_KIT, type KitQuantity } from "@/components/site
 import { checkoutHref, readAttribution } from "@/components/sites/bluue/checkout";
 import { handleCheckoutClick } from "@/lib/checkout-navigation";
 import { trackKitSelection } from "@/lib/quiz-tracking";
+import type { QuizVariant } from "@/lib/quiz-variant";
+import { QuizVsl } from "@/components/sites/bluue/quiz-vsl";
 
 const ASSETS = "/sites/cowboy/";
 const SITE = "https://cowboyenergiamasculina.com.br";
@@ -85,7 +87,12 @@ const questions = [
   { q: "Quem fabrica?", a: "BNT Farma, CNPJ 21.027.384/0001-06, como impresso no rótulo. SAC: contato@cowboyenergiamasculina.com.br." },
 ];
 
-export function PreCheckout({ answers }: { answers: Record<string, string> }) {
+interface PreCheckoutProps {
+  answers: Record<string, string>;
+  variant?: QuizVariant;
+}
+
+export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps) {
   const result = caseResult(answers);
   const [selectedPlan, setSelectedPlan] = useState<KitQuantity>(RECOMMENDED_KIT);
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
@@ -132,11 +139,13 @@ export function PreCheckout({ answers }: { answers: Record<string, string> }) {
         </div>
       </section>
 
+      {variant === "v2-vsl" ? <QuizVsl variant={variant} /> : null}
+
       <p className="text-sm font-bold text-foreground text-center mb-3">Selecione o seu kit</p>
 
       <div className="w-full space-y-3 mb-4" role="group" aria-label="Kits disponíveis">
         {plans.map((item) => (
-          <button type="button" key={item.quantity} onClick={() => { if (selectedPlan !== item.quantity) trackKitSelection(item.quantity); setSelectedPlan(item.quantity); }} aria-pressed={selectedPlan === item.quantity} className={`w-full rounded-2xl border-2 p-3.5 text-left transition-all duration-200 ${selectedPlan === item.quantity ? "cb-option-selected" : "cb-option"}`}>
+          <button type="button" key={item.quantity} onClick={() => { if (selectedPlan !== item.quantity) trackKitSelection(item.quantity, variant); setSelectedPlan(item.quantity); }} aria-pressed={selectedPlan === item.quantity} className={`w-full rounded-2xl border-2 p-3.5 text-left transition-all duration-200 ${selectedPlan === item.quantity ? "cb-option-selected" : "cb-option"}`}>
             <div className="flex items-center gap-3">
               <img src={`${ASSETS}${item.image}`} alt="" className="cb-plan-img" loading="lazy" />
               <div className="flex-1 min-w-0">
@@ -171,7 +180,7 @@ export function PreCheckout({ answers }: { answers: Record<string, string> }) {
         </p>
       </div>
       {/* Preserve SDK link decoration and give analytics a bounded opportunity to flush. */}
-      <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={(event) => handleCheckoutClick(event, plan.quantity)} className="bluue-finish-button cb-btn w-full h-14 px-8 rounded-full text-base font-bold mb-6">{plan.quantity === RECOMMENDED_KIT ? "Quero o protocolo completo »" : "Quero começar agora »"}</a>
+      <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={(event) => handleCheckoutClick(event, plan.quantity, variant)} className="bluue-finish-button cb-btn w-full h-14 px-8 rounded-full text-base font-bold mb-6">{plan.quantity === RECOMMENDED_KIT ? "Quero o protocolo completo »" : "Quero começar agora »"}</a>
 
       <div className="w-full rounded-2xl overflow-hidden mb-4 relative" aria-label="COWBOY Energia">
         <div className="relative w-full">
