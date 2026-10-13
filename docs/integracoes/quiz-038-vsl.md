@@ -56,4 +56,11 @@ Foi corrigido durante a QA um limite de altura ausente: este pacote usa utilitie
 
 Evidências locais de QA: `test-results/cowboy-quiz-vsl-v2-mobile--9166a--checkout-com-SDK-bloqueado/v2-player-375.png` e `real-playback.json`. Os arquivos de teste são locais/ignorados; não contêm confirmação de recebimento de novos eventos em produção. Nenhum pedido, pagamento ou Purchase foi criado.
 
-Publicação liberada pela QA e revisão root; registrar deployment e verificação pública no fechamento da story.
+Publicação concluída pelo [PR #22](https://github.com/murillocaetano742/cowboy-site/pull/22), merge `b9de4a924a574d6d21d7f9f8c10339fb4ba4cf50`, em 13/10/2026. Deployment Git automático `dpl_BWrdNT4w7WRKBi3Fog5wXQ2cRPWm`, READY/Production, sem deploy manual adicional.
+
+- [Nova versão com VSL](https://cowboyenergiamasculina.com.br/quiz/v2-vsl/).
+- [Versão atual preservada](https://cowboyenergiamasculina.com.br/quiz/v1-direto/).
+
+Às 13h15min35s UTC, ambas as rotas responderam HTTP 200 e corresponderam por SHA-256 ao conteúdo da implantação autenticada. O hash HTML da v2 é `2d0fdcc7db7ce14a8a3a1395ec129957890f6c8bcba557ed73f4b60dc7b9151c`. Os 14 assets referenciados responderam 200; a homepage não mudou; `/quiz` continua redirecionando para v1 com a query íntegra. A VSL respondeu 206 `video/mp4` com suporte ao Range solicitado e o poster manteve o hash do arquivo existente. A consulta de logs de erro da implantação na janela de 15 minutos retornou zero entradas.
+
+Essa verificação comprova publicação, recursos e preservação das duas versões. Os eventos de vídeo foram validados na QA interceptada; não houve nova sessão completa de mensuração, pedido, pagamento ou Purchase em produção nesta entrega. Evidência privada `.local/quiz-038-final-http.json`; rollback para `dpl_7JQkBpnN9Ag1LyxWCjg8JHhCQ2G2`. O servidor de QA 4398 foi encerrado e suas evidências locais preservadas. O fechamento documental é local e não gera novo deploy.
