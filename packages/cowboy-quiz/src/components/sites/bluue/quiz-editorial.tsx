@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element -- Reuse the existing local campaign image in the static export. */
+/* eslint-disable @next/next/no-img-element -- Serve the local campaign image directly in the static export. */
 
 import { useEffect, useRef, useSyncExternalStore, type MouseEvent } from "react";
 import { readAttribution } from "@/components/sites/bluue/checkout";
@@ -57,41 +57,41 @@ export function QuizEditorial() {
       <div className={styles.disclosure}>Conteúdo publicitário da COWBOY Energia</div>
       <div className={styles.paper}>
         <header className={styles.masthead}>
-          <p className={styles.edition}>Especial sobre vida íntima</p>
+          <p className={styles.edition}>Vida íntima masculina</p>
           <p className={styles.brand}>COWBOY <span>em pauta</span></p>
-          <p className={styles.topics}>Confiança · Relacionamentos · Bem-estar</p>
+          <p className={styles.topics}>Uma conversa sem rodeios.</p>
         </header>
 
         <article className={styles.lead} data-editorial-section="intro">
           <div className={styles.leadCopy}>
-            <h1 className={styles.headline}>Quando a confiança muda, o silêncio não precisa continuar.</h1>
-            <p className={styles.deck}>Percebeu mudanças na sua vida íntima? Comece por organizar suas dúvidas em um quiz. No final, conheça a proposta da COWBOY e os kits disponíveis.</p>
-            <a href={href} onClick={event => startQuiz(event, "hero")} className={styles.cta} data-editorial-cta="hero">Começar meu quiz</a>
-            <p className={styles.quizDetails}>14 perguntas. Sem cadastro. No seu ritmo.</p>
+            <h1 className={styles.headline}>Pau mole na hora H? Gozando antes do que gostaria?</h1>
+            <p className={styles.deck}>Se o sexo virou tensão, vá direto ao ponto. Responda 14 perguntas sobre o que está acontecendo e conheça a proposta da COWBOY para a sua rotina.</p>
+            <a href={href} onClick={event => startQuiz(event, "hero")} className={styles.cta} data-editorial-cta="hero">Quero começar meu quiz</a>
+            <p className={styles.quizDetails}>14 perguntas. Sem cadastro. Responda com sinceridade.</p>
             <p className={styles.privacyNote}>Suas respostas ficam apenas nesta aba e não são enviadas aos serviços de rastreamento.</p>
           </div>
           <figure className={styles.figure}>
-            <img src="/sites/cowboy/casal-cumplicidade.webp" alt="Casal sentado no sofá, de mãos dadas, olhando um para o outro" width={1024} height={1536} fetchPriority="high" loading="eager" className={styles.photo} />
-            <figcaption>Confiança também merece espaço na conversa. Imagem ilustrativa.</figcaption>
+            <img src="/sites/cowboy/capa-black-v3.webp" alt="Homem com expressão tensa sentado na beira da cama, com a parceira de costas ao fundo em um quarto escuro" width={1448} height={1086} fetchPriority="high" loading="eager" className={styles.photo} />
+            <figcaption>Quando a preocupação ocupa o lugar da confiança. Imagem ilustrativa.</figcaption>
           </figure>
         </article>
 
         <section className={styles.explainer} aria-labelledby="editorial-how-title" data-editorial-section="how_it_works">
           <div className={styles.explainerIntro}>
-            <h2 id="editorial-how-title">Um primeiro passo, feito por você.</h2>
-            <p>Sem preencher nome, e-mail ou telefone para responder. Você acompanha o progresso e pode voltar às perguntas.</p>
+            <h2 id="editorial-how-title">Chega de deixar essa conversa para depois.</h2>
+            <p>Comece por você. Sem informar nome, e-mail ou telefone. Ao final, veja seu resumo, assista à apresentação da COWBOY e conheça a oferta.</p>
           </div>
           <ol className={styles.steps}>
-            <li><span aria-hidden="true">1</span><div><h3>Conte o que percebe</h3><p>Responda sobre sua rotina, suas dúvidas e o que gostaria de melhorar.</p></div></li>
-            <li><span aria-hidden="true">2</span><div><h3>Veja o seu resumo</h3><p>Reveja os pontos informados antes de conhecer a proposta do produto.</p></div></li>
-            <li><span aria-hidden="true">3</span><div><h3>Conheça e escolha</h3><p>Assista à apresentação, confira valores e compare os kits. A decisão é sua.</p></div></li>
+            <li><span aria-hidden="true">1</span><div><h3>Vá direto ao ponto</h3><p>O que mudou, há quanto tempo e o que você quer melhorar. Suas respostas ficam nesta aba.</p></div></li>
+            <li><span aria-hidden="true">2</span><div><h3>Olhe para o seu resumo</h3><p>Confira o que você informou e conheça a proposta da COWBOY.</p></div></li>
+            <li><span aria-hidden="true">3</span><div><h3>Decida o próximo passo</h3><p>Assista ao vídeo, veja os preços e compare os kits antes de escolher.</p></div></li>
           </ol>
         </section>
 
         <footer className={styles.footer} data-editorial-section="footer">
           <div className={styles.lastCall}>
-            <p>Comece pela primeira pergunta.</p>
-            <a href={href} onClick={event => startQuiz(event, "footer")} className={styles.cta} data-editorial-cta="footer">Começar meu quiz</a>
+            <p>A primeira resposta é sua.</p>
+            <a href={href} onClick={event => startQuiz(event, "footer")} className={styles.cta} data-editorial-cta="footer">Quero começar meu quiz</a>
           </div>
           <p className={styles.notice}>Conteúdo publicitário da COWBOY Energia. Este questionário apresenta uma oferta comercial e não substitui uma avaliação de saúde. COWBOY é um suplemento alimentar, não um medicamento.</p>
           <div className={styles.legal}>
