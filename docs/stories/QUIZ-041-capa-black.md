@@ -1,6 +1,6 @@
 # QUIZ-041 — Capa v3 com comunicação mais direta
 
-Status: implementada; gates, QA e revisão visual aprovados, publicação liberada pelo root.
+Status: concluída — capa atualizada e verificada em produção.
 
 ## Pedido e base
 
@@ -17,7 +17,7 @@ Fetch confirmou a produção `0aa87aff78f841effb275340d5fe4a1af1a03c38`. Branch 
 - [x] Manter legibilidade, responsividade, foco e navegação por teclado na capa.
 - [x] Preservar questionário, progresso, VSL, instrumentação, checkout, preços, demais mídias, v1, v2, homepage e `/quiz`.
 - [x] Aprovar lint, TypeScript, testes, build/check:build e QA independente da capa e regressões relevantes.
-- [ ] Publicar após GO root/QA e verificar deployment READY, quatro rotas, assets e rollback.
+- [x] Publicar após GO root/QA e verificar deployment READY, quatro rotas, assets e rollback.
 
 ## Coordenação
 
@@ -42,6 +42,18 @@ Servidor local em `http://127.0.0.1:4411`, servindo `dist` com as APIs existente
 QA independente aprovada: seis E2E existentes passaram em 15,3 segundos, sem mudanças nos arquivos de teste. Foram verificados capa, fluxo de 18 etapas, VSL real/fallback, três kits, atribuição/linker, opt-out e GPC. Capturas em 375, 390 e 1440 px confirmaram CTA acima da dobra, ausência de overflow, imagem íntegra, recorte desktop, teclado/foco e contraste. Evidências locais em `test-results/quiz-041/` (`capa-mobile.png`, `capa-mobile-390.png`, `capa-desktop-1440.png` e `qa-screen.json`). Coleta externa e compra ficaram bloqueadas.
 
 O root conferiu as capturas em 375 e 1440 px, aprovou imagem, visual e botão, e autorizou commit, PR, merge e publicação automática sem ajustes adicionais. Nenhuma configuração externa de analytics foi alterada nesta atualização.
+
+## Publicação concluída
+
+PR [#25](https://github.com/murillocaetano742/cowboy-site/pull/25), head `32c2929110dc2382e9c7084e47213e96ad846071`, com checks Vercel e Vercel Preview Comments aprovados e SHA exato conferido antes do merge. Merge `09ec3e1dd642266997a4a9df76ab0cbb2a2e04b2` em 13/10/2026 às 23h09min46s UTC. O deploy Git automático gerou `dpl_Ej9xb4MhNo33cbbJyRh8g5bKKetN`, READY/Production, URL `https://cowboy-site-kw5y18kb6-murillo-digital.vercel.app`, com os aliases principal e www confirmados. Não houve deploy manual duplicado.
+
+[Capa publicada](https://cowboyenergiamasculina.com.br/quiz/v3-editorial/). Às 23h11min34s UTC, as quatro rotas — capa, questionário v3, v1 e v2 — responderam HTTP 200 e seus HTML foram idênticos aos da implantação obtidos por `vercel curl` autenticado. SHA-256 da capa: `15e665ff3995b0657b665f4136847984f83dc6ad9a689cedc81f5acf45a19bbc`. A manchete atualizada, a identificação publicitária, o CTA para o questionário e a nova imagem foram confirmados no HTML público.
+
+Os 16 assets referenciados responderam 200. A imagem retornou `image/webp`, com SHA-256 `a561286dcab60ada67f98a3a3d9b5ab67fce120dc4d56de76ded655022cfec50`, idêntico ao arquivo aprovado. Os dois bundles de instrumentação e fluxo/player identificados na evidência QUIZ-040 mantiveram seus hashes nesta publicação. A homepage permaneceu igual; `/quiz` manteve 307 para v1 com query preservada. O MP4 respondeu 206 `video/mp4` para Range 0–1023 de 30.576.839 bytes; o poster manteve o hash original.
+
+A consulta de logs de erro da implantação na janela de 15 minutos retornou zero entradas. Evidência privada: `.local/quiz-041-final-http.json`. O servidor local 4411 foi encerrado e a ausência de listener confirmada; capturas e PNG original foram preservados localmente. Rollback: `dpl_FXsFknKy7aRMD5ct66gvxas76amC`.
+
+Esta alteração visual não repetiu configuração externa nem homologação de GA4, Meta ou Purchase. A prova anterior de recepção GA4 e as limitações externas permanecem nos documentos das respectivas entregas. O fechamento documental fica em commit local, sem novo push nem redeploy apenas por documentação.
 
 ## File List
 
