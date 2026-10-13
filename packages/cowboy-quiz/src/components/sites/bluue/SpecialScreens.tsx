@@ -3,11 +3,11 @@
 /* eslint-disable @next/next/no-img-element -- Local original images preserve the source quiz sizing. */
 
 import { useEffect, useRef, useState } from "react";
-import { Logo } from "./Logo";
-import "./special.css";
+import { Logo } from "@/components/sites/bluue/Logo";
+import "@/components/sites/bluue/special.css";
 
 type NextProps = { onNext: () => void };
-type BackProps = NextProps & { onBack: () => void };
+type BackProps = NextProps & { onBack: () => void; editorial?: boolean };
 
 const ASSETS = "/sites/cowboy/";
 const PRIVACY_URL = "https://cowboyenergiamasculina.com.br/privacidade";
@@ -123,7 +123,7 @@ export function Explanation({ onNext }: NextProps) {
   );
 }
 
-export function Testimonials({ onNext, onBack }: BackProps) {
+export function Testimonials({ onNext, onBack, editorial = false }: BackProps) {
   useDelayedNext(onNext, 6000);
   return (
     <div className="flex flex-col h-[100dvh] max-w-lg mx-auto bg-background">
@@ -152,7 +152,7 @@ export function Testimonials({ onNext, onBack }: BackProps) {
         <Logo className="text-[15px]" />
         <div className="w-8" />
       </div>
-      <div className="relative">
+      {!editorial && <div className="relative">
         <div className="w-full px-4 pt-3">
           <div
             className="w-full h-1.5 bg-muted/60 rounded-full overflow-hidden"
@@ -173,7 +173,7 @@ export function Testimonials({ onNext, onBack }: BackProps) {
             <div className="h-full w-1/3 bg-white/30 rounded-full bluue-shimmer" />
           </div>
         </div>
-      </div>
+      </div>}
       <p className="text-xs text-muted-foreground animate-pulse px-4 pt-2">
         Montando o seu perfil...
       </p>

@@ -36,6 +36,19 @@ export const intro = [
   },
 ];
 
+/** Editorial-only context; intentionally excluded from severity scoring. */
+export const problemDurationQuestion: Question = {
+  id: "problem_duration",
+  question: "Há quanto tempo você percebe essa dificuldade?",
+  options: [
+    { label: "Há menos de 1 mês" },
+    { label: "De 1 a 6 meses" },
+    { label: "De 6 meses a 1 ano" },
+    { label: "Há mais de 1 ano" },
+    { label: "Não percebo uma dificuldade hoje" },
+  ],
+};
+
 export const questions: Question[] = [
   {
     id: "age",

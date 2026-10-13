@@ -19,6 +19,7 @@ function listFiles(directory) {
 const expected = [...PAGES, ...ASSETS, ...OUTPUT_ALIASES.map(({ destination }) => destination), ...quizPublicFiles()].sort();
 const actual = listFiles(OUTPUT).sort();
 assert.deepEqual(actual, expected, 'Public output must match the explicit allowlist');
+assert.deepEqual(actual.filter((name) => name.startsWith('quiz/') && name.endsWith('.html')), PUBLIC_QUIZ_ROUTES.map((route) => `${route}/index.html`).sort(), 'Only the four approved quiz entrypoints may be public');
 assert.ok(actual.every((name) => !/^(?:docs|api|config|tests|scripts|node_modules|\.)\//.test(name)));
 const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
 assert.equal(vercel.outputDirectory, 'dist');
@@ -27,8 +28,10 @@ assert.equal(fs.readFileSync(path.join(OUTPUT, 'index.html'), 'utf8'), fs.readFi
 assert.deepEqual(vercel.redirects.find(({ source }) => source === '/quiz'), { source: '/quiz', destination: '/quiz/v1-direto/', permanent: false }, 'The existing quiz shortcut must remain on v1');
 for (const route of PUBLIC_QUIZ_ROUTES) {
   const quizHtml = fs.readFileSync(path.join(OUTPUT, route, 'index.html'), 'utf8');
-  for (const match of quizHtml.matchAll(/(?:src|href)=["'](\/(?:_next|sites)\/[^"'?#]+)[^"']*["']/g)) {
-    assert.ok(fs.existsSync(path.join(OUTPUT, match[1])), `${route}: missing public asset ${match[1]}`);
+  for (const match of quizHtml.matchAll(/(?:src|href)=["'](\/(?:_next|sites|imagens|videos|quiz)\/[^"'?#]+)[^"']*["']/g)) {
+    const target = path.join(OUTPUT, match[1]);
+    assert.ok(fs.existsSync(target), `${route}: missing public asset ${match[1]}`);
+    if (fs.statSync(target).isDirectory()) assert.ok(fs.existsSync(path.join(target, 'index.html')), `${route}: missing route entrypoint ${match[1]}`);
   }
 }
 const vslAsset = 'videos/vsl/vsl-dr-durval-720.mp4';

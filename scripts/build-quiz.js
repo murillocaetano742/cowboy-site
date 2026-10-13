@@ -7,9 +7,10 @@ const { spawnSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
 const QUIZ_ROOT = path.join(ROOT, 'packages', 'cowboy-quiz');
 const QUIZ_OUTPUT = path.join(QUIZ_ROOT, 'out');
-const PUBLIC_QUIZ_ROUTES = Object.freeze(['quiz/v1-direto', 'quiz/v2-vsl']);
-const PUBLIC_DIRECTORIES = Object.freeze([...PUBLIC_QUIZ_ROUTES, '_next/static', 'sites']);
+const PUBLIC_QUIZ_ROUTES = Object.freeze(['quiz/v1-direto', 'quiz/v2-vsl', 'quiz/v3-editorial', 'quiz/v3-editorial/quiz']);
+const PUBLIC_DIRECTORIES = Object.freeze(['_next/static', 'sites']);
 const PUBLIC_EXTENSIONS = new Set(['.html', '.txt', '.js', '.css', '.json', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.woff', '.woff2', '.mp4', '.vtt', '.ico']);
+const NEXT_METADATA_EXTENSIONS = new Set(['.txt']);
 
 function buildQuiz() {
   const nextCli = path.join(QUIZ_ROOT, 'node_modules', 'next', 'dist', 'bin', 'next');
@@ -24,22 +25,34 @@ function buildQuiz() {
 }
 
 function quizPublicFiles(output = QUIZ_OUTPUT) {
-  function visit(relative) {
+  function visit(relative, extensions = PUBLIC_EXTENSIONS) {
     const absolute = path.join(output, relative);
     const entry = fs.lstatSync(absolute);
     if (entry.isSymbolicLink()) throw new Error(`Quiz public files cannot be symbolic links: ${relative}`);
     if (entry.isDirectory()) {
       return fs.readdirSync(absolute).flatMap((name) => {
         if (name.startsWith('.')) throw new Error(`Unexpected hidden quiz asset: ${relative}/${name}`);
-        return visit(`${relative}/${name}`);
+        return visit(`${relative}/${name}`, extensions);
       });
     }
-    if (!entry.isFile() || !PUBLIC_EXTENSIONS.has(path.extname(relative))) {
+    if (!entry.isFile() || !extensions.has(path.extname(relative))) {
       throw new Error(`Unexpected quiz public file: ${relative}`);
     }
     return [relative];
   }
-  const files = PUBLIC_DIRECTORIES.flatMap(visit);
+  const routeFiles = PUBLIC_QUIZ_ROUTES.flatMap((route) => {
+    const directory = path.join(output, route);
+    const entry = fs.lstatSync(directory);
+    if (entry.isSymbolicLink() || !entry.isDirectory()) throw new Error(`Invalid quiz route directory: ${route}`);
+    // Each route owns its entrypoint and Next prefetch metadata, never arbitrary child routes.
+    return fs.readdirSync(directory).flatMap((name) => {
+      if (name.startsWith('.')) throw new Error(`Unexpected hidden quiz asset: ${route}/${name}`);
+      if (name === 'index.html' || name === 'index.txt') return visit(`${route}/${name}`);
+      if (name.startsWith('__next.')) return visit(`${route}/${name}`, NEXT_METADATA_EXTENSIONS);
+      return [];
+    });
+  });
+  const files = [...routeFiles, ...PUBLIC_DIRECTORIES.flatMap((relative) => visit(relative))];
   for (const route of PUBLIC_QUIZ_ROUTES) {
     if (!files.includes(`${route}/index.html`)) throw new Error(`Quiz entrypoint missing: ${route}`);
   }

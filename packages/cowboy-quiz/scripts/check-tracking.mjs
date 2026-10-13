@@ -379,6 +379,132 @@ function mediaPlayback(ranges = [], duration = 100, ended = false) {
   };
 }
 
+test("editorial cover and questionnaire share an ID but have separate neutral landing types", () => {
+  for (const [pathname, kind] of [["/quiz/v3-editorial/", "cover"], ["/quiz/v3-editorial/quiz/", "quiz"]]) {
+    const page = fixture({ pathname, search: "?utm_source=campaign&answer=SENSITIVE" });
+    page.tracking.initializeQuizTracking();
+    page.tracking.initializeQuizTracking();
+    assert.deepEqual(plain(page.events().map(([, name]) => name)), ["page_view", "landing_view"]);
+    assert.ok(page.events().every(([, , params]) => params.quiz_id === "cowboy_v3_editorial" && params.page_kind === kind));
+    assert.doesNotMatch(JSON.stringify(page.commands()), /SENSITIVE|answer/);
+  }
+  const page = fixture();
+  for (const path of ["/quiz/v3-editorial/other", "/quiz/v3-editorial/quiz/private", "/quiz/?variant=v3-editorial"]) {
+    assert.equal(page.variants.quizVariantForPath(path), "v1-direto");
+  }
+});
+
+test("editorial uniquely counts 18 steps and 14 answers while separating back/revisit actions", () => {
+  const page = fixture({ pathname: "/quiz/v3-editorial/quiz/" });
+  const track = page.tracking;
+  track.initializeQuizTracking();
+  for (const step of [1, 1, 2, 2]) track.trackQuizStep(step);
+  track.trackQuizBack(2, 1);
+  track.trackQuizStep(1);
+  track.trackQuizStep(1);
+  for (let step = 1; step <= 18; step++) {
+    track.trackQuizStep(step);
+    track.trackQuizAnswer(step);
+    track.trackQuizAnswer(step);
+  }
+  const matching = (name) => page.events().filter(([, event]) => event === name);
+  assert.equal(matching("quiz_step_view").length, 18);
+  assert.equal(matching("quiz_answer").length, 14);
+  assert.deepEqual(plain(matching("quiz_step_revisit").map(([, , params]) => [params.step_index, params.visit_count])), [[1, 2], [2, 2]]);
+  const back = matching("quiz_back")[0][2];
+  assert.deepEqual([back.from_step_index, back.to_step_index, back.back_count], [2, 1, 1]);
+  track.trackResultView(); track.trackResultView();
+  track.trackViewKits(); track.trackViewKits();
+  assert.equal(matching("quiz_result_view").length, 1);
+  assert.equal(matching("quiz_view_kits").length, 1);
+  assert.equal(matching("view_item").length, 0, "Reaching result never implicitly declares the kits visible");
+});
+
+test("editorial enums reject arbitrary payloads and add no Meta conversions", () => {
+  const page = fixture({ pathname: "/quiz/v3-editorial/" });
+  const track = page.tracking;
+  track.initializeQuizTracking();
+  const baseline = page.window.fbq.queue.length;
+  for (let round = 0; round < 2; round++) {
+    for (const section of ["intro", "how_it_works", "footer"]) track.trackCoverSection(section);
+    for (const link of ["privacy", "terms"]) track.trackContentLink(link, "cover");
+    for (const action of ["visible", "unmute", "mute", "pause", "error", "autoplay_blocked"]) track.trackVslInteraction(action);
+  }
+  const before = page.events().length;
+  for (const invalid of ["SENSITIVE", { answer: "PRIVATE" }, 19, -1, NaN]) {
+    track.trackCoverSection(invalid); track.trackCoverCta(invalid);
+    track.trackContentLink(invalid, "offer"); track.trackContentLink("privacy", invalid);
+    track.trackVslInteraction(invalid); track.trackQuizStep(invalid); track.trackQuizAnswer(invalid);
+    track.trackQuizBack(invalid, 1); track.trackQuizBack(2, invalid);
+  }
+  assert.equal(page.events().length, before);
+  assert.equal(page.window.fbq.queue.length, baseline);
+  for (const action of ["visible", "error", "autoplay_blocked"]) assert.equal(page.events().filter(([, name]) => name === `vsl_${action}`).length, 1);
+  assert.deepEqual(plain(page.events().filter(([, name]) => name === "vsl_pause").map(([, , params]) => params.interaction_count)), [1, 2]);
+  assert.doesNotMatch(JSON.stringify(page.commands()), /SENSITIVE|PRIVATE|answers|weight|severity|duration/);
+});
+
+test("editorial cover CTA uses one bounded callback and works when the provider throws", () => {
+  for (const blocked of [false, true]) {
+    const page = fixture({ pathname: "/quiz/v3-editorial/" });
+    page.tracking.initializeQuizTracking();
+    if (blocked) page.window.gtag = () => { throw new Error("blocked"); };
+    let ready = 0;
+    page.tracking.trackCoverCta("hero", () => ready++);
+    assert.equal(ready, 0);
+    if (!blocked) {
+      const params = page.events().find(([, name]) => name === "quiz_cover_cta")[2];
+      assert.equal(params.event_timeout, 700);
+      assert.equal(params.cta_location, "hero");
+      params.event_callback(); params.event_callback();
+    } else {
+      page.advanceTimers(799); assert.equal(ready, 0);
+    }
+    page.advanceTimers(800);
+    assert.equal(ready, 1);
+    page.tracking.trackCoverCta("hero", () => ready++);
+    assert.equal(ready, 2, "Dedup does not trap a retry");
+  }
+});
+
+test("new editorial APIs never leak into older variants or bypass privacy gates", () => {
+  for (const options of [{ pathname: "/quiz/v1-direto/" }, { pathname: "/quiz/v2-vsl/" }, { pathname: "/quiz/v3-editorial/quiz/", gpc: true }, { pathname: "/quiz/v3-editorial/quiz/", disabled: true }]) {
+    const page = fixture(options);
+    const track = page.tracking;
+    track.initializeQuizTracking();
+    const before = page.events().length;
+    let ready = false;
+    track.trackCoverCta("footer", () => { ready = true; });
+    track.trackCoverSection("intro"); track.trackContentLink("terms", "offer");
+    track.trackQuizAnswer(1); track.trackQuizBack(2, 1);
+    track.trackResultView(); track.trackViewKits();
+    track.trackVslInteraction("unmute");
+    assert.equal(page.events().length, before);
+    assert.equal(ready, true);
+    if (options.gpc || options.disabled) assert.equal(page.scripts.length, 0);
+  }
+});
+
+test("editorial video coverage and checkout retain seek protection, attribution and bounded navigation", () => {
+  const page = fixture({ pathname: "/quiz/v3-editorial/quiz/", search: "?utm_source=campaign&gbraid=click" });
+  page.tracking.initializeQuizTracking();
+  page.vsl.recordVslPlayback("playing", mediaPlayback(), "v3-editorial");
+  page.vsl.recordVslPlayback("ended", mediaPlayback([[99, 100]], 100, true), "v3-editorial");
+  assert.equal(page.events().filter(([, name]) => name === "vsl_complete").length, 0);
+  page.vsl.recordVslPlayback("ended", mediaPlayback([[0, 100]], 100, true), "v3-editorial");
+  assert.equal(page.events().filter(([, name]) => name === "vsl_complete").length, 1);
+  const event = checkoutClick();
+  event.currentTarget.href = page.checkout.checkoutHref(3, "", page.checkout.readAttribution());
+  page.navigation.handleCheckoutClick(event, 3, "v3-editorial");
+  event.currentTarget.href += "&_gl=fresh-vendor";
+  page.advanceTimers(800);
+  const destination = new URL(page.navigations[0]);
+  assert.equal(destination.searchParams.get("_gl"), "fresh-vendor");
+  assert.equal(destination.searchParams.get("utm_source"), "campaign");
+  assert.equal(destination.searchParams.get("gbraid"), "click");
+  assert.equal(page.events().find(([, name]) => name === "begin_checkout")[2].quiz_id, "cowboy_v3_editorial");
+});
+
 test("native playback milestones use watched coverage, deduplicate replay and emit only neutral GA fields", () => {
   const page = fixture({ pathname: "/quiz/v2-vsl/" });
   page.tracking.initializeQuizTracking();

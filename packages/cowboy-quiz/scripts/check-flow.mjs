@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { initialState, LAST_QUESTION, progressFor, quizReducer } from "../src/components/sites/bluue/machine.ts";
-import { caseResult, questions, RECOMMENDED_KIT } from "../src/components/sites/bluue/data.ts";
+import { initialState, LAST_QUESTION, progressFor, quizReducer, quizStepFor } from "../src/components/sites/bluue/machine.ts";
+import { caseResult, problemDurationQuestion, questions, RECOMMENDED_KIT } from "../src/components/sites/bluue/data.ts";
 import { checkoutHref } from "../src/components/sites/bluue/checkout.ts";
 
 // Expected paths are transcribed from the public original handlers documented in
@@ -29,6 +29,46 @@ const normalActions = [
   { type: "ANSWER", id: "fear", value: "Dela procurar outro" },
   { type: "NEXT" },
 ];
+
+function editorialStates() {
+  const actions = [...normalActions];
+  actions.splice(8, 0, { type: "ANSWER", id: "problem_duration", value: "De 1 a 6 meses" });
+  return actions.reduce((states, next) => [...states, quizReducer(states.at(-1), next, "v3-editorial")], [fresh()]);
+}
+
+test("editorial adds exactly one question and reaches each ordinal from 1 to 18", () => {
+  const states = editorialStates();
+  assert.deepEqual(states.map((state) => quizStepFor(state, "v3-editorial")), Array.from({ length: 18 }, (_, index) => index + 1));
+  assert.equal(screen(states[8]), "timeframe");
+  assert.equal(Object.keys(states.at(-1).answers).length, 14);
+  assert.equal(states.at(-1).answers.problem_duration, "De 1 a 6 meses");
+  assert.equal(states.at(-1).answers.duration, "Não", "Medication retains its distinct existing key");
+  for (const variant of ["v1-direto", "v2-vsl"]) {
+    const original = normalActions.reduce((states, next) => [...states, quizReducer(states.at(-1), next, variant)], [fresh()]);
+    assert.deepEqual(original.map((state) => quizStepFor(state, variant)), Array.from({ length: 17 }, (_, index) => index + 1));
+    assert.ok(original.every((state) => state.stage !== "timeframe"));
+  }
+});
+
+test("editorial back decrements visible progress and preserves all remembered answers", () => {
+  for (const state of editorialStates().filter((state) => ["intro", "quiz", "weight_kg", "weight", "timeframe", "testimonials"].includes(state.stage))) {
+    const previous = quizReducer(state, { type: "BACK" }, "v3-editorial");
+    assert.equal(quizStepFor(previous, "v3-editorial"), Math.max(1, quizStepFor(state, "v3-editorial") - 1));
+    assert.deepEqual(previous.answers, state.answers);
+  }
+  const concern = editorialStates().find((state) => state.stage === "quiz" && state.questionIndex === 1);
+  const ruler = quizReducer(concern, { type: "BACK" }, "v3-editorial");
+  assert.equal(ruler.answers.weight_kg, "82 kg");
+});
+
+test("timeframe context never changes scoring or fabricates result statements", () => {
+  const original = normalStates().at(-1).answers;
+  for (const option of problemDurationQuestion.options) {
+    assert.deepEqual(caseResult({ ...original, problem_duration: option.label }), caseResult(original));
+  }
+  assert.equal(problemDurationQuestion.id, "problem_duration");
+  assert.equal(problemDurationQuestion.options.length, 5);
+});
 
 function normalStates() {
   return normalActions.reduce((states, next) => [...states, quizReducer(states.at(-1), next)], [fresh()]);
