@@ -4,10 +4,11 @@ import {
   sanitizedPageUrl,
 } from "@/components/sites/bluue/checkout";
 import type { KitQuantity } from "@/components/sites/bluue/data";
+import { QUIZ_IDS, quizIdForVariant, quizVariantForPath, type QuizVariant } from "@/lib/quiz-variant";
 
 export const MEASUREMENT_ID = "G-VYR2542XCN";
 export const META_PIXEL_ID = "1006075098894986";
-export const QUIZ_ID = "cowboy_v1_direto";
+export const QUIZ_ID = QUIZ_IDS["v1-direto"];
 export const CHECKOUT_EVENT_TIMEOUT_MS = 700;
 export const CHECKOUT_FALLBACK_MS = 800;
 
@@ -36,6 +37,10 @@ function currentWindow(): TrackingWindow | undefined {
   return typeof window === "undefined" ? undefined : window as TrackingWindow;
 }
 
+function currentVariant(): QuizVariant {
+  return quizVariantForPath(currentWindow()?.location.pathname ?? "");
+}
+
 export function trackingAllowed(): boolean {
   const browser = currentWindow();
   if (!browser) return false;
@@ -54,9 +59,9 @@ function loadScript(id: string, src: string, attributes: Record<string, string> 
   document.head.appendChild(script);
 }
 
-function sendGoogle(event: string, params: Record<string, unknown>) {
+function sendGoogle(event: string, params: Record<string, unknown>, variant = currentVariant()) {
   if (!trackingAllowed()) return;
-  try { currentWindow()?.gtag?.("event", event, { send_to: MEASUREMENT_ID, quiz_id: QUIZ_ID, ...params }); }
+  try { currentWindow()?.gtag?.("event", event, { send_to: MEASUREMENT_ID, quiz_id: quizIdForVariant(variant), ...params }); }
   catch { /* Analytics failure must never interrupt the quiz or purchase link. */ }
 }
 
@@ -66,11 +71,12 @@ function sendMeta(event: string, params: Record<string, unknown> = {}) {
   catch { /* A blocked provider is optional. */ }
 }
 
-function once(key: string, emit: () => void) {
+function once(key: string, emit: () => void, variant = currentVariant()) {
   if (!trackingAllowed()) return false;
   const state = currentWindow()?.__cowboyQuizTracking;
-  if (!state?.initialized || state.seen.has(key)) return false;
-  state.seen.add(key);
+  const namespacedKey = `${quizIdForVariant(variant)}:${key}`;
+  if (!state?.initialized || state.seen.has(namespacedKey)) return false;
+  state.seen.add(namespacedKey);
   emit();
   return true;
 }
@@ -142,17 +148,17 @@ export function initializeQuizTracking() {
   });
 }
 
-export function trackQuizStart() {
-  once("start", () => sendGoogle("quiz_start", {}));
+export function trackQuizStart(variant = currentVariant()) {
+  once("start", () => sendGoogle("quiz_start", {}, variant), variant);
 }
 
-export function trackQuizStep(stepIndex: number) {
+export function trackQuizStep(stepIndex: number, variant = currentVariant()) {
   if (!Number.isInteger(stepIndex) || stepIndex < 1 || stepIndex > 17) return;
-  once(`step:${stepIndex}`, () => sendGoogle("quiz_step_view", { step_index: stepIndex }));
+  once(`step:${stepIndex}`, () => sendGoogle("quiz_step_view", { step_index: stepIndex }, variant), variant);
 }
 
-export function trackQuizComplete() {
-  once("complete", () => sendGoogle("quiz_complete", {}));
+export function trackQuizComplete(variant = currentVariant()) {
+  once("complete", () => sendGoogle("quiz_complete", {}, variant), variant);
 }
 
 const KIT_PRICES = { 1: 79.9, 2: 154.8, 3: 199.9 } as const;
@@ -166,20 +172,20 @@ function commerce(quantity: KitQuantity) {
   };
 }
 
-export function trackOfferView(quantity: KitQuantity) {
+export function trackOfferView(quantity: KitQuantity, variant = currentVariant()) {
   if (![1, 2, 3].includes(quantity)) return;
   once("offer", () => {
-    sendGoogle("view_item", commerce(quantity));
+    sendGoogle("view_item", commerce(quantity), variant);
     sendMeta("ViewContent", { content_name: "COWBOY Energia", content_type: "product", currency: "BRL", value: KIT_PRICES[quantity] });
-  });
+  }, variant);
 }
 
-export function trackKitSelection(quantity: KitQuantity) {
+export function trackKitSelection(quantity: KitQuantity, variant = currentVariant()) {
   if (![1, 2, 3].includes(quantity)) return;
-  once(`select:${quantity}`, () => sendGoogle("select_item", { item_list_id: "cowboy_kits", ...commerce(quantity) }));
+  once(`select:${quantity}`, () => sendGoogle("select_item", { item_list_id: "cowboy_kits", ...commerce(quantity) }, variant), variant);
 }
 
-export function trackBeginCheckout(quantity: KitQuantity, onReady?: () => void) {
+export function trackBeginCheckout(quantity: KitQuantity, onReady?: () => void, variant = currentVariant()) {
   if (![1, 2, 3].includes(quantity)) { onReady?.(); return; }
   const browser = currentWindow();
   let finished = false;
@@ -196,8 +202,18 @@ export function trackBeginCheckout(quantity: KitQuantity, onReady?: () => void) 
     sendGoogle("begin_checkout", {
       ...commerce(quantity),
       ...(onReady ? { event_callback: finish, event_timeout: CHECKOUT_EVENT_TIMEOUT_MS } : {}),
-    });
+    }, variant);
     sendMeta("InitiateCheckout", { content_name: "COWBOY Energia", currency: "BRL", value: KIT_PRICES[quantity], num_items: 1 });
-  });
+  }, variant);
   if (!emitted) finish();
+}
+
+/** Fixed numeric milestones only: no media title, question text or answers. */
+export function trackVslMilestone(percent: 0 | 25 | 50 | 75 | 100, variant = currentVariant()) {
+  if (variant !== "v2-vsl" || ![0, 25, 50, 75, 100].includes(percent)) return;
+  const event = percent === 0 ? "vsl_start" : percent === 100 ? "vsl_complete" : "vsl_progress";
+  once(`vsl:${percent}`, () => sendGoogle(event, {
+    video_id: "cowboy_vsl",
+    ...(percent === 0 ? {} : { percent }),
+  }, variant), variant);
 }

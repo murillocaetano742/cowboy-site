@@ -7,7 +7,8 @@ const { spawnSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
 const QUIZ_ROOT = path.join(ROOT, 'packages', 'cowboy-quiz');
 const QUIZ_OUTPUT = path.join(QUIZ_ROOT, 'out');
-const PUBLIC_DIRECTORIES = Object.freeze(['quiz/v1-direto', '_next/static', 'sites']);
+const PUBLIC_QUIZ_ROUTES = Object.freeze(['quiz/v1-direto', 'quiz/v2-vsl']);
+const PUBLIC_DIRECTORIES = Object.freeze([...PUBLIC_QUIZ_ROUTES, '_next/static', 'sites']);
 const PUBLIC_EXTENSIONS = new Set(['.html', '.txt', '.js', '.css', '.json', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.woff', '.woff2', '.mp4', '.vtt', '.ico']);
 
 function buildQuiz() {
@@ -39,9 +40,11 @@ function quizPublicFiles(output = QUIZ_OUTPUT) {
     return [relative];
   }
   const files = PUBLIC_DIRECTORIES.flatMap(visit);
-  if (!files.includes('quiz/v1-direto/index.html')) throw new Error('Quiz entrypoint missing.');
+  for (const route of PUBLIC_QUIZ_ROUTES) {
+    if (!files.includes(`${route}/index.html`)) throw new Error(`Quiz entrypoint missing: ${route}`);
+  }
   return files.sort();
 }
 
 if (require.main === module) buildQuiz();
-module.exports = { buildQuiz, quizPublicFiles, QUIZ_ROOT, QUIZ_OUTPUT };
+module.exports = { buildQuiz, quizPublicFiles, QUIZ_ROOT, QUIZ_OUTPUT, PUBLIC_QUIZ_ROUTES };

@@ -14,6 +14,17 @@ npm run preview
 
 Abra `http://localhost:3003/quiz/v1-direto/` (a página `/` também abre o quiz).
 
+## Versões
+
+- `/quiz/v1-direto/`: fluxo original, resultado seguido pelos kits; `quiz_id=cowboy_v1_direto`.
+- `/quiz/v2-vsl/`: mesmo fluxo, com a VSL existente entre o resultado e os kits; `quiz_id=cowboy_v2_vsl`.
+
+A v1 continua sendo a variante padrão e não monta nem solicita a VSL. Na v2, o player usa controles nativos, `playsInline`, `preload="none"` e não inicia sozinho. Os kits continuam acessíveis sem assistir ao vídeo, inclusive se houver erro de mídia.
+
+O MP4 `/videos/vsl/vsl-dr-durval-720.mp4` e a capa `/imagens/v5/vsl-poster-frame.webp` pertencem ao site principal e não são duplicados no pacote. Para conferir a mídia localmente, use o build/servidor integrado da raiz; o preview isolado do pacote não contém esses dois recursos.
+
+Os eventos adicionais são `vsl_start`, `vsl_progress` (25, 50 e 75) e `vsl_complete`, com `video_id=cowboy_vsl`. Os quartis medem a cobertura de trechos realmente reproduzidos (`video.played`), sem somar duas vezes o replay. Buscar o final não gera progresso artificial. A conclusão exige o evento `ended` e cobertura de pelo menos 99%, com tolerância mínima de 0,5 segundo para diferenças de temporização. Esses eventos vão somente ao GA4, são deduplicados por variante e respeitam GPC/opt-out; não enviam texto, URL do vídeo ou respostas.
+
 ## O que mudou em relação à Bluue
 
 | Parte | Bluue | COWBOY |
@@ -41,6 +52,8 @@ Ficaram iguais: as três perguntas iniciais, preocupação, frequência, régua 
 - `src/components/sites/bluue/PreCheckout.tsx`: resultado, kits, preços, parcelas, banners, números de prova social (`RATING`, `REVIEWS`, `CUSTOMERS`), fotos de clientes, FAQ e garantia.
 - `src/components/sites/bluue/checkout.ts`: link do checkout e parâmetros repassados.
 - `src/components/sites/bluue/SpecialScreens.tsx`: telas animadas, depoimentos e nota de privacidade.
+- `src/components/sites/bluue/quiz-vsl.tsx`: player exclusivo da v2 e mensagem de erro de mídia.
+- `src/lib/quiz-variant.ts` e `src/lib/vsl-playback.ts`: identidade das variantes e marcos de vídeo baseados na cobertura reproduzida.
 - `src/app/cowboy.css`: cores, fontes e componentes do tema COWBOY (por cima do CSS original preservado em `source.css`).
 - `public/sites/cowboy/`: imagens, fontes e `videos/` (depoimentos com capa e legenda, os mesmos do site). Originais das fotos geradas em `docs/criacao/originais/`; os pedidos feitos ao Codex em `docs/criacao/pedido-codex-*.md` (faixa etária, gravidade, sem receita).
 

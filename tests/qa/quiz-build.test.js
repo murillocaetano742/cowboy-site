@@ -14,7 +14,7 @@ function fixture(t) {
     assert.ok(path.basename(output).startsWith('cowboy-quiz-build-'));
     fs.rmSync(output, { recursive: true, force: true });
   });
-  for (const relative of ['quiz/v1-direto/index.html', '_next/static/chunks/app.js', 'sites/cowboy/video.mp4', 'index.html', '404.html', '.env', 'docs/private.txt']) {
+  for (const relative of ['quiz/v1-direto/index.html', 'quiz/v2-vsl/index.html', '_next/static/chunks/app.js', 'sites/cowboy/video.mp4', 'index.html', '404.html', '.env', 'docs/private.txt', 'quiz/private/debug.html']) {
     const target = path.join(output, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, 'fixture');
@@ -22,8 +22,8 @@ function fixture(t) {
   return output;
 }
 
-test('quiz export copies only its route and public runtime; root and private artifacts stay excluded', (t) => {
-  assert.deepEqual(quizPublicFiles(fixture(t)), ['_next/static/chunks/app.js', 'quiz/v1-direto/index.html', 'sites/cowboy/video.mp4']);
+test('quiz export publishes both approved versions; unapproved routes and private artifacts stay excluded', (t) => {
+  assert.deepEqual(quizPublicFiles(fixture(t)), ['_next/static/chunks/app.js', 'quiz/v1-direto/index.html', 'quiz/v2-vsl/index.html', 'sites/cowboy/video.mp4']);
 });
 
 test('quiz export rejects hidden files and unapproved source extensions inside public roots', (t) => {
@@ -40,4 +40,10 @@ test('quiz cannot be published without the canonical HTML entrypoint', (t) => {
   const output = fixture(t);
   fs.unlinkSync(path.join(output, 'quiz/v1-direto/index.html'));
   assert.throws(() => quizPublicFiles(output), /entrypoint missing/);
+});
+
+test('quiz cannot publish a partial release without the independent VSL version', (t) => {
+  const output = fixture(t);
+  fs.unlinkSync(path.join(output, 'quiz/v2-vsl/index.html'));
+  assert.throws(() => quizPublicFiles(output), /entrypoint missing: quiz\/v2-vsl/);
 });
