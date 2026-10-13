@@ -179,7 +179,7 @@ test('capa editorial mobile 375: autoria publicitária, CTAs reais e atribuiçã
   expect(evidence.requests.some(url => new URL(url).pathname === VIDEO)).toBe(false);
   for (const placement of ['hero', 'footer']) {
     const cta = page.locator(`[data-editorial-cta="${placement}"]`);
-    await expect(cta).toHaveText(/Começar meu quiz/i);
+    await expect(cta).toHaveText(/Quero desbloquear meu resultado/i);
     await expect(cta).toHaveAttribute('href', /utm_campaign=QUIZ_040/);
     const target = new URL(await cta.getAttribute('href'), BASE);
     expect(target.pathname).toBe(FLOW);
