@@ -1,16 +1,64 @@
+.flow {
+  /* This wrapper is mounted only by v3; shared gold tokens remain unchanged elsewhere. */
+  --gold: #bd171d;
+  --gold-2: #f7b8bc;
+  --gold-3: #8f1117;
+  --gold-text: #bd171d;
+  --ink: #241516;
+  --line: rgba(189, 23, 29, .22);
+  --line-strong: rgba(189, 23, 29, .55);
+  --grad: linear-gradient(135deg, #bd171d 0%, #8f1117 52%, #bd171d 100%);
+  --grad-text: linear-gradient(135deg, #bd171d 0%, #8f1117 55%, #bd171d 100%);
+  --foreground: #241516;
+  --card-foreground: #241516;
+  --popover-foreground: #241516;
+  --primary: #bd171d;
+  --primary-foreground: #ffffff;
+  --secondary: #fff3f3;
+  --secondary-foreground: #241516;
+  --muted: #f2dfe1;
+  --muted-foreground: #6b5255;
+  --accent: rgba(189, 23, 29, .1);
+  --accent-foreground: #8f1117;
+  --border: rgba(189, 23, 29, .22);
+  --input: rgba(189, 23, 29, .22);
+  --ring: #bd171d;
+  --color-text: #241516;
+  --color-bluue-600: #8f1117;
+  --quiz-ruler-line: rgba(189, 23, 29, .35);
+  --quiz-ruler-major: #6b5255;
+  --quiz-ruler-medium: #95777b;
+  --quiz-ruler-minor: #e4c7ca;
+  --quiz-ruler-text: #6b5255;
+  --quiz-analysis-background: linear-gradient(145deg, #ffffff 0%, #fff5f5 40%, #fce5e7 70%, #ffffff 100%);
+}
+
+.flow:global(.cb-bg) { background: radial-gradient(120% 50% at 50% -10%, rgba(189, 23, 29, .1), transparent 60%), #ffffff; }
+.flow::selection, .flow ::selection { background: var(--gold-2); color: var(--ink); }
+.flow :global(.cb-option:hover) { box-shadow: 0 6px 18px rgba(189, 23, 29, .12); }
+.flow :global(.cb-option-selected) { background: var(--secondary); box-shadow: 0 8px 24px rgba(189, 23, 29, .18); }
+.flow :global(.cb-btn), .flow :global(.cb-badge-gold) { color: var(--primary-foreground); }
+.flow :global(.cb-btn) { box-shadow: 0 8px 24px rgba(189, 23, 29, .25); }
+.flow :global(.cb-btn:hover) { box-shadow: 0 12px 30px rgba(189, 23, 29, .32); }
+.flow :global(.cb-result-tag) { border-color: var(--gold-2); }
+.flow :global(.cb-result-rec) { background: linear-gradient(var(--secondary), #ffffff) padding-box, var(--grad) border-box; box-shadow: 0 12px 30px rgba(189, 23, 29, .14); }
+.flow :global(.cb-seal) { background: radial-gradient(circle at 50% 35%, #ffffff, #fce5e7) padding-box, var(--grad) border-box; box-shadow: 0 0 0 6px var(--secondary), 0 14px 34px rgba(189, 23, 29, .2); }
+.flow :global(.cb-star) { fill: var(--primary); color: var(--primary); }
+/* Success/price savings and the severity scale deliberately keep their semantic colors. */
+
 .progress {
   position: sticky;
   top: 0;
   z-index: 30;
   padding: 12px 20px 14px;
-  background: #fffaf1;
-  border-bottom: 1px solid #e9dfcc;
+  background: var(--secondary);
+  border-bottom: 1px solid var(--border);
 }
-.progress p { max-width: 472px; margin: 0 auto 7px; color: #66533a; font-size: 12px; font-weight: 700; }
-.track { max-width: 472px; height: 6px; margin: 0 auto; overflow: hidden; border-radius: 999px; background: #e9dfcc; }
-.fill { height: 100%; border-radius: inherit; background: #b8862b; transition: width 200ms ease; }
+.progress p { max-width: 472px; margin: 0 auto 7px; color: var(--muted-foreground); font-size: 12px; font-weight: 700; }
+.track { max-width: 472px; height: 6px; margin: 0 auto; overflow: hidden; border-radius: 999px; background: var(--muted); }
+.fill { height: 100%; border-radius: inherit; background: var(--primary); transition: width 200ms ease; }
 .flow > div:not(.progress):not([data-build]) { height: auto; min-height: calc(100dvh - 64px); overflow: visible; }
 .kits { scroll-margin-top: 80px; }
-.kits:focus-visible { outline: 3px solid #b8862b; outline-offset: 5px; border-radius: 12px; }
-.trust { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 14px; margin: 0 0 14px; color: #66533a; font-size: 12px; text-align: center; }
+.kits:focus-visible { outline: 3px solid var(--ring); outline-offset: 5px; border-radius: 12px; }
+.trust { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 14px; margin: 0 0 14px; color: var(--muted-foreground); font-size: 12px; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }

@@ -234,7 +234,7 @@ export function Analyzing({ onNext }: NextProps) {
       className="relative flex flex-col items-center justify-center h-[100dvh] w-full overflow-hidden"
       style={{
         background:
-          "linear-gradient(145deg, #ffffff 0%, #fdf8ee 40%, #f8ecd4 70%, #ffffff 100%)",
+          "var(--quiz-analysis-background, linear-gradient(145deg, #ffffff 0%, #fdf8ee 40%, #f8ecd4 70%, #ffffff 100%))",
       }}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -252,7 +252,7 @@ export function Analyzing({ onNext }: NextProps) {
         <div
           className="absolute w-[200px] h-[200px] rounded-full opacity-10"
           style={{
-            background: "radial-gradient(circle, #e8bf6a 0%, transparent 70%)",
+            background: "radial-gradient(circle, var(--gold-2) 0%, transparent 70%)",
             bottom: "20%",
             right: "-10%",
             filter: "blur(40px)",
@@ -275,7 +275,7 @@ export function Analyzing({ onNext }: NextProps) {
             cy={85}
             r={70}
             fill="none"
-            stroke="#b8862b"
+            stroke="var(--ring)"
             strokeWidth={2.5}
             strokeLinecap="round"
             strokeDasharray={circumference}
