@@ -60,6 +60,22 @@ Em 13/10/2026, foram criadas e confirmadas na interface autenticada da proprieda
 
 Foram preservadas Etapa do quiz (`step_index`), Progresso da VSL (`percent`) e Quiz COWBOY (`quiz_id`). A tabela final apresentou oito dimensões. Medição existente: `G-VYR2542XCN`. Configurar dimensões e testar payload local não comprova processamento de cada evento em produção.
 
+### Recebimento real após publicação
+
+Em 13/10/2026, após o deployment READY `dpl_FXsFknKy7aRMD5ct66gvxas76amC` do merge `0aa87aff78f841effb275340d5fe4a1af1a03c38` (PR 24), o navegador autenticado abriu a capa pública com `utm_source=qa`, `utm_medium=verification` e `utm_campaign=quiz040_release`, e clicou no CTA principal. O questionário abriu na etapa 1 de 18 com os parâmetros preservados. Nenhuma resposta foi selecionada e nenhum checkout foi aberto.
+
+O relatório oficial “Visão geral em tempo real” da propriedade 553376813 passou de zero para um usuário ativo e exibiu, aproximadamente às 20:59 UTC:
+
+| Evento recebido | Contagem |
+| --- | --- |
+| `page_view` | 2 |
+| `landing_view` | 2 |
+| `quiz_cover_section_view` | 2 |
+| `quiz_cover_cta` | 1 |
+| `quiz_step_view` | 1 |
+
+Esta evidência comprova recebimento GA4 da capa, navegação e primeira etapa em produção, além dos testes isolados de todo o fluxo. Não é homologação de eventos posteriores, da VSL ou de Purchase em produção. O console da navegação pública apresentou somente o aviso conhecido de Pixel Meta indisponível, sem erros do aplicativo.
+
 ## Privacidade e atribuição
 
 Respostas permanecem em memória na aba. Não se enviam idade, peso, condições de saúde, opções selecionadas, gravidade ou texto livre. Eventos customizados de navegação e vídeo vão ao GA4; Meta mantém somente eventos comerciais neutros já existentes. Inspeção automática de campos/botões e correspondência avançada permanecem desativadas.
