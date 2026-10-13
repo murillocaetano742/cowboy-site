@@ -64,10 +64,10 @@ export function QuizEditorial() {
 
         <article className={styles.lead} data-editorial-section="intro">
           <div className={styles.leadCopy}>
-            <h1 className={styles.headline}>Pau mole na hora H? Gozando antes do que gostaria?</h1>
-            <p className={styles.deck}>Se o sexo virou tensão, vá direto ao ponto. Responda 14 perguntas sobre o que está acontecendo e conheça a proposta da COWBOY para a sua rotina.</p>
-            <a href={href} onClick={event => startQuiz(event, "hero")} className={styles.cta} data-editorial-cta="hero">Quero começar meu quiz</a>
-            <p className={styles.quizDetails}>14 perguntas. Sem cadastro. Responda com sinceridade.</p>
+            <h1 className={styles.headline}>Chega de deixar o medo de falhar comandar sua vida sexual.</h1>
+            <p className={styles.deck}>Responda 14 perguntas e desbloqueie seu resultado na hora: um resumo baseado nas suas respostas e acesso à apresentação da COWBOY.</p>
+            <a href={href} onClick={event => startQuiz(event, "hero")} className={styles.cta} data-editorial-cta="hero">Quero desbloquear meu resultado</a>
+            <p className={styles.quizDetails}>Quiz gratuito. Sem cadastro. Resultado ao concluir.</p>
             <p className={styles.privacyNote}>Suas respostas ficam apenas nesta aba e não são enviadas aos serviços de rastreamento.</p>
           </div>
           <figure className={styles.figure}>
@@ -78,20 +78,20 @@ export function QuizEditorial() {
 
         <section className={styles.explainer} aria-labelledby="editorial-how-title" data-editorial-section="how_it_works">
           <div className={styles.explainerIntro}>
-            <h2 id="editorial-how-title">Chega de deixar essa conversa para depois.</h2>
-            <p>Comece por você. Sem informar nome, e-mail ou telefone. Ao final, veja seu resumo, assista à apresentação da COWBOY e conheça a oferta.</p>
+            <h2 id="editorial-how-title">14 respostas. Um próximo passo.</h2>
+            <p>Conte o que você está vivendo e veja seu resumo ao concluir. Depois, assista à apresentação da COWBOY e compare os kits antes de decidir.</p>
           </div>
           <ol className={styles.steps}>
             <li><span aria-hidden="true">1</span><div><h3>Vá direto ao ponto</h3><p>O que mudou, há quanto tempo e o que você quer melhorar. Suas respostas ficam nesta aba.</p></div></li>
-            <li><span aria-hidden="true">2</span><div><h3>Olhe para o seu resumo</h3><p>Confira o que você informou e conheça a proposta da COWBOY.</p></div></li>
+            <li><span aria-hidden="true">2</span><div><h3>Desbloqueie seu resultado</h3><p>Veja um resumo baseado no que você respondeu e conheça a proposta da COWBOY.</p></div></li>
             <li><span aria-hidden="true">3</span><div><h3>Decida o próximo passo</h3><p>Assista ao vídeo, veja os preços e compare os kits antes de escolher.</p></div></li>
           </ol>
         </section>
 
         <footer className={styles.footer} data-editorial-section="footer">
           <div className={styles.lastCall}>
-            <p>A primeira resposta é sua.</p>
-            <a href={href} onClick={event => startQuiz(event, "footer")} className={styles.cta} data-editorial-cta="footer">Quero começar meu quiz</a>
+            <p>Seu resultado começa com a primeira resposta.</p>
+            <a href={href} onClick={event => startQuiz(event, "footer")} className={styles.cta} data-editorial-cta="footer">Quero desbloquear meu resultado</a>
           </div>
           <p className={styles.notice}>Conteúdo publicitário da COWBOY Energia. Este questionário apresenta uma oferta comercial e não substitui uma avaliação de saúde. COWBOY é um suplemento alimentar, não um medicamento.</p>
           <div className={styles.legal}>
