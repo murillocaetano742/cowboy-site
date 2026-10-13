@@ -39,12 +39,12 @@
   min-height: 48px;
   margin-top: 16px;
   padding: 12px 18px;
-  border: 1px solid #b8862b;
+  border: 1px solid var(--ring);
   border-radius: 999px;
-  background: #fff8e9;
-  color: #684b17;
+  background: var(--secondary);
+  color: var(--primary);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
-.kitsButton:focus-visible { outline: 3px solid #b8862b; outline-offset: 3px; }
+.kitsButton:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }

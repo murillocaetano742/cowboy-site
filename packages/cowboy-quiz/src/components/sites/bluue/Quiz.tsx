@@ -385,7 +385,7 @@ function WeightScreen({
                 y1="2"
                 x2="300"
                 y2="2"
-                stroke="rgba(154,111,31,.35)"
+                stroke="var(--quiz-ruler-line, rgba(154,111,31,.35))"
                 strokeWidth="1"
               />
               {Array.from({ length: end - start + 1 }, (_, index) => {
@@ -402,7 +402,7 @@ function WeightScreen({
                       y1={2}
                       x2={x}
                       y2={2 + height}
-                      stroke={ten ? "#5f564a" : five ? "#a39a8c" : "#d9d0c1"}
+                      stroke={ten ? "var(--quiz-ruler-major, #5f564a)" : five ? "var(--quiz-ruler-medium, #a39a8c)" : "var(--quiz-ruler-minor, #d9d0c1)"}
                       strokeWidth={ten ? 2 : five ? 1.5 : 1}
                       strokeLinecap="round"
                     />
@@ -411,7 +411,7 @@ function WeightScreen({
                         x={x}
                         y={2 + height + 14}
                         textAnchor="middle"
-                        fill="#8a8173"
+                        fill="var(--quiz-ruler-text, #8a8173)"
                         fontSize="12"
                         fontWeight="500"
                         fontFamily="system-ui, sans-serif"
@@ -427,11 +427,11 @@ function WeightScreen({
                 y1="0"
                 x2="150"
                 y2="34"
-                stroke="#b8862b"
+                stroke="var(--ring)"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
-              <polygon points="143,34 157,34 150,44" fill="#b8862b" />
+              <polygon points="143,34 157,34 150,44" fill="var(--ring)" />
             </svg>
           </div>
           <div className="flex items-center justify-center gap-2 mt-3">
