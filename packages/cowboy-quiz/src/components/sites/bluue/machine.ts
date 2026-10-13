@@ -1,3 +1,5 @@
+import type { QuizVariant } from "@/lib/quiz-variant";
+
 export type Stage =
   | "intro"
   | "explanation"
@@ -5,6 +7,7 @@ export type Stage =
   | "weight_kg"
   | "weight"
   | "testimonials"
+  | "timeframe"
   | "analyzing"
   | "precheckout";
 export interface QuizState {
@@ -35,13 +38,17 @@ export const LAST_QUESTION = 7;
  * COWBOY is a food supplement sold without prescription (owner's decision,
  * 05/10/2026). They only feed the case severity on the offer screen.
  */
-export function quizReducer(state: QuizState, action: QuizAction): QuizState {
+export function quizReducer(state: QuizState, action: QuizAction, variant: QuizVariant = "v1-direto"): QuizState {
   const { stage, questionIndex: q } = state;
   if (action.type === "BACK") {
     if (stage === "intro")
       return { ...state, introIndex: Math.max(0, state.introIndex - 1) };
     if (stage === "weight_kg")
       return { ...state, stage: "quiz", questionIndex: 0, direction: -1 };
+    if (stage === "timeframe")
+      return { ...state, stage: "quiz", questionIndex: 2, direction: -1 };
+    if (variant === "v3-editorial" && (stage === "weight" || stage === "testimonials"))
+      return { ...state, stage: stage === "weight" ? "testimonials" : "timeframe", direction: -1 };
     if (stage === "weight" || stage === "testimonials")
       return { ...state, stage: "quiz", questionIndex: 2, direction: -1 };
     if (stage === "quiz")
@@ -81,9 +88,10 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   if (stage === "weight_kg")
     return { ...next, stage: "quiz", questionIndex: 1 };
   if (stage === "weight") return { ...next, stage: "quiz", questionIndex: 3 };
+  if (stage === "timeframe") return { ...next, stage: "testimonials" };
   if (stage === "quiz") {
     if (action.id === "age") return { ...next, stage: "weight_kg" };
-    if (action.id === "frequency") return { ...next, stage: "testimonials" };
+    if (action.id === "frequency") return { ...next, stage: variant === "v3-editorial" ? "timeframe" : "testimonials" };
     return {
       ...next,
       stage: q === LAST_QUESTION ? "analyzing" : "quiz",
@@ -91,6 +99,15 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
     };
   }
   return state;
+}
+
+/** Stable ordinal only; labels and answers remain outside analytics. */
+export function quizStepFor(state: Pick<QuizState, "stage" | "introIndex" | "questionIndex">, variant: QuizVariant = "v1-direto"): number {
+  const questionSteps = [5, 7, 8, 11, 12, 13, 14, 15] as const;
+  const otherSteps = { explanation: 4, weight_kg: 6, testimonials: 9, weight: 10, analyzing: 16, precheckout: 17, timeframe: 9 } as const;
+  const step = state.stage === "intro" ? state.introIndex + 1
+    : state.stage === "quiz" ? questionSteps[state.questionIndex] : otherSteps[state.stage];
+  return variant === "v3-editorial" && state.stage !== "timeframe" && step >= 9 ? step + 1 : step;
 }
 
 export function progressFor(state: QuizState) {

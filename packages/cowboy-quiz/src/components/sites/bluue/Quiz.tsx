@@ -3,9 +3,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useReducer, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { intro, questions, RECOMMENDED_KIT, type Question } from "@/components/sites/bluue/data";
-import { initialState, progressFor, quizReducer } from "@/components/sites/bluue/machine";
-import { trackOfferView, trackQuizComplete, trackQuizStart, trackQuizStep } from "@/lib/quiz-tracking";
+import { intro, questions, problemDurationQuestion, RECOMMENDED_KIT, type Question } from "@/components/sites/bluue/data";
+import { initialState, progressFor, quizReducer, quizStepFor, type QuizState, type QuizAction } from "@/components/sites/bluue/machine";
+import { trackOfferView, trackQuizAnswer, trackQuizBack, trackQuizComplete, trackQuizStart, trackQuizStep } from "@/lib/quiz-tracking";
 import type { QuizVariant } from "@/lib/quiz-variant";
 import {
   Explanation,
@@ -15,6 +15,7 @@ import {
 } from "@/components/sites/bluue/SpecialScreens";
 import { PreCheckout } from "@/components/sites/bluue/PreCheckout";
 import { Logo } from "@/components/sites/bluue/Logo";
+import styles from "@/components/sites/bluue/quiz-flow.module.css";
 
 const panel =
   "flex flex-col items-center px-4 py-4 max-w-lg mx-auto h-[100dvh] overflow-hidden";
@@ -92,10 +93,14 @@ function IntroScreen({
   index,
   onAnswer,
   onBack,
+  editorial = false,
+  savedAnswer,
 }: {
   index: number;
   onAnswer: (answer: string) => void;
   onBack: () => void;
+  editorial?: boolean;
+  savedAnswer?: string;
 }) {
   const [consentOpen, setConsentOpen] = useState(false);
   const data = intro[index];
@@ -112,7 +117,7 @@ function IntroScreen({
           Voltar
         </button>
       )}
-      <div className="cb-steps flex items-center rounded-full px-1.5 py-1.5 mb-6 gap-1 shadow-sm border">
+      {!editorial && <div className="cb-steps flex items-center rounded-full px-1.5 py-1.5 mb-6 gap-1 shadow-sm border">
         {[0, 1, 2].map((step) => (
           <div
             key={step}
@@ -121,7 +126,7 @@ function IntroScreen({
             {step + 1}
           </div>
         ))}
-      </div>
+      </div>}
       <h2 className="text-xl md:text-2xl font-extrabold text-foreground text-center mb-3 leading-tight">
         {data.question}
       </h2>
@@ -131,7 +136,8 @@ function IntroScreen({
             type="button"
             key={option}
             onClick={() => onAnswer(option)}
-            className={`w-full text-left rounded-2xl border-2 px-4 py-3 flex items-center gap-3 transition-all duration-200 backdrop-blur-sm active:scale-[0.97] ${unselected} hover:scale-[1.01]`}
+            aria-pressed={editorial ? savedAnswer === option : undefined}
+            className={`w-full text-left rounded-2xl border-2 px-4 py-3 flex items-center gap-3 transition-all duration-200 backdrop-blur-sm active:scale-[0.97] ${savedAnswer === option ? selectedOption : unselected} hover:scale-[1.01]`}
           >
             <div className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 border-muted-foreground/30" />
             <span className="text-sm font-semibold text-foreground">
@@ -177,12 +183,14 @@ function QuestionScreen({
   data,
   onAnswer,
   onBack,
+  savedAnswer,
 }: {
   data: Question;
   onAnswer: (answer: string) => void;
   onBack: () => void;
+  savedAnswer?: string;
 }) {
-  const { selected, choose } = useChoice(onAnswer, data.preSelected ?? null);
+  const { selected, choose } = useChoice(onAnswer, savedAnswer ?? data.preSelected ?? null);
   const hasImages = data.options.some((option) => option.image);
   return (
     <div className={panel}>
@@ -252,11 +260,13 @@ function QuestionScreen({
 function OverweightScreen({
   onAnswer,
   onBack,
+  savedAnswer,
 }: {
   onAnswer: (answer: string) => void;
   onBack: () => void;
+  savedAnswer?: string;
 }) {
-  const { selected, choose } = useChoice(onAnswer, "Não");
+  const { selected, choose } = useChoice(onAnswer, savedAnswer ?? "Não");
   return (
     <div className={panel}>
       <Header onBack={onBack} />
@@ -287,11 +297,13 @@ function OverweightScreen({
 function WeightScreen({
   onAnswer,
   onBack,
+  savedAnswer,
 }: {
   onAnswer: (answer: string) => void;
   onBack: () => void;
+  savedAnswer?: string;
 }) {
-  const [weight, setWeight] = useState(70);
+  const [weight, setWeight] = useState(() => savedAnswer ? Number.parseInt(savedAnswer, 10) : 70);
   const drag = useRef<{ x: number; weight: number } | null>(null);
   const clamp = (value: number) =>
     Math.max(40, Math.min(180, Math.round(value)));
@@ -447,34 +459,44 @@ interface QuizProps {
 }
 
 export function Quiz({ variant = "v1-direto" }: QuizProps) {
-  const [state, dispatch] = useReducer(quizReducer, initialState);
+  const [state, dispatch] = useReducer((current: QuizState, action: QuizAction) => quizReducer(current, action, variant), initialState);
   const { stage, introIndex, questionIndex } = state;
+  const editorial = variant === "v3-editorial";
+  const stepIndex = quizStepFor(state, variant);
   const question = questions[questionIndex];
   const next = () => dispatch({ type: "NEXT" });
-  const back = () => dispatch({ type: "BACK" });
+  const back = () => {
+    const previous = quizReducer(state, { type: "BACK" }, variant);
+    trackQuizBack(stepIndex, quizStepFor(previous, variant), variant);
+    dispatch({ type: "BACK" });
+  };
   const answer = (id: string, value: string) => {
     trackQuizStart(variant);
+    trackQuizAnswer(stepIndex, variant);
     dispatch({ type: "ANSWER", id, value });
   };
   useEffect(() => {
     window.scrollTo(0, 0);
     // Only an ordinal crosses the analytics boundary; answer/state objects never do.
-    const questionSteps = [5, 7, 8, 11, 12, 13, 14, 15] as const;
-    const otherSteps = { explanation: 4, weight_kg: 6, testimonials: 9, weight: 10, analyzing: 16, precheckout: 17 } as const;
-    const stepIndex = stage === "intro" ? introIndex + 1
-      : stage === "quiz" ? questionSteps[questionIndex] : otherSteps[stage];
     trackQuizStep(stepIndex, variant);
     if (stage === "precheckout") {
       trackQuizComplete(variant);
-      trackOfferView(RECOMMENDED_KIT, variant);
+      if (variant !== "v3-editorial") trackOfferView(RECOMMENDED_KIT, variant);
     }
-  }, [stage, introIndex, questionIndex, variant]);
+  }, [stage, stepIndex, variant]);
   return (
     <main
-      className="min-h-screen cb-bg"
+      className={`min-h-screen cb-bg${editorial ? ` ${styles.flow}` : ""}`}
       data-stage={stage}
+      data-step-index={editorial ? stepIndex : undefined}
     >
-      {["quiz", "weight", "weight_kg"].includes(stage) && (
+      {editorial && <div className={styles.progress} data-quiz-progress>
+        <p>Etapa {stepIndex} de 18</p>
+        <div className={styles.track} role="progressbar" aria-label="Progresso do questionário" aria-valuemin={0} aria-valuemax={18} aria-valuenow={stepIndex} aria-valuetext={`Etapa ${stepIndex} de 18`}>
+          <div className={styles.fill} style={{ width: `${stepIndex / 18 * 100}%` }} />
+        </div>
+      </div>}
+      {!editorial && ["quiz", "weight", "weight_kg"].includes(stage) && (
         <Progress current={progressFor(state)} />
       )}
       {stage === "intro" && (
@@ -483,6 +505,8 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
           index={introIndex}
           onAnswer={(value) => answer(intro[introIndex].id, value)}
           onBack={back}
+          editorial={editorial}
+          savedAnswer={editorial ? state.answers[intro[introIndex].id] : undefined}
         />
       )}
       {stage === "explanation" && <Explanation onNext={next} />}
@@ -492,21 +516,25 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
           data={question}
           onAnswer={(value) => answer(question.id, value)}
           onBack={back}
+          savedAnswer={editorial ? state.answers[question.id] : undefined}
         />
       )}
+      {stage === "timeframe" && <QuestionScreen key="problem_duration" data={problemDurationQuestion} savedAnswer={state.answers.problem_duration} onAnswer={(value) => answer(problemDurationQuestion.id, value)} onBack={back} />}
       {stage === "weight_kg" && (
         <WeightScreen
           onAnswer={(value) => answer("weight_kg", value)}
           onBack={back}
+          savedAnswer={editorial ? state.answers.weight_kg : undefined}
         />
       )}
       {stage === "weight" && (
         <OverweightScreen
           onAnswer={(value) => answer("weight", value)}
           onBack={back}
+          savedAnswer={editorial ? state.answers.weight : undefined}
         />
       )}
-      {stage === "testimonials" && <Testimonials onNext={next} onBack={back} />}
+      {stage === "testimonials" && <Testimonials onNext={next} onBack={back} editorial={editorial} />}
       {stage === "analyzing" && <Analyzing onNext={next} />}
       {stage === "precheckout" && <PreCheckout answers={state.answers} variant={variant} />}
     </main>

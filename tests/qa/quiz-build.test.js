@@ -14,7 +14,7 @@ function fixture(t) {
     assert.ok(path.basename(output).startsWith('cowboy-quiz-build-'));
     fs.rmSync(output, { recursive: true, force: true });
   });
-  for (const relative of ['quiz/v1-direto/index.html', 'quiz/v2-vsl/index.html', '_next/static/chunks/app.js', 'sites/cowboy/video.mp4', 'index.html', '404.html', '.env', 'docs/private.txt', 'quiz/private/debug.html']) {
+  for (const relative of ['quiz/v1-direto/index.html', 'quiz/v2-vsl/index.html', 'quiz/v3-editorial/index.html', 'quiz/v3-editorial/quiz/index.html', 'quiz/v3-editorial/quiz/index.txt', 'quiz/v3-editorial/__next._tree.txt', 'quiz/v3-editorial/__next.quiz/v3-editorial/__PAGE__.txt', '_next/static/chunks/app.js', 'sites/cowboy/video.mp4', 'index.html', '404.html', '.env', 'docs/private.txt', 'quiz/private/debug.html', 'quiz/v1-direto/private/index.html', 'quiz/v3-editorial/private/index.html', 'quiz/v3-editorial/quiz/private/index.html']) {
     const target = path.join(output, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, 'fixture');
@@ -22,8 +22,8 @@ function fixture(t) {
   return output;
 }
 
-test('quiz export publishes both approved versions; unapproved routes and private artifacts stay excluded', (t) => {
-  assert.deepEqual(quizPublicFiles(fixture(t)), ['_next/static/chunks/app.js', 'quiz/v1-direto/index.html', 'quiz/v2-vsl/index.html', 'sites/cowboy/video.mp4']);
+test('quiz export publishes four approved entrypoints and metadata once; nested unapproved routes stay excluded', (t) => {
+  assert.deepEqual(quizPublicFiles(fixture(t)), ['_next/static/chunks/app.js', 'quiz/v1-direto/index.html', 'quiz/v2-vsl/index.html', 'quiz/v3-editorial/__next._tree.txt', 'quiz/v3-editorial/__next.quiz/v3-editorial/__PAGE__.txt', 'quiz/v3-editorial/index.html', 'quiz/v3-editorial/quiz/index.html', 'quiz/v3-editorial/quiz/index.txt', 'sites/cowboy/video.mp4']);
 });
 
 test('quiz export rejects hidden files and unapproved source extensions inside public roots', (t) => {
@@ -46,4 +46,20 @@ test('quiz cannot publish a partial release without the independent VSL version'
   const output = fixture(t);
   fs.unlinkSync(path.join(output, 'quiz/v2-vsl/index.html'));
   assert.throws(() => quizPublicFiles(output), /entrypoint missing: quiz\/v2-vsl/);
+});
+
+test('quiz cannot publish the editorial release without either cover or questionnaire entrypoint', (t) => {
+  const output = fixture(t);
+  const cover = path.join(output, 'quiz/v3-editorial/index.html');
+  fs.unlinkSync(cover);
+  assert.throws(() => quizPublicFiles(output), /entrypoint missing: quiz\/v3-editorial$/);
+  fs.writeFileSync(cover, 'fixture');
+  fs.unlinkSync(path.join(output, 'quiz/v3-editorial/quiz/index.html'));
+  assert.throws(() => quizPublicFiles(output), /entrypoint missing: quiz\/v3-editorial\/quiz$/);
+});
+
+test('Next prefetch metadata cannot publish an extra HTML page under an approved route', (t) => {
+  const output = fixture(t);
+  fs.writeFileSync(path.join(output, 'quiz/v3-editorial/__next.quiz/extra.html'), 'fixture');
+  assert.throws(() => quizPublicFiles(output), /Unexpected quiz public file/);
 });

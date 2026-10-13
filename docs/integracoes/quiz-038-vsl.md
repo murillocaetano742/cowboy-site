@@ -46,7 +46,7 @@ Somente identificadores neutros e parâmetros de reprodução entram nos eventos
 
 O bloqueio de fonte Meta registrado em [QUIZ-037](quiz-037-meta-block.md) não é contornado por esta nova rota. Este trabalho não fabrica Purchase nem comprova nova compra aprovada.
 
-## Validação e publicação
+## Validação e publicação inicial (QUIZ-038)
 
 Gates locais aprovados: lint, TypeScript e 89 testes (53 do site, 13 do fluxo e 23 da instrumentação). O export final contém 119 arquivos na allowlist. Nenhuma dependência nova foi necessária.
 
@@ -68,3 +68,13 @@ Publicação concluída pelo [PR #22](https://github.com/murillocaetano742/cowbo
 Às 13h15min35s UTC, ambas as rotas responderam HTTP 200 e corresponderam por SHA-256 ao conteúdo da implantação autenticada. O hash HTML da v2 é `2d0fdcc7db7ce14a8a3a1395ec129957890f6c8bcba557ed73f4b60dc7b9151c`. Os 14 assets referenciados responderam 200; a homepage não mudou; `/quiz` continua redirecionando para v1 com a query íntegra. A VSL respondeu 206 `video/mp4` com suporte ao Range solicitado e o poster manteve o hash do arquivo existente. A consulta de logs de erro da implantação na janela de 15 minutos retornou zero entradas.
 
 Essa verificação comprova publicação, recursos e preservação das duas versões. Os eventos de vídeo foram validados na QA interceptada; não houve nova sessão completa de mensuração, pedido, pagamento ou Purchase em produção nesta entrega. Evidência privada `.local/quiz-038-final-http.json`; rollback para `dpl_7JQkBpnN9Ag1LyxWCjg8JHhCQ2G2`. O servidor de QA 4398 foi encerrado e suas evidências locais preservadas. O fechamento documental é local e não gera novo deploy.
+
+## Atualização publicada: autoplay visível (QUIZ-039)
+
+Em 13/10/2026, o [PR #23](https://github.com/murillocaetano742/cowboy-site/pull/23) publicou o comportamento de início automático sem som descrito acima. Merge `631063e30df726072c95887c615bb7228dfeffe8`; deployment `dpl_G4R8G5J8DUxEPNwzciECp8UBJSWj`, READY/Production. O destino continua sendo a [v2 com VSL](https://cowboyenergiamasculina.com.br/quiz/v2-vsl/), com a [v1 preservada](https://cowboyenergiamasculina.com.br/quiz/v1-direto/).
+
+Gates: lint, TypeScript, 89 testes e build/check:build com 119 arquivos. Quatro casos Playwright passaram no reteste final em 21,7 segundos. A QA verificou o limiar de visibilidade 49%/51%, reprodução e decodificação reais inicialmente silenciadas, ativação do som, slider 0 → 0,6 sem mute involuntário, pausa manual sem reinício, rejeição do autoplay e recuperação por gesto, ausência de download na v1, erro de mídia, GPC e Google/linker/API. O root aprovou as telas em 375 e 390 px. Evidências locais em `test-results/quiz-039/`.
+
+Verificação pública às 15h42min18s UTC: ambas as rotas em HTTP 200, HTML idêntico ao deployment autenticado, 14 assets em 200 e bundle com `IntersectionObserver` e a ação de reprodução com som. SHA-256 do HTML v2: `87ed0dd4d713679d72f96a9e80bc01183b4468646ed73a0359df1a4d35c1690b`. Homepage, redirecionamento `/quiz` para v1 com query e mídia foram preservados; MP4 em 206 `video/mp4` para Range e poster com hash original. A consulta de logs de erro na janela de 15 minutos retornou zero entradas.
+
+Não houve nova sessão completa de analytics, pedido, pagamento ou Purchase em produção nesta atualização. Evidência privada `.local/quiz-039-final-http.json`; rollback para `dpl_BWrdNT4w7WRKBi3Fog5wXQ2cRPWm`. Servidor local 4399 encerrado e ausência de listener confirmada. O fechamento documental fica local, sem redeploy adicional.

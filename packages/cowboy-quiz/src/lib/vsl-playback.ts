@@ -21,7 +21,7 @@ export function playedSeconds(video: Playback): number {
 
 /** Seeking changes currentTime but cannot manufacture any watched-coverage milestone. */
 export function recordVslPlayback(event: VslPlaybackEvent, video: Playback, variant: QuizVariant) {
-  if (variant !== "v2-vsl") return;
+  if (variant !== "v2-vsl" && variant !== "v3-editorial") return;
   if (event === "playing") {
     trackVslMilestone(0, variant);
     return;

@@ -2,14 +2,15 @@
 
 /* eslint-disable @next/next/no-img-element -- Static export serves the local images as they are. */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, CircleCheck, Lock, ShieldCheck, Star, TriangleAlert, Truck } from "lucide-react";
 import { caseResult, RECOMMENDED_KIT, type KitQuantity } from "@/components/sites/bluue/data";
 import { checkoutHref, readAttribution } from "@/components/sites/bluue/checkout";
 import { handleCheckoutClick } from "@/lib/checkout-navigation";
-import { trackKitSelection } from "@/lib/quiz-tracking";
+import { trackContentLink, trackKitSelection, trackOfferView, trackResultView, trackViewKits } from "@/lib/quiz-tracking";
 import type { QuizVariant } from "@/lib/quiz-variant";
 import { QuizVsl } from "@/components/sites/bluue/quiz-vsl";
+import styles from "@/components/sites/bluue/quiz-flow.module.css";
 
 const ASSETS = "/sites/cowboy/";
 const SITE = "https://cowboyenergiamasculina.com.br";
@@ -99,6 +100,30 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
   const [bannerIndex, setBannerIndex] = useState(0);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const plan = plans.find((item) => item.quantity === selectedPlan) ?? plans[0];
+  const resultRef = useRef<HTMLElement>(null);
+  const kitsRef = useRef<HTMLDivElement>(null);
+  const editorial = variant === "v3-editorial";
+
+  useEffect(() => {
+    if (!editorial || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.25) continue;
+        if (entry.target === resultRef.current) trackResultView(variant);
+        if (entry.target === kitsRef.current) trackOfferView(selectedPlan, variant);
+        observer.unobserve(entry.target);
+      }
+    }, { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" });
+    if (resultRef.current) observer.observe(resultRef.current);
+    if (kitsRef.current) observer.observe(kitsRef.current);
+    return () => observer.disconnect();
+  }, [editorial, selectedPlan, variant]);
+
+  const viewKits = () => {
+    trackViewKits(variant);
+    kitsRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+    kitsRef.current?.focus({ preventScroll: true });
+  };
 
   useEffect(() => {
     const timer = window.setInterval(() => setBannerIndex((index) => (index + 1) % banners.length), 3000);
@@ -112,7 +137,7 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
 
   return (
     <div className="bluue-finish-enter flex flex-col items-center px-4 py-8 max-w-md mx-auto" data-build="cowboy-1">
-      <section className="cb-result w-full mb-6" data-severity={result.severity} aria-labelledby="cb-result-level">
+      <section ref={resultRef} className="cb-result w-full mb-6" data-severity={result.severity} aria-labelledby="cb-result-level">
         <div className="cb-result-media">
           <img src={`${ASSETS}gravidade.webp`} alt="Homem sentado na beira da cama à noite, de cabeça baixa, com a mulher deitada de costas para ele" loading="eager" fetchPriority="high" />
           <span className="cb-result-tag">Seu resultado</span>
@@ -139,11 +164,11 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
         </div>
       </section>
 
-      {variant === "v2-vsl" ? <QuizVsl variant={variant} /> : null}
+      {variant !== "v1-direto" ? <QuizVsl variant={variant} onViewKits={editorial ? viewKits : undefined} /> : null}
 
       <p className="text-sm font-bold text-foreground text-center mb-3">Selecione o seu kit</p>
 
-      <div className="w-full space-y-3 mb-4" role="group" aria-label="Kits disponíveis">
+      <div ref={kitsRef} id={editorial ? "quiz-kits" : undefined} tabIndex={editorial ? -1 : undefined} className={`w-full space-y-3 mb-4${editorial ? ` ${styles.kits}` : ""}`} role="group" aria-label="Kits disponíveis">
         {plans.map((item) => (
           <button type="button" key={item.quantity} onClick={() => { if (selectedPlan !== item.quantity) trackKitSelection(item.quantity, variant); setSelectedPlan(item.quantity); }} aria-pressed={selectedPlan === item.quantity} className={`w-full rounded-2xl border-2 p-3.5 text-left transition-all duration-200 ${selectedPlan === item.quantity ? "cb-option-selected" : "cb-option"}`}>
             <div className="flex items-center gap-3">
@@ -180,6 +205,7 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
         </p>
       </div>
       {/* Preserve SDK link decoration and give analytics a bounded opportunity to flush. */}
+      {editorial && <p className={styles.trust} data-checkout-trust><span>{plan.freeShipping ? "Frete grátis" : "Frete R$ 26,75"}</span><span>Envio discreto</span><span>Garantia de 30 dias</span></p>}
       <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={(event) => handleCheckoutClick(event, plan.quantity, variant)} className="bluue-finish-button cb-btn w-full h-14 px-8 rounded-full text-base font-bold mb-6">{plan.quantity === RECOMMENDED_KIT ? "Quero o protocolo completo »" : "Quero começar agora »"}</a>
 
       <div className="w-full rounded-2xl overflow-hidden mb-4 relative" aria-label="COWBOY Energia">
@@ -255,7 +281,7 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
       <footer className="cb-footer text-center">
         <p>COWBOY Energia · Suplemento alimentar em gotas, 30 mL. Este produto não é um medicamento.</p>
         <p>Fabricado por BNT Farma, CNPJ 21.027.384/0001-06 · SAC: contato@cowboyenergiamasculina.com.br</p>
-        <p className="mt-2"><a href={`${SITE}/privacidade`} target="_blank" rel="noopener">Privacidade</a> · <a href={`${SITE}/termos`} target="_blank" rel="noopener">Termos e garantia</a></p>
+        <p className="mt-2"><a href={`${SITE}/privacidade`} target="_blank" rel="noopener" onClick={() => trackContentLink("privacy", "offer")}>Privacidade</a> · <a href={`${SITE}/termos`} target="_blank" rel="noopener" onClick={() => trackContentLink("terms", "offer")}>Termos e garantia</a></p>
       </footer>
     </div>
   );
