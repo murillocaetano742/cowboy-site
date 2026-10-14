@@ -9,7 +9,12 @@ const COVER = '/quiz/v5-etapas/';
 const FLOW = '/quiz/v5-etapas/quiz/';
 const QUIZ_ID = 'cowboy_v5_etapas';
 const VIDEO = '/videos/vsl/vsl-dr-durval-720.mp4';
-const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_049&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture&symptom_intensity=very_high&score=999#private_fixture';
+// Optional explicit 12-second real MP4 for control regressions. Without it the
+// original media is used. The dedicated @full-vsl case always uses the original.
+const VSL_FIXTURE = process.env.E2E_VSL_FIXTURE;
+const FULL_VSL = process.env.E2E_FULL_VSL === '1';
+if (VSL_FIXTURE && !fs.existsSync(VSL_FIXTURE)) throw new Error(`E2E_VSL_FIXTURE not found: ${VSL_FIXTURE}`);
+const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_050&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture&symptom_intensity=very_high&score=999#private_fixture';
 const INTENSITIES = [
   { answer:'Não percebo dificuldade hoje', label:'Nenhuma', gauge:6 },
   { answer:'Leve', label:'Leve', gauge:26 },
@@ -27,15 +32,19 @@ const SOURCES = [
 
 test.describe.configure({ mode: 'parallel' });
 test.use({ channel: process.env.E2E_CHANNEL || undefined, reducedMotion: 'reduce' });
+test.beforeEach(({ }, testInfo) => {
+  if (!VSL_FIXTURE) testInfo.setTimeout(380000);
+});
 
-async function isolate(page, { google = false, failVideo = false, rejectAutoplay = false, preference } = {}) {
-  const evidence = { requests: [], hits: [], checkouts: [], destination: null, errors: [] };
+async function isolate(page, { google = false, failVideo = false, rejectAutoplay = false, preference, realVideo = false } = {}) {
+  const evidence = { requests: [], hits: [], checkouts: [], destination: null, errors: [], failVideo };
   page.on('pageerror', error => evidence.errors.push(error.message));
-  await page.addInitScript(({ rejectAutoplay, preference }) => {
+  await page.addInitScript(({ rejectAutoplay, preference, realVideo }) => {
     if (preference === 'GPC') Object.defineProperty(navigator, 'globalPrivacyControl', { get: () => true });
     if (preference === 'GA opt-out') window['ga-disable-G-VYR2542XCN'] = true;
     const nativePlay = HTMLMediaElement.prototype.play;
     window.__journeyPlayAttempts = [];
+    if (realVideo) return;
     HTMLMediaElement.prototype.play = function () {
       if (!this.closest('[data-quiz-vsl]')) return nativePlay.call(this);
       const box = this.getBoundingClientRect();
@@ -44,9 +53,10 @@ async function isolate(page, { google = false, failVideo = false, rejectAutoplay
       if (rejectAutoplay && window.__journeyPlayAttempts.length === 1) return Promise.reject(new DOMException('QA autoplay block', 'NotAllowedError'));
       return nativePlay.call(this);
     };
-  }, { rejectAutoplay, preference });
+  }, { rejectAutoplay, preference, realVideo });
   // All analytics, reference pages and checkout destinations are answered locally.
-  await page.route('**/*', async route => {
+  // The long real-media proof excludes the MP4 from routing entirely.
+  await page.route(url => !(realVideo && url.origin === new URL(BASE).origin && url.pathname === VIDEO), async route => {
     const request = route.request();
     const url = new URL(request.url());
     evidence.requests.push(url.toString());
@@ -62,11 +72,11 @@ async function isolate(page, { google = false, failVideo = false, rejectAutoplay
         evidence.destination = response.headers().location;
         return route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<p>Checkout isolado pela QA</p>' });
       }
-      if (failVideo && url.pathname === VIDEO) return route.fulfill({ status: 404, body: 'Intentional media failure' });
-      if (url.pathname === VIDEO && new URL(BASE).hostname === '127.0.0.1') {
+      if (evidence.failVideo && url.pathname === VIDEO) return route.fulfill({ status: 404, body: 'Intentional media failure' });
+      if (url.pathname === VIDEO && (VSL_FIXTURE || new URL(BASE).hostname === '127.0.0.1')) {
         // The lightweight local server has no Range support. Serve the actual
         // built MP4 with production-equivalent byte ranges for native seeking.
-        const media = fs.readFileSync(`dist${VIDEO}`);
+        const media = fs.readFileSync(VSL_FIXTURE || `dist${VIDEO}`);
         const range = /^bytes=(\d+)-(\d*)$/.exec(request.headers().range || '');
         const start = range ? Number(range[1]) : 0;
         const end = range?.[2] ? Math.min(Number(range[2]), media.length - 1) : media.length - 1;
@@ -180,23 +190,32 @@ async function openTestimonials(page) {
 async function finishPresentation(page) {
   const video=page.locator('[data-quiz-vsl] video');
   await expect.poll(()=>video.evaluate(element=>Number.isFinite(element.duration)&&element.duration>0),{timeout:15000}).toBe(true);
-  await video.evaluate(async element=>{element.currentTime=element.duration-2;await element.play();});
-  await expect.poll(()=>video.evaluate(element=>element.ended),{timeout:5000}).toBe(true);
+  if (await video.evaluate(element=>element.paused&&!element.ended)) await page.locator('[data-vsl-playback]').click();
+  const duration=await video.evaluate(element=>element.duration);
+  await expect.poll(()=>video.evaluate(element=>element.ended),{timeout:(duration+15)*1000,intervals:[250]}).toBe(true);
   await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
-  // Reaching ended by seeking may unlock the UI, but is not watched completion.
-  expect(named(await events(page),'vsl_complete')).toHaveLength(0);
+  const actual=await video.evaluate(element=>({duration:element.duration,played:Array.from({length:element.played.length},(_,i)=>[element.played.start(i),element.played.end(i)]),rate:element.playbackRate}));
+  expect(actual.rate).toBe(1);
+  expect(actual.played[0][0]).toBeLessThanOrEqual(.1);
+  expect(actual.duration-actual.played.at(-1)[1]).toBeLessThanOrEqual(.1);
 }
 
-async function assertEntryPlayback(page) {
+async function assertEntryPlayback(page, realVideo=false) {
   const video=page.locator('[data-quiz-vsl] video');
   await expect.poll(()=>video.evaluate(element=>element.currentTime),{timeout:15000}).toBeGreaterThan(.25);
   expect(await page.evaluate(()=>scrollY)).toBe(0);
   expect(await video.evaluate(element=>element.muted&&element.playsInline)).toBe(true);
-  expect(await page.evaluate(()=>window.__journeyPlayAttempts[0].visibility)).toBeGreaterThanOrEqual(.5);
+  if (!realVideo) expect(await page.evaluate(()=>window.__journeyPlayAttempts[0].visibility)).toBeGreaterThanOrEqual(.5);
   const box=await video.boundingBox();
   const dockTop=await page.locator('[data-journey-dock]').evaluate(element=>element.getBoundingClientRect().top);
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y+box.height).toBeLessThanOrEqual(dockTop+1);
+  for(const selector of ['[data-vsl-playback]','[data-vsl-audio]']) {
+    const control=await page.locator(selector).boundingBox();
+    expect(control.height).toBeGreaterThanOrEqual(44);
+    expect(control.y).toBeGreaterThanOrEqual(0);
+    expect(control.y+control.height).toBeLessThanOrEqual(dockTop+1);
+  }
   await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
   await noOverflow(page);
 }
@@ -356,7 +375,7 @@ for (const intensity of INTENSITIES) {
     await expect(page.locator('[data-editorial-cta="hero"]')).toHaveAttribute('href', /\/quiz\/v5-etapas\/quiz\//);
     await page.locator('[data-editorial-cta="hero"]').click();
     await expect(page).toHaveURL(new RegExp(FLOW));
-    expect(page.url()).toContain('utm_campaign=QUIZ_049');
+    expect(page.url()).toContain('utm_campaign=QUIZ_050');
     if (lowest) {
       const consent = page.getByRole('button', { name: 'uso das suas respostas', exact: true });
       await consent.click();
@@ -427,9 +446,9 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   await page.getByRole('button', { name: 'Ativar som', exact: true }).click();
   await expect.poll(() => video.evaluate(element => element.muted)).toBe(false);
   const playback = await video.evaluate(element => ({ duration: element.duration, width: element.videoWidth, height: element.videoHeight, currentTime: element.currentTime, audioDecodedBytes: element.webkitAudioDecodedByteCount, videoDecodedBytes: element.webkitVideoDecodedByteCount }));
-  expect(playback.duration).toBeCloseTo(276.341, 1);
-  expect(playback.width).toBe(720);
-  expect(playback.height).toBe(1280);
+  expect(playback.duration).toBeCloseTo(VSL_FIXTURE ? 12 : 276.341, 1);
+  expect(playback.width).toBe(VSL_FIXTURE ? 180 : 720);
+  expect(playback.height).toBe(VSL_FIXTURE ? 320 : 1280);
   expect(playback.audioDecodedBytes).toBeGreaterThan(0);
   expect(playback.videoDecodedBytes).toBeGreaterThan(0);
   await finishPresentation(page);
@@ -548,7 +567,7 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
     await clickCheckout(page, evidence);
     const target = new URL(evidence.checkouts.at(-1));
     expect(target.searchParams.get('quantity')).toBe(String(quantity));
-    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_049');
+    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_050');
     expect(target.searchParams.get('gbraid')).toBe('braid_fixture');
   }
   const snapshot = await events(page);
@@ -557,7 +576,7 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   expect(named(snapshot, 'quiz_result_view')).toHaveLength(1);
   expect(named(snapshot, 'view_item')).toHaveLength(1);
   expect(named(snapshot, 'vsl_start')).toHaveLength(1);
-  expect(named(snapshot, 'vsl_complete')).toHaveLength(0);
+  expect(named(snapshot, 'vsl_complete')).toHaveLength(1);
   expect(named(snapshot, 'begin_checkout').map(params => params.value)).toEqual([79.9,154.8,199.9]);
   expect([...new Set(named(snapshot,'select_item').map(params=>params.value))].sort((a,b)=>a-b)).toEqual([79.9,154.8,199.9]);
   expect(named(snapshot,'quiz_answer')).toHaveLength(14);
@@ -580,7 +599,7 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   privacy(await events(page));
 });
 
-test('v5 SDK real: fontes sem atribuição, erro de vídeo permite oferta, linker e cookies chegam ao checkout isolado', async ({ page }, testInfo) => {
+test('v5 SDK real: erro bloqueia até recuperação, fontes limpas e linker chegam ao checkout isolado', async ({ page }, testInfo) => {
   test.skip(!GOOGLE_FIXTURE || !UTM_FIXTURE, 'Requer fixtures locais dos SDKs Google e UTMify; nunca coleta externa.');
   await page.setViewportSize({ width: 390, height: 844 });
   const evidence = await isolate(page, { google: true, failVideo: true });
@@ -592,6 +611,11 @@ test('v5 SDK real: fontes sem atribuição, erro de vídeo permite oferta, linke
   await expect(page.locator('[data-quiz-vsl] [role="status"]')).toContainText('Não foi possível carregar o vídeo');
   expect(named(await events(page), 'vsl_error')).toHaveLength(1);
   expect(named(await events(page), 'vsl_start')).toHaveLength(0);
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+  await expect(page.locator('[data-vsl-continue-fallback]')).toHaveCount(0);
+  evidence.failVideo=false;
+  await page.locator('[data-vsl-retry]').click();
+  await finishPresentation(page);
   await openOffer(page);
   const cookies = await page.evaluate(() => document.cookie);
   privacy(await events(page));
@@ -607,7 +631,7 @@ test('v5 SDK real: fontes sem atribuição, erro de vídeo permite oferta, linke
   expect(session.match(/^s\d+/)?.[0]).toBe(/(?:^|; )_ga_VYR2542XCN=GS\d\.\d\.([^;]+)/.exec(cookies)?.[1]?.match(/^s\d+/)?.[0]);
   expect(destination.searchParams.get('_gl')).toBe(linker);
   expect(destination.hostname).toBe('cowboyenergia.carrinho.app');
-  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_049');
+  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_050');
   expect(destination.searchParams.get('cid')).toBe('journey_fixture');
   expect(destination.searchParams.get('gbraid')).toBe('braid_fixture');
   expect(destination.toString()).not.toMatch(/private_fixture|excluded|answers|severity|confidence_impact|symptom_intensity|very_high|score/);
@@ -617,33 +641,40 @@ test('v5 SDK real: fontes sem atribuição, erro de vídeo permite oferta, linke
   testInfo.annotations.push({ type: 'scope', description: 'SDKs reais com coleta interceptada; não comprova processamento GA/Meta ou compra aprovada.' });
 });
 
-test('v5 autoplay bloqueado: alternativa explícita segue sem vídeo e retorno pausado permite reprodução manual', async ({ page }) => {
+test('v5 autoplay bloqueado: permanece travado e gesto manual retoma sem perder a pausa ao voltar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const evidence = await isolate(page, { rejectAutoplay: true });
   await page.goto(BASE + FLOW + PARAMS);
   await finishQuiz(page, INTENSITIES[1]);
   await openPresentation(page);
   const video = page.locator('[data-quiz-vsl] video');
-  await expect(page.getByRole('button', { name: 'Reproduzir vídeo com som', exact: true })).toBeVisible();
+  await expect(page.locator('[data-vsl-playback]')).toHaveText('Retomar vídeo');
   await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
   expect(named(await events(page), 'vsl_autoplay_blocked')).toHaveLength(1);
   for (const event of ['vsl_start', 'vsl_progress', 'vsl_complete']) expect(named(await events(page), event)).toHaveLength(0);
   expect(evidence.requests.some(url => new URL(url).pathname === VIDEO)).toBe(false);
-  await page.locator('[data-vsl-continue-fallback]').click();
-  await expect(page.locator('[data-journey-screen="testimonials"]')).toBeVisible();
-  await openOffer(page);
-  await clickCheckout(page, evidence);
-  await page.locator('[data-journey-back]').click();
-  await expect(page.locator('[data-journey-screen="testimonials"]')).toBeVisible();
-  await page.locator('[data-journey-back]').click();
+  await expect(page.locator('[data-vsl-continue-fallback]')).toHaveCount(0);
+  await page.locator('[data-vsl-audio]').focus();
+  await page.keyboard.press('Enter');
+  await page.locator('[data-vsl-playback]').click();
+  await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 15000 }).toBeGreaterThan(.25);
+  expect(await video.evaluate(element=>element.muted)).toBe(false);
+  await page.locator('[data-vsl-playback]').focus();
+  await page.keyboard.press('Space');
+  const pausedAt=await video.evaluate(element=>element.currentTime);
+  const attempts=await page.evaluate(()=>window.__journeyPlayAttempts.length);
+  await page.goBack();
+  await expect(page.locator('[data-journey-screen="result"]')).toBeVisible();
+  await page.goForward();
   await expect(page.locator('[data-journey-screen="presentation"]')).toBeVisible();
   expect(await video.evaluate(element => element.paused)).toBe(true);
-  expect(await page.evaluate(() => window.__journeyPlayAttempts.length)).toBe(1);
-  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
-  await page.getByRole('button', { name: 'Reproduzir vídeo com som', exact: true }).click();
-  await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 15000 }).toBeGreaterThan(0.25);
-  expect(await video.evaluate(element => element.muted)).toBe(false);
-  await video.evaluate(element => element.pause());
+  expect(await video.evaluate(element=>element.currentTime)).toBeCloseTo(pausedAt,1);
+  expect(await page.evaluate(() => window.__journeyPlayAttempts.length)).toBe(attempts);
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+  await finishPresentation(page);
+  await openOffer(page);
+  await clickCheckout(page,evidence);
+  expect(named(await events(page),'vsl_complete')).toHaveLength(1);
   privacy(await events(page));
   expect(evidence.errors).toEqual([]);
 });
@@ -664,13 +695,13 @@ for (const preference of ['GPC', 'GA opt-out']) {
     expect(snapshot.storage).toEqual({ session: {}, local: {} });
     privacy(snapshot);
     expect(evidence.requests.every(url => new URL(url).origin === new URL(BASE).origin)).toBe(true);
-    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_049');
+    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_050');
     expect(evidence.errors).toEqual([]);
   });
 }
 
 for(const size of [{width:375,height:667},{width:390,height:844}]) {
-  test(`v5 VSL inicia sem rolagem em${size.width}x${size.height}, CTA aparece após ended sem inventar conclusão`,async({page},testInfo)=>{
+  test(`v5 VSL inicia sem rolagem em${size.width}x${size.height}, CTA aparece após reprodução integral real`,async({page},testInfo)=>{
     await page.setViewportSize(size);
     const evidence=await isolate(page);
     await page.goto(BASE+FLOW+PARAMS);
@@ -679,7 +710,7 @@ for(const size of [{width:375,height:667},{width:390,height:844}]) {
     await assertEntryPlayback(page);
     const video=page.locator('[data-quiz-vsl] video');
     await page.screenshot({path:testInfo.outputPath('vsl-entrada-sem-scroll.png')});
-    await video.evaluate(element=>element.pause());
+    await page.locator('[data-vsl-playback]').click();
     const pausedAt=await video.evaluate(element=>element.currentTime);
     await page.evaluate(()=>{scrollTo(0,document.documentElement.scrollHeight);scrollTo(0,0);});
     await page.waitForTimeout(300);
@@ -697,13 +728,13 @@ for(const size of [{width:375,height:667},{width:390,height:844}]) {
     await page.locator('[data-journey-back]').click();
     await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
     expect(await video.evaluate(element=>element.paused)).toBe(true);
-    expect(named(await events(page),'vsl_complete')).toHaveLength(0);
+    expect(named(await events(page),'vsl_complete')).toHaveLength(1);
     privacy(await events(page));
     expect(evidence.errors).toEqual([]);
   });
 }
 
-test('v5 MP4 sem suporte libera continuidade com aviso, sem reprodução ou conclusão fictícia',async({page})=>{
+test('v5 MP4 sem suporte mantém bloqueio e oferece retry, sem conclusão fictícia',async({page})=>{
   await page.setViewportSize({width:375,height:667});
   const evidence=await isolate(page);
   await page.addInitScript(()=>{
@@ -714,13 +745,146 @@ test('v5 MP4 sem suporte libera continuidade com aviso, sem reprodução ou conc
   await finishQuiz(page,INTENSITIES[1]);
   await openPresentation(page);
   await expect(page.locator('[data-quiz-vsl] [role="status"]')).toContainText('Não foi possível carregar o vídeo');
-  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+  await expect(page.locator('[data-vsl-continue-fallback]')).toHaveCount(0);
   expect(evidence.requests.some(url=>new URL(url).pathname===VIDEO)).toBe(false);
   for(const event of ['vsl_start','vsl_progress','vsl_complete']) expect(named(await events(page),event)).toHaveLength(0);
+  await page.locator('[data-vsl-retry]').click();
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+  await page.goBack();
+  await expect(page.locator('[data-journey-screen="result"]')).toBeVisible();
+  expect(evidence.checkouts).toEqual([]);
+  privacy(await events(page));
+  expect(evidence.errors).toEqual([]);
+});
+
+test('v5 trava avanço, ended artificial, taxa e histórico; controles de teclado e reprodução legítima recuperam', async ({page},testInfo)=>{
+  const evidence=await isolate(page);
+  await page.setViewportSize({width:375,height:667});
+  await page.goto(BASE+FLOW+PARAMS);
+  await finishQuiz(page,INTENSITIES[2]);
+  await openPresentation(page);
+  await assertEntryPlayback(page);
+  const video=page.locator('[data-quiz-vsl] video');
+  const playback=page.locator('[data-vsl-playback]');
+  const audio=page.locator('[data-vsl-audio]');
+  expect(await video.evaluate(element=>element.controls)).toBe(false);
+  await expect(page.locator('[data-quiz-vsl] input[type=range], [data-quiz-vsl] select, [data-vsl-continue-fallback]')).toHaveCount(0);
+  for (const button of [playback,audio]) {
+    expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    await expect(button).toHaveAttribute('aria-controls','quiz-vsl-video');
+  }
+  await playback.focus();
+  await page.keyboard.press('Space');
+  await expect(playback).toHaveText('Retomar vídeo');
+  const frontier=await video.evaluate(element=>element.currentTime);
+  await video.evaluate(element=>{
+    element.currentTime=element.duration-.05;
+    element.dispatchEvent(new Event('ended'));
+  });
+  await expect.poll(()=>video.evaluate(element=>element.currentTime)).toBeLessThanOrEqual(frontier+.1);
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+  expect(named(await events(page),'vsl_complete')).toHaveLength(0);
+  await video.evaluate(element=>{element.playbackRate=4;element.defaultPlaybackRate=4;});
+  await expect.poll(()=>video.evaluate(element=>[element.playbackRate,element.defaultPlaybackRate])).toEqual([1,1]);
+  // Test the normal media-key surface; no writable playback evidence is injected.
+  await video.evaluate(element=>element.focus());
+  for(const key of ['ArrowRight','End','l']) await page.keyboard.press(key);
+  expect(await video.evaluate(element=>element.currentTime)).toBeLessThanOrEqual(frontier+.1);
+  await audio.focus();
+  await page.keyboard.press('Enter');
+  await expect(audio).toHaveText('Desativar som');
+  await page.keyboard.press('Space');
+  await expect(audio).toHaveText('Ativar som');
+  // Stale/future entries cannot jump past an incomplete presentation.
+  for(const screen of ['testimonials','offer']) {
+    await page.evaluate(value=>history.pushState({...history.state,cowboyJourney:value},'',location.href),screen);
+    await page.goBack();
+    await expect(page.locator('[data-journey-screen="presentation"]')).toBeVisible();
+    await page.goForward();
+    await expect.poll(()=>page.evaluate(()=>history.state.cowboyJourney)).toBe('presentation');
+    await checkStep(page,19);
+    await expect(page.locator('[data-journey-screen="testimonials"]:visible, [data-journey-screen="offer"]:visible')).toHaveCount(0);
+  }
+  const locked=await events(page);
+  expect(named(locked,'quiz_step_view').every(item=>item.step_index<=19)).toBe(true);
+  expect(named(locked,'quiz_journey_view').map(item=>item.page_kind)).toEqual(['result','presentation']);
+  expect(named(locked,'view_item')).toHaveLength(0);
+  await page.screenshot({path:testInfo.outputPath('gate-teclado-mobile.png')});
+  await finishPresentation(page);
+  expect(named(await events(page),'vsl_complete')).toHaveLength(1);
   await openOffer(page);
   await clickCheckout(page,evidence);
   privacy(await events(page));
   expect(evidence.errors).toEqual([]);
+});
+
+test('@full-vsl v5 original: 276 segundos reais em 1x liberam a próxima etapa apenas no término nativo',async({page},testInfo)=>{
+  test.skip(!FULL_VSL,'Executar explicitamente com E2E_FULL_VSL=1; MP4 original, sem fixture, seek, patch de play ou cobertura artificial.');
+  test.setTimeout(390000);
+  const evidence=await isolate(page,{realVideo:true});
+  await page.setViewportSize({width:375,height:667});
+  await page.goto(BASE+FLOW+PARAMS);
+  await finishQuiz(page,INTENSITIES[4]);
+  await openPresentation(page);
+  await assertEntryPlayback(page,true);
+  const video=page.locator('[data-quiz-vsl] video');
+  await page.locator('[data-vsl-audio]').click();
+  const initial=await video.evaluate(element=>({duration:element.duration,width:element.videoWidth,height:element.videoHeight,muted:element.muted,rate:element.playbackRate,controls:element.controls}));
+  expect(initial).toEqual({duration:expect.any(Number),width:720,height:1280,muted:false,rate:1,controls:false});
+  expect(initial.duration).toBeCloseTo(276.341,1);
+  await video.evaluate(element=>{
+    window.__nativeVslEnd=[];
+    element.addEventListener('ended',event=>window.__nativeVslEnd.push({trusted:event.isTrusted,time:element.currentTime,ended:element.ended}));
+  });
+  await page.screenshot({path:testInfo.outputPath('vsl-original-inicio-375.png')});
+  const samples=[];
+  const began=Date.now();
+  let nextLog=0;
+  while(Date.now()-began<330000) {
+    const sample=await video.evaluate(element=>({time:element.currentTime,duration:element.duration,ended:element.ended,paused:element.paused,rate:element.playbackRate,readyState:element.readyState,networkState:element.networkState,error:element.error?.code||null,played:Array.from({length:element.played.length},(_,i)=>[element.played.start(i),element.played.end(i)]),audioDecodedBytes:element.webkitAudioDecodedByteCount,videoDecodedBytes:element.webkitVideoDecodedByteCount}));
+    samples.push({wallSeconds:(Date.now()-began)/1000,...sample});
+    expect(sample.rate).toBe(1);
+    expect(sample.error).toBeNull();
+    if(Date.now()-began>=nextLog) {
+      console.log(`[VSL original 1x] ${sample.time.toFixed(1)}/${sample.duration.toFixed(1)}s; ready=${sample.readyState}; paused=${sample.paused}; elapsed=${Math.round((Date.now()-began)/1000)}s`);
+      fs.writeFileSync(testInfo.outputPath('reproducao-original-progresso.json'),JSON.stringify({initial,samples},null,2));
+      nextLog+=30000;
+    }
+    if(sample.ended) break;
+    await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+    await page.waitForTimeout(1000);
+  }
+  const final=samples.at(-1);
+  expect(final.ended).toBe(true);
+  expect(final.played).toHaveLength(1);
+  expect(final.played[0][0]).toBeLessThanOrEqual(.1);
+  expect(final.duration-final.played[0][1]).toBeLessThanOrEqual(.1);
+  expect(final.audioDecodedBytes).toBeGreaterThan(0);
+  expect(final.videoDecodedBytes).toBeGreaterThan(0);
+  expect((Date.now()-began)/1000).toBeGreaterThan(270);
+  const nativeEnded=await page.evaluate(()=>window.__nativeVslEnd);
+  expect(nativeEnded).toEqual([{trusted:true,time:expect.any(Number),ended:true}]);
+  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
+  const complete=await events(page);
+  expect(named(complete,'vsl_start')).toHaveLength(1);
+  expect(named(complete,'vsl_progress').map(item=>item.percent)).toEqual([25,50,75]);
+  expect(named(complete,'vsl_complete')).toHaveLength(1);
+  await page.screenshot({path:testInfo.outputPath('vsl-original-concluido-375.png')});
+  await openTestimonials(page);
+  await expect(page.locator('[data-proof-rating]')).toContainText('4,8 de 1.836');
+  await openOffer(page);
+  await page.locator('[data-offer-view-kits]').click();
+  await expect(page.locator('[data-journey-kits]')).toBeFocused();
+  await expect(page.locator('[data-offer-carousel]')).toHaveCount(1);
+  await expect(page.locator('[data-offer-reassurances] svg')).toHaveCount(4);
+  await clickCheckout(page,evidence);
+  const snapshot=await events(page);
+  privacy(snapshot);
+  expect(evidence.errors).toEqual([]);
+  const file=testInfo.outputPath('reproducao-original-completa.json');
+  fs.writeFileSync(file,JSON.stringify({base:BASE,media:VIDEO,fixture:false,playPatched:false,mediaIntercepted:false,initial,samples,nativeEnded,snapshot,checkout:evidence.checkouts},null,2));
+  await testInfo.attach('reproducao-original-completa',{path:file,contentType:'application/json'});
 });
 
 test('v4 etapa 4: Continuar único flutua sem encobrir nota, aceita teclado e mantém progresso legado', async ({page},testInfo)=>{

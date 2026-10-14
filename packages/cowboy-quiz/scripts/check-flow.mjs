@@ -8,6 +8,7 @@ import { JOURNEY_SCREEN_STEPS, nextJourneyScreen, readJourneyScreen } from "../s
 import { INTENSITY_QUESTION, intensityReport, intensityValue, intensitySummary } from "../src/components/sites/bluue/symptom-intensity.ts";
 import { productSavings } from "../src/components/sites/bluue/quiz-product-savings.ts";
 import { plans } from "../src/components/sites/bluue/quiz-offer-data.ts";
+import { allowedSeekTarget, continuousCoverage, hasCompletedVsl } from "../src/lib/vsl-completion.ts";
 
 // Expected paths are transcribed from the public original handlers documented in
 // docs/research/RESEARCH.md. Tests use synthetic answers and perform no I/O.
@@ -43,6 +44,48 @@ test("v5 product savings compare current kit prices with individual bottles, exc
   for (const quantity of [0, 4, 1.5, NaN]) assert.equal(productSavings(single, "R$ 0,00", quantity), null);
   assert.equal(productSavings("PRIVATE", "R$ 154,80", 2), null);
   assert.equal(productSavings(single, "PRIVATE", 3), null);
+});
+
+const completionMedia = (ranges, { duration = 276.341, currentTime = duration, ended = true, playbackRate = 1 } = {}) => ({
+  duration, currentTime, ended, playbackRate,
+  played: { length: ranges.length, start: index => ranges[index][0], end: index => ranges[index][1] },
+});
+
+test("strict VSL gate requires a trusted native ending and continuous real playback at 1x", () => {
+  const full = completionMedia([[0, 276.341]]);
+  assert.equal(hasCompletedVsl(full, true), true);
+  assert.equal(hasCompletedVsl(full, false), false, "Dispatching ended cannot unlock the next screen");
+  assert.equal(hasCompletedVsl({ ...full, ended: false }, true), false);
+  assert.equal(hasCompletedVsl({ ...full, playbackRate: 2 }, true), false);
+  assert.equal(hasCompletedVsl({ ...full, currentTime: 12 }, true), false);
+  assert.equal(hasCompletedVsl(completionMedia([]), true), false);
+  assert.equal(hasCompletedVsl(completionMedia([], { duration: 0.05 }), true), false);
+  assert.equal(hasCompletedVsl(completionMedia([[0, 10], [275, 276.341]]), true), false);
+  assert.equal(hasCompletedVsl(completionMedia([[0, 273.58]]), true), false, "99% watch time is not full playback");
+});
+
+test("strict completion budgets all gaps and the tail together within a fixed 0.1 seconds", () => {
+  assert.equal(hasCompletedVsl(completionMedia([[0, 276.30]]), true), true, "A final video/audio timing difference is tolerated");
+  assert.equal(hasCompletedVsl(completionMedia([[0.02, 100], [100.03, 276.30]]), true), true);
+  assert.equal(hasCompletedVsl(completionMedia([[0, 100], [100.06, 200], [200.06, 276.341]]), true), false, "Do not grant the tolerance separately to every hole");
+  assert.equal(hasCompletedVsl(completionMedia([[0.06, 276.29]]), true), false, "Start gap and end tail share the same budget");
+  assert.equal(hasCompletedVsl(completionMedia([[0, 276.20]]), true), false);
+});
+
+test("strict seeking uses the watched prefix, never the maximum time or disjoint end range", () => {
+  const attemptedSkip = completionMedia([[0, 10], [260, 276.341]]);
+  assert.equal(continuousCoverage(attemptedSkip).end, 10);
+  assert.equal(allowedSeekTarget(attemptedSkip, 275), 10);
+  assert.equal(allowedSeekTarget(attemptedSkip, 5), 5, "Returning to a watched passage is allowed");
+  assert.equal(allowedSeekTarget(completionMedia([]), 250), 0);
+  assert.equal(allowedSeekTarget(completionMedia([[0, 10]]), NaN), 0);
+  assert.equal(continuousCoverage(completionMedia([[20, 276.341]])).end, 0);
+  for (const duration of [NaN, Infinity, 0, -1]) assert.equal(hasCompletedVsl(completionMedia([[0, 100]], { duration }), true), false);
+  assert.equal(hasCompletedVsl(completionMedia([[0, NaN]]), true), false);
+  assert.equal(hasCompletedVsl(completionMedia([[0, 100], [10, 5]]), true), false);
+  const broken = completionMedia([[0, 276.341]]);
+  broken.played.start = () => { throw new Error("Unavailable TimeRanges"); };
+  assert.equal(hasCompletedVsl(broken, true), false);
 });
 
 function editorialStates() {
