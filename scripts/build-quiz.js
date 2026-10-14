@@ -7,7 +7,14 @@ const { spawnSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
 const QUIZ_ROOT = path.join(ROOT, 'packages', 'cowboy-quiz');
 const QUIZ_OUTPUT = path.join(QUIZ_ROOT, 'out');
-const PUBLIC_QUIZ_ROUTES = Object.freeze(['quiz/v1-direto', 'quiz/v2-vsl', 'quiz/v3-editorial', 'quiz/v3-editorial/quiz']);
+const PUBLIC_QUIZ_ROUTES = Object.freeze([
+  'quiz/v1-direto',
+  'quiz/v2-vsl',
+  'quiz/v3-editorial',
+  'quiz/v3-editorial/quiz',
+  'quiz/v4-jornada',
+  'quiz/v4-jornada/quiz',
+]);
 const PUBLIC_DIRECTORIES = Object.freeze(['_next/static', 'sites']);
 const PUBLIC_EXTENSIONS = new Set(['.html', '.txt', '.js', '.css', '.json', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.woff', '.woff2', '.mp4', '.vtt', '.ico']);
 const NEXT_METADATA_EXTENSIONS = new Set(['.txt']);

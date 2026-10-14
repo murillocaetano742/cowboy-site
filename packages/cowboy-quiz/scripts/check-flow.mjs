@@ -3,6 +3,7 @@ import test from "node:test";
 import { initialState, LAST_QUESTION, progressFor, quizReducer, quizStepFor } from "../src/components/sites/bluue/machine.ts";
 import { caseResult, problemDurationQuestion, questions, RECOMMENDED_KIT } from "../src/components/sites/bluue/data.ts";
 import { checkoutHref } from "../src/components/sites/bluue/checkout.ts";
+import { CONFIDENCE_QUESTION, confidenceReport, confidenceValue } from "../src/components/sites/bluue/confidence-impact.ts";
 
 // Expected paths are transcribed from the public original handlers documented in
 // docs/research/RESEARCH.md. Tests use synthetic answers and perform no I/O.
@@ -73,6 +74,33 @@ test("timeframe context never changes scoring or fabricates result statements", 
 function normalStates() {
   return normalActions.reduce((states, next) => [...states, quizReducer(states.at(-1), next)], [fresh()]);
 }
+
+test("v4 preserves 14 answers and 18 ordinals while replacing only the third introductory answer", () => {
+  const actions = normalActions.map((action, index) => index === 2 ? { type: "ANSWER", id: "confidence_impact", value: "none" } : action);
+  actions.splice(8, 0, { type: "ANSWER", id: "problem_duration", value: "Há mais de 1 ano" });
+  const states = actions.reduce((all, next) => [...all, quizReducer(all.at(-1), next, "v4-jornada")], [fresh()]);
+  assert.deepEqual(states.map(state => quizStepFor(state, "v4-jornada")), Array.from({ length: 18 }, (_, index) => index + 1));
+  assert.equal(Object.keys(states.at(-1).answers).length, 14);
+  assert.equal(states.at(-1).answers.confidence_impact, "none");
+  assert.equal(states.at(-1).answers.intro_urgency, undefined);
+  for (const state of states.filter(state => ["intro", "quiz", "weight_kg", "weight", "timeframe", "testimonials"].includes(state.stage))) {
+    const previous = quizReducer(state, { type: "BACK" }, "v4-jornada");
+    assert.equal(quizStepFor(previous, "v4-jornada"), Math.max(1, quizStepFor(state, "v4-jornada") - 1));
+    assert.deepEqual(previous.answers, state.answers);
+  }
+  assert.equal(editorialStates().at(-1).answers.intro_urgency, "Ainda estou avaliando");
+});
+
+test("confidence summary exactly reflects the four self-reports and never invents a default", () => {
+  assert.equal(CONFIDENCE_QUESTION.question, "Quanto isso afeta sua confiança hoje?");
+  for (const [value, label] of [["none", "Nada"], ["little", "Um pouco"], ["considerable", "Bastante"], ["much", "Muito"]]) {
+    assert.equal(confidenceReport(value).label, label);
+    assert.equal(confidenceValue(label), value);
+    assert.equal(confidenceReport(value).severity, undefined);
+    assert.equal(confidenceReport(value).score, undefined);
+  }
+  for (const invalid of [undefined, "", "ALTA", "PRIVATE", "Nada", { age: "70", conditions: "PRIVATE" }]) assert.equal(confidenceReport(invalid), null);
+});
 
 function atQuestion(index) {
   const state = normalStates().find((candidate) => candidate.stage === "quiz" && candidate.questionIndex === index);

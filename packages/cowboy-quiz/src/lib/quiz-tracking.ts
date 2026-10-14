@@ -26,6 +26,7 @@ interface TrackingState {
   visits: Map<number, number>;
   lastStep?: number;
   counts: Map<string, number>;
+  journeyScreen?: JourneyScreen;
 }
 interface TrackingWindow extends Window {
   dataLayer?: unknown[];
@@ -140,8 +141,8 @@ export function initializeQuizTracking() {
   // Disable automatic button/form inspection BEFORE initializing the pixel.
   browser.fbq("set", "autoConfig", false, META_PIXEL_ID);
   browser.fbq("init", META_PIXEL_ID);
-  const editorial = currentVariant() === "v3-editorial";
-  const pageKind = /^\/quiz\/v3-editorial\/?$/.test(browser.location.pathname) ? "cover" : "quiz";
+  const editorial = ["v3-editorial", "v4-jornada"].includes(currentVariant());
+  const pageKind = /^\/quiz\/(?:v3-editorial|v4-jornada)\/?$/.test(browser.location.pathname) ? "cover" : "quiz";
   once("page", () => {
     sendGoogle("page_view", { ...page, ...(editorial ? { page_kind: pageKind } : {}) });
     if (editorial) sendGoogle("landing_view", { page_kind: pageKind });
@@ -164,8 +165,8 @@ export function trackQuizStart(variant = currentVariant()) {
 }
 
 export function trackQuizStep(stepIndex: number, variant = currentVariant()) {
-  if (!Number.isInteger(stepIndex) || stepIndex < 1 || stepIndex > (variant === "v3-editorial" ? 18 : 17)) return;
-  if (variant === "v3-editorial") {
+  if (!Number.isInteger(stepIndex) || stepIndex < 1 || stepIndex > (["v3-editorial", "v4-jornada"].includes(variant) ? 18 : 17)) return;
+  if (["v3-editorial", "v4-jornada"].includes(variant)) {
     const state = editorialState(variant);
     if (!state || state.lastStep === stepIndex) return;
     state.lastStep = stepIndex;
@@ -229,7 +230,7 @@ export function trackBeginCheckout(quantity: KitQuantity, onReady?: () => void, 
 
 /** Fixed numeric milestones only: no media title, question text or answers. */
 export function trackVslMilestone(percent: 0 | 25 | 50 | 75 | 100, variant = currentVariant()) {
-  if (!["v2-vsl", "v3-editorial"].includes(variant) || ![0, 25, 50, 75, 100].includes(percent)) return;
+  if (!["v2-vsl", "v3-editorial", "v4-jornada"].includes(variant) || ![0, 25, 50, 75, 100].includes(percent)) return;
   const event = percent === 0 ? "vsl_start" : percent === 100 ? "vsl_complete" : "vsl_progress";
   once(`vsl:${percent}`, () => sendGoogle(event, {
     video_id: "cowboy_vsl",
@@ -238,7 +239,7 @@ export function trackVslMilestone(percent: 0 | 25 | 50 | 75 | 100, variant = cur
 }
 
 function editorialState(variant: QuizVariant) {
-  if (variant !== "v3-editorial" || !trackingAllowed()) return undefined;
+  if (!["v3-editorial", "v4-jornada"].includes(variant) || !trackingAllowed()) return undefined;
   const state = currentWindow()?.__cowboyQuizTracking;
   return state?.initialized ? state : undefined;
 }
@@ -318,4 +319,34 @@ export function trackVslInteraction(action: VslInteraction, variant = currentVar
   }, variant);
   if (["visible", "error", "autoplay_blocked"].includes(action)) once(`vsl:${action}`, emit, variant);
   else emit();
+}
+
+export type JourneyScreen = "result" | "presentation" | "offer";
+export type JourneyAction = "result_continue" | "presentation_continue" | "offer_view_kits" | "back";
+const JOURNEY_SCREENS = ["result", "presentation", "offer"] as const;
+
+/** These are virtual screens, not URLs or medical result categories. */
+export function trackJourneyView(screen: JourneyScreen) {
+  if (currentVariant() !== "v4-jornada" || !(JOURNEY_SCREENS as readonly string[]).includes(screen)) return;
+  const state = editorialState("v4-jornada");
+  const browser = currentWindow();
+  if (!state || !browser || state.journeyScreen === screen) return;
+  state.journeyScreen = screen;
+  sendGoogle("page_view", {
+    page_kind: screen,
+    page_location: sanitizedPageUrl(browser.location.href),
+    page_title: "COWBOY Energia | Jornada",
+    page_referrer: browser.location.origin,
+  }, "v4-jornada");
+  once(`journey:${screen}`, () => sendGoogle("quiz_journey_view", { page_kind: screen }, "v4-jornada"), "v4-jornada");
+}
+
+export function trackJourneyAction(action: JourneyAction, screen: JourneyScreen) {
+  if (currentVariant() !== "v4-jornada" || !editorialState("v4-jornada")) return;
+  const allowed = action === "result_continue" && screen === "result"
+    || action === "presentation_continue" && screen === "presentation"
+    || action === "offer_view_kits" && screen === "offer"
+    || action === "back" && (screen === "presentation" || screen === "offer");
+  if (!allowed) return;
+  once(`journey-action:${action}:${screen}`, () => sendGoogle("quiz_journey_action", { cta_location: action, page_kind: screen }, "v4-jornada"), "v4-jornada");
 }

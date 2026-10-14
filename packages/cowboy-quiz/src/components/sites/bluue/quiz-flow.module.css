@@ -61,4 +61,5 @@
 .kits { scroll-margin-top: 80px; }
 .kits:focus-visible { outline: 3px solid var(--ring); outline-offset: 5px; border-radius: 12px; }
 .trust { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 14px; margin: 0 0 14px; color: var(--muted-foreground); font-size: 12px; text-align: center; }
+.restart { margin: 0; padding: 16px; background: #fff3f3; color: #641015; text-align: center; font-size: 15px; }
 @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }

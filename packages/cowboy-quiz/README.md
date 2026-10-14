@@ -1,6 +1,6 @@
 # COWBOY Energia: quiz
 
-Quiz de entrada para o COWBOY Energia (suplemento alimentar em gotas), modelado sobre o quiz da Bluue (`bluue-quiz-codigo.zip`, 05/10/2026). Mantém o mesmo fluxo, telas e animações; mudou só o necessário para o produto. React, TypeScript e Next.js com exportação estática.
+Quiz de entrada para o COWBOY Energia (suplemento alimentar em gotas), inicialmente modelado sobre o quiz da Bluue (`bluue-quiz-codigo.zip`, 05/10/2026). As versões posteriores acrescentam jornadas independentes e preservam as anteriores. React, TypeScript e Next.js com exportação estática.
 
 ## Abrir localmente
 
@@ -19,12 +19,17 @@ Abra `http://localhost:3003/quiz/v1-direto/` (a página `/` também abre o quiz)
 - `/quiz/v1-direto/`: fluxo original, resultado seguido pelos kits; `quiz_id=cowboy_v1_direto`.
 - `/quiz/v2-vsl/`: mesmo fluxo, com a VSL existente entre o resultado e os kits; `quiz_id=cowboy_v2_vsl`.
 - `/quiz/v3-editorial/`: capa identificada como conteúdo publicitário, com acesso ao questionário em `/quiz/v3-editorial/quiz/`; ambas usam `quiz_id=cowboy_v3_editorial`.
+- `/quiz/v4-jornada/`: versão paralela com entrada em `/quiz/v4-jornada/quiz/` e `quiz_id=cowboy_v4_jornada`; entrega resultado, apresentação e oferta em três telas separadas.
 
 A v1 continua sendo a variante padrão e não monta nem solicita a VSL. Na v2 e v3, o player usa controles nativos, `playsInline` e `preload="none"`. Ao ficar pelo menos 50% visível, tenta iniciar uma única vez, sem som. O botão “Ativar som” exige um gesto do visitante; se o navegador bloquear a reprodução, aparece “Reproduzir vídeo com som”. Rolar a página não desfaz uma pausa manual. Os kits continuam acessíveis sem assistir ao vídeo, inclusive se houver erro de mídia.
 
 Na v3, são 14 perguntas em 18 etapas. A pergunta `problem_duration`, depois da frequência, registra há quanto tempo a dificuldade é percebida, somente em memória, sem alterar a pontuação ou as frases de gravidade. O progresso único indica a etapa atual de 1 a 18 em todas as telas; avança no fluxo e recua ao voltar. As escolhas anteriores e o peso ajustado reaparecem ao voltar. “Ver kits e valores” junto à VSL rola e move o foco para os kits. Frete do kit selecionado, envio discreto e garantia existente ficam próximos ao checkout. As versões v1 e v2 conservam suas 13 perguntas e 17 etapas.
 
 Na atualização QUIZ-045 da v3, a etapa 4 apresenta imagens de identificação de tadalafila/Cialis e informação sobre riscos do uso sem orientação, com notícia real da Anvisa e bula vinculadas. A etapa 10 é um jornal digital com fonte científica identificada. Ambas aguardam o clique em Continuar, sem autoavanço. Os frascos do COWBOY e a apresentação comercial ficam na etapa 18; o bloco existente de prova social aparece uma única vez, depois da VSL e antes dos kits. Logo, identificação publicitária e consentimento permanecem. A [base editorial, imagens e seus limites](../../docs/research/quiz-045-source.md) estão documentados. V1/v2 conservam suas telas e ordem anteriores, incluindo a caixa e o avanço automático de seis segundos.
+
+Na QUIZ-046, a v4 conserva 14 perguntas e 18 etapas até o resultado. Sua terceira pergunta registra quanto a dificuldade afeta a confiança, com quatro respostas válidas, inclusive “Nada”. O resultado repete esse autorrelato; não usa a pontuação clínica aparente de `caseResult` nem atribui gravidade por idade, doenças ou uso de medicamentos. A etapa 18 exibe somente o resumo e sua continuidade. Depois aparecem uma tela dedicada à VSL e uma oferta com apresentação própria, retomada do relato, condições da garantia, depoimentos e kits. O [mapa elaborado antes da implementação](../../docs/research/quiz-046-funnel-plan.md) detalha as decisões.
+
+As três telas finais da v4 compartilham a memória da mesma aplicação, sem respostas em URL, histórico, cookies ou armazenamento. Navegar entre elas mantém a sessão; recarregar não recupera o relato. A oferta permanece acessível se o vídeo falhar. Esta versão não acrescenta cadastro obrigatório, disparos de e-mail/WhatsApp, liberação por contagem regressiva ou redirecionamento de campanhas.
 
 O MP4 `/videos/vsl/vsl-dr-durval-720.mp4` e a capa `/imagens/v5/vsl-poster-frame.webp` pertencem ao site principal e não são duplicados no pacote. Para conferir a mídia localmente, use o build/servidor integrado da raiz; o preview isolado do pacote não contém esses dois recursos.
 
@@ -82,7 +87,7 @@ As respostas e o resultado ficam somente na memória da aba. A instrumentação 
 - Meta `1006075098894986`: `PageView`, `ViewContent` e `InitiateCheckout`, enviados manualmente com `autoConfig=false` antes da inicialização. Não há correspondência avançada configurada pelo código nem captura de cliques por texto.
 - UTMify: somente `scripts/utms/latest.js` para atribuição. O SDK de pixel UTMify, que inspeciona formulários e botões, não é carregado dentro do questionário. A integração existente do checkout/webhook continua responsável pelos eventos de compra; o quiz nunca emite `Purchase` nem `Lead`.
 
-Somente a v3 acrescenta os eventos abaixo, com parâmetros fechados por tipos e validação de allowlist em runtime:
+As variantes v3 e v4 acrescentam os eventos abaixo, com parâmetros fechados por tipos e validação de allowlist em runtime:
 
 | Evento | Parâmetros adicionais e momento |
 |---|---|
@@ -98,6 +103,8 @@ Somente a v3 acrescenta os eventos abaixo, com parâmetros fechados por tipos e 
 | `vsl_visible` | `video_id=cowboy_vsl`; vídeo pelo menos 50% visível |
 | `vsl_unmute`, `vsl_mute`, `vsl_pause` | `video_id` e `interaction_count`; mudanças de audibilidade e pausas após reprodução |
 | `vsl_error`, `vsl_autoplay_blocked` | `video_id`; únicos por visita, sem mensagem livre do erro |
+
+A v4 também registra as três telas finais por `page_view` com `page_kind=result`, `presentation` ou `offer`, além de `quiz_journey_view` e `quiz_journey_action`. Os cliques usam `cta_location` com valores fechados. Essas dimensões já existem no GA4; nenhum evento recebe a resposta de impacto ou o texto do resumo. O [mapa da medição da jornada](../../docs/integracoes/quiz-046-jornada.md) descreve os momentos e os limites da verificação.
 
 Os marcos de vídeo existentes mantêm a cobertura efetivamente reproduzida. Novos eventos editoriais e de vídeo não criam eventos adicionais no Meta. A URL, os títulos e os dados de saúde não são parâmetros das interações. A visibilidade usa `IntersectionObserver`; sem suporte, os elementos e os CTAs funcionam, mas esses eventos não são inventados.
 

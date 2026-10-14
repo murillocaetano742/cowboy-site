@@ -7,23 +7,22 @@ import { readAttribution } from "@/components/sites/bluue/checkout";
 import { trackContentLink, trackCoverCta, trackCoverSection } from "@/lib/quiz-tracking";
 import styles from "@/components/sites/bluue/quiz-editorial.module.css";
 
-const QUIZ_PATH = "/quiz/v3-editorial/quiz/";
 const COVER_SECTIONS = ["intro", "how_it_works", "footer"] as const;
 type CtaLocation = "hero" | "footer";
 
-function quizHref() {
+function quizHref(path: string) {
   const search = new URLSearchParams(readAttribution()).toString();
-  return QUIZ_PATH + (search ? `?${search}` : "");
+  return path + (search ? `?${search}` : "");
 }
 
 // Attribution is fixed for this document; hydrate native links from browser storage.
 const subscribeAttribution = () => () => {};
-const serverQuizHref = () => QUIZ_PATH;
-
-export function QuizEditorial() {
+interface QuizEditorialProps { variant?: "v3-editorial" | "v4-jornada" }
+export function QuizEditorial({ variant = "v3-editorial" }: QuizEditorialProps) {
+  const path = `/quiz/${variant}/quiz/`;
   const rootRef = useRef<HTMLElement>(null);
   const navigating = useRef(false);
-  const href = useSyncExternalStore(subscribeAttribution, quizHref, serverQuizHref);
+  const href = useSyncExternalStore(subscribeAttribution, () => quizHref(path), () => path);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -48,7 +47,7 @@ export function QuizEditorial() {
     event.preventDefault();
     if (navigating.current) return;
     navigating.current = true;
-    const destination = quizHref();
+    const destination = quizHref(path);
     trackCoverCta(location, () => window.location.assign(destination));
   };
 

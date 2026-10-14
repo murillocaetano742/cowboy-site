@@ -47,7 +47,7 @@ export function quizReducer(state: QuizState, action: QuizAction, variant: QuizV
       return { ...state, stage: "quiz", questionIndex: 0, direction: -1 };
     if (stage === "timeframe")
       return { ...state, stage: "quiz", questionIndex: 2, direction: -1 };
-    if (variant === "v3-editorial" && (stage === "weight" || stage === "testimonials"))
+    if ((variant === "v3-editorial" || variant === "v4-jornada") && (stage === "weight" || stage === "testimonials"))
       return { ...state, stage: stage === "weight" ? "testimonials" : "timeframe", direction: -1 };
     if (stage === "weight" || stage === "testimonials")
       return { ...state, stage: "quiz", questionIndex: 2, direction: -1 };
@@ -91,7 +91,7 @@ export function quizReducer(state: QuizState, action: QuizAction, variant: QuizV
   if (stage === "timeframe") return { ...next, stage: "testimonials" };
   if (stage === "quiz") {
     if (action.id === "age") return { ...next, stage: "weight_kg" };
-    if (action.id === "frequency") return { ...next, stage: variant === "v3-editorial" ? "timeframe" : "testimonials" };
+    if (action.id === "frequency") return { ...next, stage: variant === "v3-editorial" || variant === "v4-jornada" ? "timeframe" : "testimonials" };
     return {
       ...next,
       stage: q === LAST_QUESTION ? "analyzing" : "quiz",
@@ -107,7 +107,7 @@ export function quizStepFor(state: Pick<QuizState, "stage" | "introIndex" | "que
   const otherSteps = { explanation: 4, weight_kg: 6, testimonials: 9, weight: 10, analyzing: 16, precheckout: 17, timeframe: 9 } as const;
   const step = state.stage === "intro" ? state.introIndex + 1
     : state.stage === "quiz" ? questionSteps[state.questionIndex] : otherSteps[state.stage];
-  return variant === "v3-editorial" && state.stage !== "timeframe" && step >= 9 ? step + 1 : step;
+  return (variant === "v3-editorial" || variant === "v4-jornada") && state.stage !== "timeframe" && step >= 9 ? step + 1 : step;
 }
 
 export function progressFor(state: QuizState) {
