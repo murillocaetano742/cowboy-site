@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { recordVslPlayback } from "@/lib/vsl-playback";
 import { allowedSeekTarget, hasCompletedVsl } from "@/lib/vsl-completion";
-import { trackVslInteraction } from "@/lib/quiz-tracking";
+import { trackingAllowed, trackVslInteraction } from "@/lib/quiz-tracking";
+import { observeVsl, type VslTelemetry } from "@/lib/vsl-telemetry";
 import type { QuizVariant } from "@/lib/quiz-variant";
 import styles from "@/components/sites/bluue/quiz-vsl.module.css";
 
@@ -24,11 +25,21 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
   const autoplayAttempted = useRef(false);
   const hasPlayed = useRef(false);
   const audible = useRef(false);
+  const telemetry = useRef<VslTelemetry | null>(null);
   const [hasError, setHasError] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [requiresInteraction, setRequiresInteraction] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const showError = () => { setHasError(true); trackVslInteraction("error", variant); if (!strict) onContinueReady?.(); };
+  const showError = () => { setHasError(true); telemetry.current?.failed(); trackVslInteraction("error", variant); if (!strict) onContinueReady?.(); };
+
+  useEffect(() => {
+    if (variant !== "v5-etapas" || !trackingAllowed() || !videoRef.current) return;
+    const observer = observeVsl(videoRef.current);
+    telemetry.current = observer;
+    return () => { observer.dispose(); telemetry.current = null; };
+  }, [variant]);
+
+  useEffect(() => { telemetry.current?.setActive(active); }, [active]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -39,6 +50,7 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
       queueMicrotask(() => {
         if (!isMounted) return;
         setHasError(true);
+        telemetry.current?.failed();
         trackVslInteraction("error", variant);
         if (!strict) onContinueReady();
       });
@@ -54,7 +66,7 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
       autoplayAttempted.current = true;
       observer.disconnect();
       void video.play().catch(() => {
-        if (isMounted) { setRequiresInteraction(true); trackVslInteraction("autoplay_blocked", variant); }
+        if (isMounted) { telemetry.current?.failed(); setRequiresInteraction(true); trackVslInteraction("autoplay_blocked", variant); }
       });
     }, { threshold: 0.5 });
     observer.observe(video);
@@ -77,8 +89,8 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
     const video = videoRef.current;
     if (!video || typeof video.play !== "function") return;
     autoplayAttempted.current = true;
-    if (!video.paused) video.pause();
-    else void video.play().catch(() => setRequiresInteraction(true));
+    if (!video.paused) { telemetry.current?.manualPause(); video.pause(); }
+    else void video.play().catch(() => { telemetry.current?.failed(); setRequiresInteraction(true); });
   };
 
   const toggleAudio = () => {
@@ -94,6 +106,7 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
     autoplayAttempted.current = true;
     setHasError(false);
     setRequiresInteraction(false);
+    telemetry.current?.retry();
     // Reloading starts a new played range at zero; no previous coverage is invented.
     video.load();
     void video.play().catch(() => setRequiresInteraction(true));
@@ -153,6 +166,7 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
               return;
             }
           }
+          telemetry.current?.completed();
           recordVslPlayback("ended", event.currentTarget, variant);
           onContinueReady?.();
         }}

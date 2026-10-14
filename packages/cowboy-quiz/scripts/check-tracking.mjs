@@ -17,6 +17,14 @@ function fixture({ search = "", stored = "{}", gpc = false, disabled = false, st
   const timers = new Map();
   let nextTimer = 0;
   let clock = 0;
+  const eventTarget = () => {
+    const listeners = new Map();
+    return {
+      addEventListener(name, callback) { if (!listeners.has(name)) listeners.set(name, new Set()); listeners.get(name).add(callback); },
+      removeEventListener(name, callback) { listeners.get(name)?.delete(callback); },
+      emit(name) { for (const callback of listeners.get(name) ?? []) callback(); },
+    };
+  };
   const location = (href) => Object.assign(new URL(href), { assign: (url) => navigations.push(url) });
   function advanceTimers(milliseconds) {
     const end = clock + milliseconds;
@@ -25,22 +33,31 @@ function fixture({ search = "", stored = "{}", gpc = false, disabled = false, st
       if (!next) break;
       timers.delete(next[0]);
       clock = next[1].at;
+      if (next[1].interval) timers.set(next[0], { ...next[1], at: clock + next[1].interval });
       next[1].callback();
     }
     clock = end;
   }
   const document = {
+    ...eventTarget(),
+    visibilityState: "visible",
+    focused: true,
+    hasFocus() { return this.focused; },
     referrer: "https://example.com/private?email=PRIVATE&answer=SENSITIVE",
     getElementById: (id) => scripts.find((script) => script.id === id),
     createElement: () => ({ attributes: {}, setAttribute(name, value) { this.attributes[name] = value; } }),
     head: { appendChild(script) { scripts.push({ ...script, pageAtLoad: window.location.href }); } },
   };
   const window = {
+    ...eventTarget(),
+    performance: { now: () => clock },
     navigator: { globalPrivacyControl: gpc },
     "ga-disable-G-VYR2542XCN": disabled,
     location: location(`https://${hostname}${pathname}${search}`),
     setTimeout(callback, delay = 0) { const id = ++nextTimer; timers.set(id, { at: clock + delay, callback }); return id; },
     clearTimeout(id) { timers.delete(id); },
+    setInterval(callback, interval) { const id = ++nextTimer; timers.set(id, { at: clock + interval, callback, interval }); return id; },
+    clearInterval(id) { timers.delete(id); },
     sessionStorage: {
       getItem(key) { if (storageBlocked) throw new Error("storage blocked"); return storage.get(key); },
       setItem(key, value) { if (storageBlocked) throw new Error("storage blocked"); storage.set(key, value); },
@@ -70,12 +87,140 @@ function fixture({ search = "", stored = "{}", gpc = false, disabled = false, st
   const navigation = load("src/lib/checkout-navigation.ts");
   const variants = load("src/lib/quiz-variant.ts");
   const vsl = load("src/lib/vsl-playback.ts");
+  const telemetry = load("src/lib/vsl-telemetry.ts");
   const commands = () => (window.dataLayer ?? []).map((command) => Array.from(command));
   const events = () => commands().filter(([command]) => command === "event");
-  return { tracking, checkout, navigation, variants, vsl, window, scripts, storage, commands, events, advanceTimers, navigations };
+  return { tracking, checkout, navigation, variants, vsl, telemetry, window, document, eventTarget, scripts, storage, commands, events, advanceTimers, navigations, jumpClock: milliseconds => { clock += milliseconds; } };
 }
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
+
+test("v5 engagement measures per-step foreground deltas with heartbeat, revisit and lifecycle dedup", () => {
+  const page = fixture({ pathname: "/quiz/v5-etapas/" });
+  page.tracking.initializeQuizTracking();
+  page.advanceTimers(30_000);
+  const engagement = () => page.events().filter(([, name]) => name === "quiz_step_engagement").map(([, , data]) => data);
+  assert.deepEqual(plain(engagement().map(({ step_index, active_time_ms, flush_reason }) => ({ step_index, active_time_ms, flush_reason }))), [{ step_index: 0, active_time_ms: 30_000, flush_reason: "heartbeat" }]);
+  page.advanceTimers(2_000);
+  page.tracking.trackQuizStep(1);
+  page.tracking.trackQuizStep(1);
+  page.advanceTimers(3_000);
+  page.document.visibilityState = "hidden";
+  page.document.emit("visibilitychange");
+  page.window.emit("pagehide");
+  assert.equal(engagement().length, 3);
+  assert.equal(engagement()[2].active_time_ms, 3_000);
+  page.advanceTimers(30_000);
+  assert.equal(engagement().length, 3, "Hidden time must not become engagement");
+  page.document.visibilityState = "visible";
+  page.document.emit("visibilitychange");
+  page.advanceTimers(4_000);
+  page.tracking.trackQuizStep(2);
+  page.advanceTimers(1_000);
+  page.tracking.trackQuizStep(1);
+  page.advanceTimers(2_000);
+  page.document.focused = false;
+  page.window.emit("blur");
+  assert.deepEqual(plain(engagement().slice(3).map(data => [data.step_index, data.active_time_ms, data.flush_reason])), [[1, 4_000, "transition"], [2, 1_000, "transition"], [1, 2_000, "blur"]]);
+  page.advanceTimers(30_000);
+  assert.equal(engagement().length, 6);
+  page.document.focused = true;
+  page.window.emit("focus");
+  page.advanceTimers(1_000);
+  page.window.emit("pagehide");
+  assert.equal(engagement().at(-1).active_time_ms, 1_000);
+});
+
+test("unknown clock gaps are discarded; new APIs reject invalid data and respect opt-out/legacy", () => {
+  const page = fixture({ pathname: "/quiz/v5-etapas/quiz/" });
+  page.tracking.initializeQuizTracking();
+  page.tracking.trackQuizStep(1);
+  page.jumpClock(120_000);
+  page.tracking.trackQuizStep(2);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_step_engagement").length, 0);
+  const before = page.events().length;
+  page.tracking.trackStepEngagement(22, 1_000, "transition");
+  page.tracking.trackStepEngagement(1, NaN, "transition");
+  page.tracking.trackStepEngagement(1, 1_000, "PRIVATE");
+  page.tracking.trackVslRetention(100);
+  page.tracking.trackVslCheckpoint({ position_bucket: 15, video_percent: 10, watched_time_ms: 100, buffer_time_ms: 0 }, "pause", "manual");
+  assert.equal(page.events().length, before);
+  for (const settings of [{ pathname: "/quiz/v4-jornada/quiz/" }, { pathname: "/quiz/v5-etapas/quiz/", gpc: true }, { pathname: "/quiz/v5-etapas/quiz/", disabled: true }]) {
+    const blocked = fixture(settings);
+    blocked.tracking.initializeQuizTracking();
+    const count = blocked.events().length;
+    blocked.tracking.trackStepEngagement(1, 1_000, "heartbeat");
+    blocked.tracking.trackVslRetention(10);
+    blocked.tracking.trackVslCheckpoint({ position_bucket: 0, video_percent: 0, watched_time_ms: 100, buffer_time_ms: 0 }, "pause", "manual");
+    blocked.advanceTimers(30_000);
+    assert.equal(blocked.events().length, count);
+  }
+});
+
+function mediaFixture(page) {
+  let coverage = 0;
+  const video = { ...page.eventTarget(), duration: 100, currentTime: 0, readyState: 4, seeking: false, paused: true, ended: false,
+    played: { get length() { return coverage > 0 ? 1 : 0; }, start: () => 0, end: () => coverage } };
+  return { video, cover: seconds => { coverage = seconds; video.currentTime = seconds; video.emit("timeupdate"); } };
+}
+
+test("v5 video deciles use played coverage, checkpoints carry only safe deltas and pause causes", () => {
+  const page = fixture({ pathname: "/quiz/v5-etapas/quiz/" });
+  page.tracking.initializeQuizTracking();
+  const { video, cover } = mediaFixture(page);
+  const observer = page.telemetry.observeVsl(video);
+  video.paused = false;
+  video.emit("play");
+  page.advanceTimers(2_000);
+  video.emit("playing");
+  const checkpoints = () => page.events().filter(([, name]) => name === "vsl_watch_checkpoint").map(([, , data]) => data);
+  assert.equal(checkpoints()[0].buffer_time_ms, 2_000, "Startup is measured from play to playing");
+  page.advanceTimers(3_000);
+  cover(10);
+  cover(10);
+  video.currentTime = 99;
+  video.emit("timeupdate");
+  assert.deepEqual(plain(page.events().filter(([, name]) => name === "vsl_retention").map(([, , data]) => data.video_percent)), [10]);
+  video.currentTime = 10;
+  observer.manualPause();
+  video.paused = true;
+  video.emit("pause");
+  assert.equal(checkpoints().at(-1).watched_time_ms, 3_000);
+  assert.equal(checkpoints().at(-1).pause_reason, "manual");
+  page.advanceTimers(10_000);
+  video.paused = false;
+  video.emit("play"); video.emit("playing");
+  page.advanceTimers(1_000);
+  video.emit("waiting");
+  page.advanceTimers(2_000);
+  video.emit("playing");
+  assert.equal(checkpoints().at(-1).buffer_time_ms, 2_000);
+  assert.equal(checkpoints().at(-1).watched_time_ms, 1_000);
+  page.advanceTimers(2_000);
+  page.document.visibilityState = "hidden";
+  page.document.emit("visibilitychange");
+  const count = checkpoints().length;
+  page.window.emit("pagehide");
+  page.advanceTimers(30_000);
+  assert.equal(checkpoints().length, count);
+  page.document.visibilityState = "visible";
+  page.document.emit("visibilitychange");
+  page.advanceTimers(1_000);
+  observer.setActive(false);
+  video.paused = true; video.emit("pause");
+  assert.equal(checkpoints().at(-1).pause_reason, "viewport");
+  assert.equal(checkpoints().at(-1).checkpoint_reason, "transition");
+  assert.equal(checkpoints().at(-1).watched_time_ms, 1_000);
+  observer.setActive(true);
+  observer.failed(); observer.failed(); observer.retry();
+  assert.equal(checkpoints().filter(data => data.checkpoint_reason === "error").length, 1);
+  assert.equal(checkpoints().filter(data => data.checkpoint_reason === "retry").length, 1);
+  cover(90); cover(90);
+  assert.equal(page.events().filter(([, name]) => name === "vsl_retention").length, 9);
+  assert.equal(page.events().filter(([, name]) => name === "vsl_complete").length, 0, "Telemetry cannot release/complete the video");
+  assert.ok(checkpoints().every(data => Object.keys(data).every(key => ["send_to", "quiz_id", "video_id", "position_bucket", "video_percent", "watched_time_ms", "buffer_time_ms", "checkpoint_reason", "pause_reason"].includes(key))));
+  observer.dispose();
+});
 
 test("v5 counts 21 neutral steps but only 14 answers; testimonial exposure is separate from navigation", () => {
   const page = fixture({ pathname: "/quiz/v5-etapas/quiz/", search: "?utm_source=validation&impact=PRIVATE" });

@@ -5,6 +5,7 @@ import {
 } from "@/components/sites/bluue/checkout";
 import type { KitQuantity } from "@/components/sites/bluue/data";
 import { QUIZ_IDS, quizIdForVariant, quizVariantForPath, type QuizVariant } from "@/lib/quiz-variant";
+import { startStepEngagement, type EngagementReason, type StepEngagement } from "@/lib/quiz-engagement";
 
 export const MEASUREMENT_ID = "G-VYR2542XCN";
 export const META_PIXEL_ID = "1006075098894986";
@@ -27,6 +28,7 @@ interface TrackingState {
   lastStep?: number;
   counts: Map<string, number>;
   journeyScreen?: JourneyScreen;
+  engagement?: StepEngagement;
 }
 interface TrackingWindow extends Window {
   dataLayer?: unknown[];
@@ -149,6 +151,11 @@ export function initializeQuizTracking() {
     sendMeta("PageView");
   });
 
+  if (currentVariant() === "v5-etapas") {
+    browser.__cowboyQuizTracking.engagement = startStepEngagement(trackingAllowed, trackStepEngagement);
+    if (pageKind === "cover") browser.__cowboyQuizTracking.engagement.setStep(0);
+  }
+
   loadScript("cowboy-quiz-ga4", `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`);
   loadScript("cowboy-quiz-meta", "https://connect.facebook.net/en_US/fbevents.js");
   // Attribution-only SDK. UTMify's pixel/form-reader SDK is intentionally absent.
@@ -167,6 +174,7 @@ export function trackQuizStart(variant = currentVariant()) {
 export function trackQuizStep(stepIndex: number, variant = currentVariant()) {
   const maxStep = variant === "v5-etapas" ? 21 : ["v3-editorial", "v4-jornada"].includes(variant) ? 18 : 17;
   if (!Number.isInteger(stepIndex) || stepIndex < 1 || stepIndex > maxStep) return;
+  if (variant === "v5-etapas") currentWindow()?.__cowboyQuizTracking?.engagement?.setStep(stepIndex);
   if (["v3-editorial", "v4-jornada", "v5-etapas"].includes(variant)) {
     const state = editorialState(variant);
     if (!state || state.lastStep === stepIndex) return;
@@ -209,6 +217,7 @@ export function trackKitSelection(quantity: KitQuantity, variant = currentVarian
 export function trackBeginCheckout(quantity: KitQuantity, onReady?: () => void, variant = currentVariant()) {
   if (![1, 2, 3].includes(quantity)) { onReady?.(); return; }
   const browser = currentWindow();
+  if (variant === "v5-etapas") browser?.__cowboyQuizTracking?.engagement?.flush("transition");
   let finished = false;
   let fallback: number | undefined;
   const finish = () => {
@@ -281,6 +290,7 @@ export function trackCoverCta(location: CoverCtaLocation, onReady?: () => void) 
   const variant = currentVariant();
   const browser = currentWindow();
   if (!editorialState(variant) || !["hero", "footer"].includes(location)) { onReady?.(); return; }
+  if (variant === "v5-etapas") browser?.__cowboyQuizTracking?.engagement?.flush("transition");
   let finished = false;
   let fallback: number | undefined;
   const finish = () => {
@@ -358,4 +368,45 @@ export function trackJourneyAction(action: JourneyAction, screen: JourneyScreen)
 export function trackTestimonialsView() {
   if (currentVariant() !== "v5-etapas") return;
   once("testimonials-view", () => sendGoogle("quiz_testimonials_view", {}));
+}
+
+const ENGAGEMENT_REASONS = ["heartbeat", "transition", "hidden", "blur", "pagehide"] as const;
+const CHECKPOINT_REASONS = ["heartbeat", "pause", "hidden", "blur", "pagehide", "transition", "completed", "error", "retry", "recovered"] as const;
+const PAUSE_REASONS = ["manual", "viewport", "lifecycle", "completed", "unknown"] as const;
+export type VslCheckpointReason = typeof CHECKPOINT_REASONS[number];
+export type VslPauseReason = typeof PAUSE_REASONS[number];
+export interface VslCheckpoint {
+  position_bucket: number;
+  video_percent: number;
+  watched_time_ms: number;
+  buffer_time_ms: number;
+}
+
+function v5MetricsAllowed() {
+  return currentVariant() === "v5-etapas" && !!editorialState("v5-etapas");
+}
+
+export function trackStepEngagement(stepIndex: number, milliseconds: number, reason: EngagementReason) {
+  if (!v5MetricsAllowed() || !Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex > 21
+    || !Number.isFinite(milliseconds) || milliseconds <= 0 || milliseconds > 60_000
+    || !(ENGAGEMENT_REASONS as readonly string[]).includes(reason)) return;
+  const pageKind = stepIndex === 0 ? "cover" : stepIndex === 18 ? "result" : stepIndex === 19 ? "presentation" : stepIndex === 20 ? "testimonials" : stepIndex === 21 ? "offer" : "quiz";
+  sendGoogle("quiz_step_engagement", { step_index: stepIndex, page_kind: pageKind, active_time_ms: Math.floor(milliseconds), flush_reason: reason });
+}
+
+export function trackVslRetention(percent: number) {
+  if (!v5MetricsAllowed() || !Number.isInteger(percent) || percent < 10 || percent > 90 || percent % 10 !== 0) return;
+  once(`vsl-retention:${percent}`, () => sendGoogle("vsl_retention", { video_id: "cowboy_vsl", video_percent: percent }));
+}
+
+/** Copy only allowlisted primitive fields; never forward arbitrary media/answer objects. */
+export function trackVslCheckpoint(snapshot: VslCheckpoint, reason: VslCheckpointReason, pauseReason?: VslPauseReason) {
+  if (!v5MetricsAllowed() || !(CHECKPOINT_REASONS as readonly string[]).includes(reason)
+    || pauseReason !== undefined && !(PAUSE_REASONS as readonly string[]).includes(pauseReason)) return;
+  const { position_bucket, video_percent, watched_time_ms, buffer_time_ms } = snapshot;
+  if (!Number.isInteger(position_bucket) || position_bucket < 0 || position_bucket > 3_600 || position_bucket % 10 !== 0
+    || !Number.isInteger(video_percent) || video_percent < 0 || video_percent > 100 || video_percent % 10 !== 0
+    || !Number.isInteger(watched_time_ms) || watched_time_ms < 0 || watched_time_ms > 60_000
+    || !Number.isInteger(buffer_time_ms) || buffer_time_ms < 0 || buffer_time_ms > 60_000) return;
+  sendGoogle("vsl_watch_checkpoint", { video_id: "cowboy_vsl", position_bucket, video_percent, watched_time_ms, buffer_time_ms, checkpoint_reason: reason, ...(pauseReason ? { pause_reason: pauseReason } : {}) });
 }
