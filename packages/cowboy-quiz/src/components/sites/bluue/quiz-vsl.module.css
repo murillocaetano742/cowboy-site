@@ -67,3 +67,9 @@
   cursor: pointer;
 }
 .fallbackButton:focus-visible { outline: 3px solid #ff858b; outline-offset: 4px; }
+.compact.strict .player {
+  height: max(200px, calc(100svh - 276px - var(--journey-dock-height, 120px) - env(safe-area-inset-bottom, 0px)));
+}
+.playbackControls { display: flex; justify-content: center; gap: 10px; margin: 10px 0; }
+.playbackControls button { flex: 1; min-height: 44px; padding: 10px 12px; border: 1px solid #a79a9a; border-radius: 8px; background: #211b1b; color: #fff; font: inherit; font-size: 14px; font-weight: 700; line-height: 1.35; cursor: pointer; }
+.playbackControls button:focus-visible { outline: 3px solid #ff858b; outline-offset: 3px; }

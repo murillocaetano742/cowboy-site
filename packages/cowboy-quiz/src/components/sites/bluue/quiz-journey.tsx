@@ -35,14 +35,19 @@ export function QuizJourney({ impact, answers, variant = "v4-jornada", onStepCha
   const [hasTestimonials, setHasTestimonials] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<KitQuantity>(RECOMMENDED_KIT);
   const [presentationReady, setPresentationReady] = useState(false);
+  const presentationReadyRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const releasePresentation = useCallback(() => setPresentationReady(true), []);
+  const releasePresentation = useCallback(() => { presentationReadyRef.current = true; setPresentationReady(true); }, []);
 
   useEffect(() => {
     // Only fixed navigation identifiers enter history; personal state stays in Quiz.
     window.history.replaceState({ ...window.history.state, cowboyJourney: "result" }, "", window.location.href);
     const onPop = (event: PopStateEvent) => {
-      const next = readJourneyScreen(event.state?.cowboyJourney, split);
+      let next = readJourneyScreen(event.state?.cowboyJourney, split);
+      if (split && !presentationReadyRef.current && (next === "testimonials" || next === "offer")) {
+        next = "presentation";
+        window.history.replaceState({ ...window.history.state, cowboyJourney: next }, "", window.location.href);
+      }
       if (next === "presentation") setHasVideo(true);
       if (next === "testimonials") setHasTestimonials(true);
       setScreen(next);
@@ -75,6 +80,7 @@ export function QuizJourney({ impact, answers, variant = "v4-jornada", onStepCha
   }, [screen, variant]);
 
   const forward = () => {
+    if (split && screen === "presentation" && !presentationReadyRef.current) return;
     const destination = nextJourneyScreen(screen, split);
     trackJourneyAction(screen === "result" ? "result_continue" : screen === "testimonials" ? "testimonials_continue" : "presentation_continue", screen);
     if (destination === "presentation") setHasVideo(true);
@@ -121,7 +127,7 @@ export function QuizJourney({ impact, answers, variant = "v4-jornada", onStepCha
         <h1 id={screen === "presentation" ? "journey-title" : undefined} tabIndex={-1} data-journey-title>{split ? "Apresentação do COWBOY" : "Conheça a proposta. Decida no seu tempo."}</h1>
         {!split && <><p>Você contou como isso afeta sua confiança. Agora, assista à apresentação do COWBOY e conheça a oferta.</p>
         <button type="button" className={styles.primary} data-journey-next="presentation" onClick={forward}>Ver kits e valores</button></>}
-        <div className={styles.video}><QuizVsl variant={variant} active={screen === "presentation"} presentation nextDestination={split ? "testimonials" : "offer"} compact={split} onContinueReady={split ? releasePresentation : undefined} onPlaybackFallback={split ? () => { releasePresentation(); forward(); } : undefined} /></div>
+        <div className={styles.video}><QuizVsl variant={variant} active={screen === "presentation"} presentation nextDestination={split ? "testimonials" : "offer"} compact={split} strictCompletion={split} onContinueReady={split ? releasePresentation : undefined} /></div>
       </section>}
 
       {hasTestimonials && <section className={styles.offer} data-journey-screen="testimonials" hidden={screen !== "testimonials"}>
@@ -129,7 +135,7 @@ export function QuizJourney({ impact, answers, variant = "v4-jornada", onStepCha
       </section>}
       {screen === "offer" && <QuizJourneyOffer impactLabel={report.label} selectedPlan={selectedPlan} onSelectPlan={setSelectedPlan} variant={variant} />}
       {split && screen !== "offer" && <QuizJourneyDock>
-        {screen === "presentation" && <p className={styles.dockHint} aria-live="polite">{presentationReady ? "Próximo: depoimentos de clientes" : "Ao final do vídeo, siga para os depoimentos de clientes."}</p>}
+        {screen === "presentation" && <p className={styles.dockHint} aria-live="polite">{presentationReady ? "Próximo: depoimentos de clientes" : "Assista ao vídeo completo para seguir aos depoimentos de clientes."}</p>}
         {(screen !== "presentation" || presentationReady) && <button type="button" className={styles.primary} data-journey-next={screen} onClick={forward}>{screen === "result" ? "Assistir à apresentação" : "Escolher meu kit"}</button>}
       </QuizJourneyDock>}
     </div>

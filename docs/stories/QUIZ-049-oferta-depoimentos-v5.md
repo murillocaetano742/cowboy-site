@@ -1,6 +1,6 @@
 # QUIZ-049 — Oferta e depoimentos da v5
 
-Status: fonte consolidada, gates e QA funcional/visual aprovados. GO root/QA concedido; release em andamento.
+Status: publicada e verificada em produção; gates, QA e revisão visual aprovados. Fechamento documental somente local.
 
 ## Pedido e base
 
@@ -25,7 +25,7 @@ Oito rotas existentes; nenhum novo pacote, mídia, SDK ou endpoint. V1–v4, eta
 - [x] Seleção, foco, teclado, zoom e layout mobile/desktop funcionam sem overflow ou conteúdo ocultado; vídeos pausam fora da etapa.
 - [x] Tracking permanece neutro, sem respostas/dados de saúde; GPC/opt-out e deduplicação preservados.
 - [x] Lint, TypeScript, testes, build/check:build, E2E e revisão visual aprovados; oito rotas e regressões anteriores sem bloqueadores.
-- [ ] Publicar somente após GO root/QA via PR, checks e merge de SHA exato; um deployment automático READY, smoke público e rollback preservado.
+- [x] Publicar somente após GO root/QA via PR, checks e merge de SHA exato; um deployment automático READY, smoke público e rollback preservado.
 
 ## Coordenação e progresso
 
@@ -34,11 +34,23 @@ Root define contrato e revisa produto/documentação. Dev possui componentes/lib
 - [x] Confirmar base limpa, fetch remoto e rollback READY.
 - [x] Criar branch e story antes do código.
 - [x] Consolidar implementação/File List e evidências de QA.
-- [ ] Publicar, verificar, encerrar servidor e manter fechamento documental somente local.
+- [x] Publicar, verificar, encerrar servidor e manter fechamento documental somente local.
 
 Gates aprovados: sintaxe de 54 arquivos JavaScript + ESLint, TypeScript, 115 testes (57 site, 22 fluxo e 36 tracking), build/check:build com 152 arquivos públicos e oito HTML. Nenhuma alteração de rotas, dependências, SDKs ou handler de checkout. Servidor 4419 disponibilizado para 33 E2E e capturas 375/390/1440. Root revisou fonte/plano/README sem bloqueios adicionais; título de kits compacto, seleção explicitamente vermelha e quantidade no CTA foram aplicados somente à v5.
 
 QA funcional: 33/33 E2E passaram em 1,9 minuto, incluindo 19 regressões legadas. A revisão visual encontrou a barra fixa cobrindo o título/primeiro card após o salto aos kits; o ajuste ficou restrito ao CSS v5, `scroll-margin-top: 104px`. Lint/TypeScript e build/check:build passaram novamente. No último artefato, o caso principal passou novamente (1/1, 24 segundos) e as capturas confirmaram título/card abaixo da barra, carrossel de quatro slides com teclado/rolagem, quatro selos e um checkout dinâmico. Capturas em `.local/quiz-049-final-captures/`; testes em `test-results/quiz-049/` e `test-results/quiz-049-final/`. GO QA final concedido; nenhum pedido/coleta externa foi realizado.
+
+## Publicação e fechamento
+
+PR [#33](https://github.com/murillocaetano742/cowboy-site/pull/33), head `ef8d37665d76259a0d453d2ecd0b0052e2299205`, passou nos checks Vercel e Preview Comments. Merge exato em `b2f2976bf100c4674e78b37e8c69ba3a3a45f8f4`, às 14:10:54 UTC de 14/10/2026. O único deployment automático de produção `dpl_4g3vPgdWqNy2heTT5KU1pZUyVjMc` está READY, com aliases canônicos confirmados. URL imutável: `https://cowboy-site-i473gi97t-murillo-digital.vercel.app`. Rollback 048 preservado: `dpl_EvUqwYrRF4hE6rPHeNK3somocSGi`.
+
+Atualização na mesma [capa v5](https://cowboyenergiamasculina.com.br/quiz/v5-etapas/) e [questionário v5](https://cowboyenergiamasculina.com.br/quiz/v5-etapas/quiz/). Às 14:13:44 UTC, oito rotas e 22 assets retornaram HTTP 200. Os oito HTML canônicos coincidiram byte a byte com o deployment autenticado; bundles contêm carrossel, selos e cabeçalho de avaliações. Imagens do carrossel/kits, resultado, capa, medicamentos e poster mantêm os hashes dos arquivos aprovados. Homepage e `/quiz` → v1 com query preservados. MP4 retornou 206, MIME `video/mp4`, range de 1.024 bytes e total de 30.576.839 bytes. Evidência em `.local/quiz-049-final-http.json` do workspace original. Consulta de erros Vercel dos últimos 15 minutos retornou zero registros.
+
+Os dois primeiros percursos públicos v5 pararam no início do vídeo com `readyState=1` e `currentTime=0`, sem erro de mídia; a causa não foi comprovada. Ranges públicos de 64 KB no início, meio e final retornaram HTTP 206, tamanhos e bytes idênticos ao MP4 local, sem encoding adicional, conforme `.local/quiz-049-media-ranges.json`. Diagnóstico posterior reproduziu normalmente; não houve alteração de fonte nem deployment extra durante a investigação.
+
+GO público final: o percurso v5 completo passou em 25,2 segundos usando o MP4 público sem interceptar mídia nem substituir `play()`. Autoplay/áudio, ended/CTA, depoimentos, kits/carrossel/selos, três checkouts isolados, histórico, recarga e privacidade aprovados. A regressão pública do CTA4 v4 também passou. Evidências em `test-results/quiz-049-production-native/` e `test-results/quiz-049-production/`. SDKs, coleta e checkout externos foram interceptados; nenhum pedido criado. Os testes não afirmam recebimento nos fornecedores nem auditoria independente das avaliações fornecidas pelo proprietário; Meta/Purchase continuam pendências externas.
+
+Servidor 4419 encerrado, zero listeners confirmados. Árvore limpa antes deste registro; fechamento mantido em commit local, sem push e sem segundo deployment. Workspace original e evidências preservados.
 
 ## File List
 
