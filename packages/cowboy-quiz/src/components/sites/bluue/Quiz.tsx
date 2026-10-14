@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft } from "lucide-react";
 import { intro, questions, problemDurationQuestion, RECOMMENDED_KIT, type Question } from "@/components/sites/bluue/data";
 import { initialState, progressFor, quizReducer, quizStepFor, type QuizState, type QuizAction } from "@/components/sites/bluue/machine";
@@ -14,6 +14,8 @@ import {
   ConsentModal,
 } from "@/components/sites/bluue/SpecialScreens";
 import { PreCheckout } from "@/components/sites/bluue/PreCheckout";
+import { CONFIDENCE_QUESTION, confidenceReport, confidenceValue } from "@/components/sites/bluue/confidence-impact";
+import { QuizJourney } from "@/components/sites/bluue/quiz-journey";
 import { Logo } from "@/components/sites/bluue/Logo";
 import styles from "@/components/sites/bluue/quiz-flow.module.css";
 
@@ -95,15 +97,17 @@ function IntroScreen({
   onBack,
   editorial = false,
   savedAnswer,
+  journey = false,
 }: {
   index: number;
   onAnswer: (answer: string) => void;
   onBack: () => void;
   editorial?: boolean;
   savedAnswer?: string;
+  journey?: boolean;
 }) {
   const [consentOpen, setConsentOpen] = useState(false);
-  const data = intro[index];
+  const data = journey && index === 2 ? CONFIDENCE_QUESTION : intro[index];
   return (
     <div className="flex flex-col items-center px-4 py-6 pt-8 max-w-lg mx-auto min-h-[100dvh]">
       <Logo className="cb-logo-lg mb-4 flex-shrink-0" />
@@ -174,7 +178,7 @@ function IntroScreen({
           </p>
         </>
       )}
-      {consentOpen && <ConsentModal onClose={() => setConsentOpen(false)} />}
+      {consentOpen && <ConsentModal onClose={() => setConsentOpen(false)} neutral={journey} />}
     </div>
   );
 }
@@ -458,10 +462,19 @@ interface QuizProps {
   variant?: QuizVariant;
 }
 
+const subscribeRestart = () => () => {};
+const readRestart = () => ["result", "presentation", "offer"].includes(window.history.state?.cowboyJourney);
+const noRestart = () => false;
+function JourneyRestartNotice() {
+  const restarted = useSyncExternalStore(subscribeRestart, readRestart, noRestart);
+  return restarted ? <p role="status" className={styles.restart}>Esta sessão foi reiniciada. Responda novamente para ver seu resumo.</p> : null;
+}
+
 export function Quiz({ variant = "v1-direto" }: QuizProps) {
   const [state, dispatch] = useReducer((current: QuizState, action: QuizAction) => quizReducer(current, action, variant), initialState);
   const { stage, introIndex, questionIndex } = state;
-  const editorial = variant === "v3-editorial";
+  const journey = variant === "v4-jornada";
+  const editorial = variant === "v3-editorial" || journey;
   const stepIndex = quizStepFor(state, variant);
   const question = questions[questionIndex];
   const next = () => dispatch({ type: "NEXT" });
@@ -481,16 +494,17 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
     trackQuizStep(stepIndex, variant);
     if (stage === "precheckout") {
       trackQuizComplete(variant);
-      if (variant !== "v3-editorial") trackOfferView(RECOMMENDED_KIT, variant);
+      if (!editorial) trackOfferView(RECOMMENDED_KIT, variant);
     }
-  }, [stage, stepIndex, variant]);
+  }, [stage, stepIndex, variant, editorial]);
   return (
     <main
       className={`min-h-screen cb-bg${editorial ? ` ${styles.flow}` : ""}`}
       data-stage={stage}
       data-step-index={editorial ? stepIndex : undefined}
     >
-      {editorial && <div className={styles.progress} data-quiz-progress>
+      {journey && stage === "intro" && introIndex === 0 && <JourneyRestartNotice />}
+      {editorial && !(journey && stage === "precheckout") && <div className={styles.progress} data-quiz-progress>
         <p>Etapa {stepIndex} de 18</p>
         <div className={styles.track} role="progressbar" aria-label="Progresso do questionário" aria-valuemin={0} aria-valuemax={18} aria-valuenow={stepIndex} aria-valuetext={`Etapa ${stepIndex} de 18`}>
           <div className={styles.fill} style={{ width: `${stepIndex / 18 * 100}%` }} />
@@ -503,10 +517,16 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
         <IntroScreen
           key={introIndex}
           index={introIndex}
-          onAnswer={(value) => answer(intro[introIndex].id, value)}
+          onAnswer={(value) => {
+            if (journey && introIndex === 2) {
+              const impact = confidenceValue(value);
+              if (impact) answer(CONFIDENCE_QUESTION.id, impact);
+            } else answer(intro[introIndex].id, value);
+          }}
           onBack={back}
           editorial={editorial}
-          savedAnswer={editorial ? state.answers[intro[introIndex].id] : undefined}
+          journey={journey}
+          savedAnswer={journey && introIndex === 2 ? confidenceReport(state.answers.confidence_impact)?.label : editorial ? state.answers[intro[introIndex].id] : undefined}
         />
       )}
       {stage === "explanation" && <Explanation onNext={next} editorial={editorial} />}
@@ -535,8 +555,8 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
         />
       )}
       {stage === "testimonials" && <Testimonials onNext={next} onBack={back} editorial={editorial} />}
-      {stage === "analyzing" && <Analyzing onNext={next} />}
-      {stage === "precheckout" && <PreCheckout answers={state.answers} variant={variant} />}
+      {stage === "analyzing" && <Analyzing onNext={next} neutral={journey} />}
+      {stage === "precheckout" && (journey ? <QuizJourney impact={state.answers.confidence_impact} /> : <PreCheckout answers={state.answers} variant={variant} />)}
     </main>
   );
 }

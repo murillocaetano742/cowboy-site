@@ -19,7 +19,7 @@ function listFiles(directory) {
 const expected = [...PAGES, ...ASSETS, ...OUTPUT_ALIASES.map(({ destination }) => destination), ...quizPublicFiles()].sort();
 const actual = listFiles(OUTPUT).sort();
 assert.deepEqual(actual, expected, 'Public output must match the explicit allowlist');
-assert.deepEqual(actual.filter((name) => name.startsWith('quiz/') && name.endsWith('.html')), PUBLIC_QUIZ_ROUTES.map((route) => `${route}/index.html`).sort(), 'Only the four approved quiz entrypoints may be public');
+assert.deepEqual(actual.filter((name) => name.startsWith('quiz/') && name.endsWith('.html')), PUBLIC_QUIZ_ROUTES.map((route) => `${route}/index.html`).sort(), 'Only the six approved quiz entrypoints may be public');
 assert.ok(actual.every((name) => !/^(?:docs|api|config|tests|scripts|node_modules|\.)\//.test(name)));
 const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
 assert.equal(vercel.outputDirectory, 'dist');

@@ -9,9 +9,11 @@ import styles from "@/components/sites/bluue/quiz-vsl.module.css";
 interface QuizVslProps {
   variant: QuizVariant;
   onViewKits?: () => void;
+  active?: boolean;
+  presentation?: boolean;
 }
 
-export function QuizVsl({ variant, onViewKits }: QuizVslProps) {
+export function QuizVsl({ variant, onViewKits, active = true, presentation = false }: QuizVslProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const autoplayAttempted = useRef(false);
   const hasPlayed = useRef(false);
@@ -23,8 +25,9 @@ export function QuizVsl({ variant, onViewKits }: QuizVslProps) {
 
   useEffect(() => {
     const video = videoRef.current;
+    if (!active) { video?.pause(); return; }
     if (!video || typeof IntersectionObserver === "undefined") return;
-    let active = true;
+    let isMounted = true;
     const observer = new IntersectionObserver((entries) => {
       if (!entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.5)) return;
       trackVslInteraction("visible", variant);
@@ -34,15 +37,15 @@ export function QuizVsl({ variant, onViewKits }: QuizVslProps) {
       autoplayAttempted.current = true;
       observer.disconnect();
       void video.play().catch(() => {
-        if (active) { setRequiresInteraction(true); trackVslInteraction("autoplay_blocked", variant); }
+        if (isMounted) { setRequiresInteraction(true); trackVslInteraction("autoplay_blocked", variant); }
       });
     }, { threshold: 0.5 });
     observer.observe(video);
     return () => {
-      active = false;
+      isMounted = false;
       observer.disconnect();
     };
-  }, [variant]);
+  }, [variant, active]);
 
   const playWithSound = () => {
     const video = videoRef.current;
@@ -54,8 +57,8 @@ export function QuizVsl({ variant, onViewKits }: QuizVslProps) {
   };
 
   return (
-    <section className="w-full mb-6" data-quiz-vsl aria-labelledby="quiz-vsl-title">
-      <h2 id="quiz-vsl-title" className="text-lg font-extrabold text-foreground text-center mb-2">Conheça o COWBOY</h2>
+    <section className="w-full mb-6" data-quiz-vsl aria-labelledby={presentation ? "journey-title" : "quiz-vsl-title"}>
+      {!presentation && <h2 id="quiz-vsl-title" className="text-lg font-extrabold text-foreground text-center mb-2">Conheça o COWBOY</h2>}
       <p className="text-sm text-muted-foreground text-center mb-3">Entenda como usar e conheça a proposta do COWBOY.</p>
       <div className={styles.frame}>
       <video
@@ -86,7 +89,7 @@ export function QuizVsl({ variant, onViewKits }: QuizVslProps) {
         onError={showError}
       >
         <source src="/videos/vsl/vsl-dr-durval-720.mp4" type="video/mp4" onError={showError} />
-        Seu navegador não suporta a reprodução de vídeo. Você pode escolher seu kit abaixo.
+        {presentation ? "Seu navegador não suporta a reprodução de vídeo. Você pode acessar os kits pelo botão." : "Seu navegador não suporta a reprodução de vídeo. Você pode escolher seu kit abaixo."}
       </video>
       {isMuted || requiresInteraction ? (
         <button type="button" className={styles.soundButton} aria-controls="quiz-vsl-video" onClick={playWithSound}>
@@ -94,10 +97,10 @@ export function QuizVsl({ variant, onViewKits }: QuizVslProps) {
         </button>
       ) : null}
       </div>
-      {hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">Não foi possível carregar o vídeo. Você pode escolher seu kit abaixo.</p> : null}
+      {hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">{presentation ? "Não foi possível carregar o vídeo. Você pode acessar os kits pelo botão." : "Não foi possível carregar o vídeo. Você pode escolher seu kit abaixo."}</p> : null}
       {requiresInteraction && !hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">Toque no botão para iniciar o vídeo.</p> : null}
-      <p id="quiz-vsl-caption" className="text-xs text-muted-foreground text-center mt-2">O vídeo começa sem som ao aparecer na tela. Toque em “Ativar som” para ouvir. Os kits estão disponíveis abaixo.</p>
-      {onViewKits && <button type="button" data-view-kits aria-controls="quiz-kits" className={styles.kitsButton} onClick={onViewKits}>Ver kits e valores</button>}
+      <p id="quiz-vsl-caption" className="text-xs text-muted-foreground text-center mt-2">O vídeo começa sem som ao aparecer na tela. Toque em “Ativar som” para ouvir. {presentation ? "Você pode acessar a oferta quando quiser." : "Os kits estão disponíveis abaixo."}</p>
+      {onViewKits && <button type="button" data-view-kits aria-controls={presentation ? undefined : "quiz-kits"} className={styles.kitsButton} onClick={onViewKits}>Ver kits e valores</button>}
     </section>
   );
 }

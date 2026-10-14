@@ -1,6 +1,6 @@
 # QUIZ-045 — Jornal digital e produto somente no final
 
-Status: escopo final implementado; gates, QA e revisão visual aprovados, aguardando GO de publicação.
+Status: concluída, publicada e verificada; fechamento documental local sem novo deploy.
 
 ## Pedido e base
 
@@ -25,7 +25,7 @@ Worktree reutilizada `.local/quiz-038-vsl`, branch `feat/quiz-045-newspaper`, a 
 - [x] Bloco existente de prova social é posicionado na etapa 18, após VSL e antes dos kits, em uma única instância, sem porcentagem não auditada.
 - [x] V1/v2, VSL, preços, kits, checkout, atribuição e privacidade preservados.
 - [x] Lint, TypeScript, testes, build/check:build e QA independente mobile/desktop aprovados.
-- [ ] GO root/QA, PR com SHA exato, deploy automático READY e verificação pública concluídos.
+- [x] GO root/QA, PR com SHA exato, deploy automático READY e verificação pública concluídos.
 
 ## Coordenação e publicação
 
@@ -46,6 +46,18 @@ A rodada anterior à ampliação da etapa 4/prova social passou 10 E2E em 38,5 s
 O escopo ampliado final contém a tela de medicamentos, duas fotografias WebP reais documentadas (600×600 pixels; 21.498 e 21.766 bytes), links exatos Anvisa/DailyMed e prova social existente reposicionada somente na v3. Temporários das imagens foram removidos da área pública por root. Gates finais novamente aprovados: lint, TypeScript e 103 testes (55 site, 16 fluxo, 32 tracking), build/check:build com 132 arquivos e quatro entradas HTML. Servidor 4415 atualizado para a rodada final de QA, sem alteração de dependências ou hosting.
 
 QA final aprovou 10/10 E2E em 43,7 segundos no último artefato. Com SDK real, as três fontes permaneceram exatas após 6,5 segundos e clique por teclado; IDs neutros, deduplicação, GPC/opt-out, etapas 4/10 manuais, 18 etapas/14 respostas, ausência de produtos COWBOY nas etapas 1–17, prova social única depois da VSL e antes dos kits, `view_item` somente pela visibilidade dos kits, CTA de rolagem/foco, três kits com UTMs/`_gl` e regressões v1/v2/VSL aprovados. Capturas 375/390/1440 sem overflow, inspecionadas pelo auditor e por root. Evidências locais em `test-results/quiz-045/`. Nenhuma coleta externa ou pedido foi realizado pela QA.
+
+## Fechamento da publicação
+
+- GO final de root e QA recebido para a QUIZ-045 existente. Nenhuma implementação ou arquivo da variante futura QUIZ-046 foi incluído.
+- PR [#29](https://github.com/murillocaetano742/cowboy-site/pull/29), commit `5d2d1170cef4d805502026d307212eea0f22a761`, exatamente 13 arquivos previstos. Dois checks Vercel aprovados antes do merge do SHA exato.
+- Produção `f8b977144e70e553dc8e94e67515cd653d0c1ab5`, merge em 14/10/2026 às 00:43:45 UTC (13/10, 21:43 em Brasília). Deploy automático `dpl_cFswBcb2TGMiYh4tbYsrw55owjVy`, status READY, sem publicação manual duplicada.
+- Deployment imutável `https://cowboy-site-de1qt8eru-murillo-digital.vercel.app`; aliases canônicos com e sem `www` confirmados. [Capa preservada](https://cowboyenergiamasculina.com.br/quiz/v3-editorial/) e [questionário atualizado](https://cowboyenergiamasculina.com.br/quiz/v3-editorial/quiz/).
+- Smoke público às 00:44:56 UTC: quatro rotas HTTP 200 com HTML idêntico ao deployment autenticado e 17 assets HTTP 200. Componentes de medicamentos/pesquisa, links primários, IDs fixos e exclusão UTMify confirmados nos bundles publicados. HTML v3 SHA-256 `c92badb3e9f650e0ed1970452f34d4ae1c152dc3fefec346d587570fc5f2dd8b`.
+- As duas imagens de medicamentos respondem `image/webp` e mantêm os hashes documentados: tadalafila `98287932fab0f8735bb627dccdf9934ccbbc5e4abfdaf7bbce8cb1e8c84e0aea`; Cialis `12a5f31647fe20a62e088cbe5f04b4d43f6468929d834618898ac2b540af35af`. Capa e poster anteriores íntegros.
+- Homepage preservada byte a byte após normalizar finais de linha; `/quiz` continua 307 para v1 com query preservada. V1/v2 permanecem acessíveis e sem wrapper da paleta v3. MP4 retornou 206 para `bytes=0-1023`, MIME `video/mp4`, total 30.576.839 bytes.
+- Consulta de erros do deployment nos últimos 15 minutos: zero registros. Servidor 4415 encerrado e ausência de listener confirmada. Evidências QA, HTML/HTTP e logs preservadas localmente. A entrega não alega nova recepção externa Meta/Purchase.
+- Rollback `dpl_FW1rEcQaCzL1rWvzevPxXdPdSAAm` preservado. Fechamento em commit documental local, sem push/redeploy.
 
 ## File List
 

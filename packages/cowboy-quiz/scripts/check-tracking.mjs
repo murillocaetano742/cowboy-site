@@ -77,6 +77,71 @@ function fixture({ search = "", stored = "{}", gpc = false, disabled = false, st
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
 
+test("v4 screens emit neutral GA views with legitimate revisits, unique milestones and fixed actions", () => {
+  const page = fixture({ pathname: "/quiz/v4-jornada/quiz/", search: "?utm_source=validation&confidence_impact=PRIVATE#PRIVATE" });
+  page.tracking.initializeQuizTracking();
+  assert.equal(page.variants.quizVariantForPath("/quiz/v4-jornada/"), "v4-jornada");
+  assert.equal(page.variants.quizVariantForPath("/quiz/v4-jornada/quiz/"), "v4-jornada");
+  assert.equal(page.variants.quizVariantForPath("/quiz/v4-jornada/PRIVATE/"), "v1-direto");
+  for (let step = 1; step <= 18; step++) { page.tracking.trackQuizStep(step); page.tracking.trackQuizAnswer(step); }
+  page.tracking.trackQuizComplete();
+  page.tracking.trackQuizComplete();
+  for (const screen of ["result", "result", "presentation", "offer", "presentation", "result"]) page.tracking.trackJourneyView(screen);
+  for (const [action, screen] of [["result_continue", "result"], ["presentation_continue", "presentation"], ["back", "offer"], ["offer_view_kits", "offer"]]) {
+    page.tracking.trackJourneyAction(action, screen);
+    page.tracking.trackJourneyAction(action, screen);
+  }
+  const journey = page.events().filter(([, name]) => name === "quiz_journey_view");
+  assert.deepEqual(plain(journey.map(([, , params]) => params.page_kind)), ["result", "presentation", "offer"]);
+  const pv = page.events().filter(([, name]) => name === "page_view");
+  assert.deepEqual(plain(pv.map(([, , params]) => params.page_kind)), ["quiz", "result", "presentation", "offer", "presentation", "result"]);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_journey_action").length, 4);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_answer").length, 14);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_step_view").length, 18);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_complete").length, 1);
+  assert.equal(page.events().filter(([, name]) => name === "view_item").length, 0);
+  assert.ok(page.events().every(([, , params]) => params.quiz_id === "cowboy_v4_jornada"));
+  assert.ok(!JSON.stringify(page.commands()).includes("PRIVATE"));
+  const meta = plain(page.window.fbq.queue);
+  assert.equal(meta.filter(command => command[0] === "trackSingle").length, 1, "Virtual phases add no Meta events");
+  const count = page.events().length;
+  for (const screen of ["PRIVATE", "none", "little", "considerable", "much"]) page.tracking.trackJourneyView(screen);
+  page.tracking.trackJourneyAction("PRIVATE", "result");
+  page.tracking.trackJourneyAction("result_continue", "offer");
+  page.tracking.trackJourneyAction("offer_view_kits", "result");
+  page.tracking.trackQuizStep(19);
+  assert.equal(page.events().length, count);
+});
+
+test("v4 phases respect privacy, reject use on legacy routes and preserve playback coverage", () => {
+  for (const settings of [
+    { gpc: true, pathname: "/quiz/v4-jornada/quiz/" },
+    { disabled: true, pathname: "/quiz/v4-jornada/quiz/" },
+    { pathname: "/quiz/v1-direto/" }, { pathname: "/quiz/v2-vsl/" }, { pathname: "/quiz/v3-editorial/quiz/" },
+  ]) {
+    const page = fixture(settings);
+    page.tracking.initializeQuizTracking();
+    const before = page.events().length;
+    page.tracking.trackJourneyView("result");
+    page.tracking.trackJourneyAction("result_continue", "result");
+    assert.equal(page.events().length, before);
+    if (settings.gpc || settings.disabled) assert.equal(page.scripts.length, 0);
+  }
+  const page = fixture({ pathname: "/quiz/v4-jornada/quiz/" });
+  page.tracking.initializeQuizTracking();
+  page.vsl.recordVslPlayback("playing", { duration: 100, played: { length: 0 }, ended: false }, "v4-jornada");
+  page.vsl.recordVslPlayback("timeupdate", { duration: 100, currentTime: 99, played: { length: 0 }, ended: false }, "v4-jornada");
+  assert.equal(page.events().filter(([, name]) => name === "vsl_start").length, 1);
+  assert.equal(page.events().filter(([, name]) => name === "vsl_progress").length, 0);
+  page.vsl.recordVslPlayback("timeupdate", { duration: 100, played: { length: 1, start: () => 0, end: () => 50 }, ended: false }, "v4-jornada");
+  assert.deepEqual(plain(page.events().filter(([, name]) => name === "vsl_progress").map(([, , params]) => params.percent)), [25, 50]);
+  page.window["ga-disable-G-VYR2542XCN"] = true;
+  const before = page.events().length;
+  page.tracking.trackJourneyView("offer");
+  page.tracking.trackJourneyAction("presentation_continue", "presentation");
+  assert.equal(page.events().length, before);
+});
+
 test("boot is idempotent, suppresses automatic PageView and disables Meta inspection before init", () => {
   const page = fixture();
   page.tracking.initializeQuizTracking();

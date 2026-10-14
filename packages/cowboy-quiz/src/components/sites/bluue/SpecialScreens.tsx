@@ -221,7 +221,8 @@ const ANALYSIS_ITEMS = [
   { icon: "🔥", label: "Gravidade do seu caso" },
 ];
 
-export function Analyzing({ onNext }: NextProps) {
+interface AnalyzingProps extends NextProps { neutral?: boolean }
+export function Analyzing({ onNext, neutral = false }: AnalyzingProps) {
   const [percent, setPercent] = useState(0);
   useDelayedNext(onNext, 6400);
   useEffect(() => {
@@ -234,6 +235,12 @@ export function Analyzing({ onNext }: NextProps) {
     return () => window.clearInterval(timer);
   }, []);
   const circumference = 2 * Math.PI * 70;
+  const items = neutral ? [
+    { icon: "✓", label: "Respostas concluídas" },
+    { icon: "✓", label: "Seu relato de confiança" },
+    { icon: "✓", label: "Resumo das suas respostas" },
+    { icon: "✓", label: "Próxima etapa: apresentação" },
+  ] : ANALYSIS_ITEMS;
   const activeItem = Math.min(
     Math.floor((percent / 100) * ANALYSIS_ITEMS.length),
     ANALYSIS_ITEMS.length - 1,
@@ -295,14 +302,14 @@ export function Analyzing({ onNext }: NextProps) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <p className="text-foreground text-sm font-medium text-center leading-snug px-6">
-            Calculando a gravidade
+            {neutral ? "Organizando seu resumo" : "Calculando a gravidade"}
             <br />
-            do seu caso...
+            {neutral ? "a partir do seu relato..." : "do seu caso..."}
           </p>
         </div>
       </div>
       <div className="w-full max-w-xs px-4 space-y-0">
-        {ANALYSIS_ITEMS.map((item, index) => (
+        {items.map((item, index) => (
           <div key={item.label}>
             <div
               className="flex items-center gap-3 py-3.5 transition-opacity duration-300"
@@ -330,7 +337,8 @@ export function Analyzing({ onNext }: NextProps) {
   );
 }
 
-export function ConsentModal({ onClose }: { onClose: () => void }) {
+interface ConsentModalProps { onClose: () => void; neutral?: boolean }
+export function ConsentModal({ onClose, neutral = false }: ConsentModalProps) {
   const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const previousFocus =
@@ -388,7 +396,7 @@ export function ConsentModal({ onClose }: { onClose: () => void }) {
           Uso das suas respostas
         </h2>
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          <ConsentText />
+          <ConsentText neutral={neutral} />
         </div>
         <button
           type="button"
@@ -416,12 +424,12 @@ export function ConsentModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function ConsentText() {
+interface ConsentTextProps { neutral?: boolean }
+function ConsentText({ neutral = false }: ConsentTextProps) {
   return (
     <div className="cb-dialog-body text-[13px] sm:text-sm leading-relaxed space-y-4">
       <p>
-        As respostas deste questionário servem para uma coisa: indicar o kit de
-        COWBOY Energia que combina com a sua rotina.
+        {neutral ? "As respostas deste questionário organizam seu resumo. O impacto na confiança é aquele que você declarou. Depois, você pode assistir à apresentação e comparar os kits." : "As respostas deste questionário servem para uma coisa: indicar o kit de COWBOY Energia que combina com a sua rotina."}
       </p>
       <h3>O que acontece com elas</h3>
       <p>
@@ -431,9 +439,7 @@ function ConsentText() {
       </p>
       <h3>Saúde</h3>
       <p>
-        O COWBOY Energia é um suplemento alimentar em gotas, vendido sem
-        receita. As perguntas de saúde não são avaliação médica: servem para
-        medir a gravidade do seu caso e indicar o kit.
+        {neutral ? "O COWBOY Energia é um suplemento alimentar em gotas, não um medicamento. As perguntas não calculam diagnóstico, gravidade clínica ou recomendação individual de kit. Este resumo não substitui uma avaliação de saúde." : "O COWBOY Energia é um suplemento alimentar em gotas, vendido sem receita. As perguntas de saúde não são avaliação médica: servem para medir a gravidade do seu caso e indicar o kit."}
       </p>
       <h3>Compra</h3>
       <p>
