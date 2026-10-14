@@ -64,7 +64,7 @@ export function QuizEditorial() {
 
         <article className={styles.lead} data-editorial-section="intro">
           <div className={styles.leadCopy}>
-            <h1 className={styles.headline}>Chega de deixar o medo de falhar comandar sua vida sexual.</h1>
+            <h1 className={styles.headline}>Chega de broxar e de gozar rápido no momento em que sua mulher mais te quer firme.</h1>
             <p className={styles.deck}>Responda 14 perguntas e desbloqueie seu resultado na hora: um resumo baseado nas suas respostas e acesso à apresentação da COWBOY.</p>
             <a href={href} onClick={event => startQuiz(event, "hero")} className={styles.cta} data-editorial-cta="hero">Quero desbloquear meu resultado</a>
             <p className={styles.quizDetails}>Quiz gratuito. Sem cadastro. Resultado ao concluir.</p>
