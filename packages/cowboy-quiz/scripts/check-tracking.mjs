@@ -77,6 +77,59 @@ function fixture({ search = "", stored = "{}", gpc = false, disabled = false, st
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
 
+test("v5 counts 21 neutral steps but only 14 answers; testimonial exposure is separate from navigation", () => {
+  const page = fixture({ pathname: "/quiz/v5-etapas/quiz/", search: "?utm_source=validation&impact=PRIVATE" });
+  page.tracking.initializeQuizTracking();
+  assert.equal(page.variants.quizVariantForPath("/quiz/v5-etapas/"), "v5-etapas");
+  assert.equal(page.variants.quizVariantForPath("/quiz/v5-etapas/quiz/"), "v5-etapas");
+  assert.equal(page.variants.quizVariantForPath("/quiz/v5-etapas/PRIVATE/"), "v1-direto");
+  for (let step = 1; step <= 21; step++) { page.tracking.trackQuizStep(step); page.tracking.trackQuizAnswer(step); }
+  for (const screen of ["result", "presentation", "testimonials", "testimonials", "offer", "testimonials", "presentation"]) page.tracking.trackJourneyView(screen);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_step_view").length, 21);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_answer").length, 14);
+  assert.equal(page.events().filter(([, name]) => name === "quiz_testimonials_view").length, 0, "A phase transition must not invent exposure");
+  assert.equal(page.events().filter(([, name]) => name === "view_item").length, 0);
+  page.tracking.trackTestimonialsView();
+  page.tracking.trackTestimonialsView();
+  const exposure = page.events().filter(([, name]) => name === "quiz_testimonials_view");
+  assert.equal(exposure.length, 1);
+  assert.deepEqual(Object.keys(exposure[0][2]).sort(), ["quiz_id", "send_to"]);
+  assert.deepEqual(plain(page.events().filter(([, name]) => name === "quiz_journey_view").map(([, , params]) => params.page_kind)), ["result", "presentation", "testimonials", "offer"]);
+  assert.deepEqual(plain(page.events().filter(([, name]) => name === "page_view").map(([, , params]) => params.page_kind)), ["quiz", "result", "presentation", "testimonials", "offer", "testimonials", "presentation"]);
+  page.tracking.trackJourneyAction("testimonials_continue", "testimonials");
+  page.tracking.trackJourneyAction("testimonials_continue", "testimonials");
+  assert.equal(page.events().filter(([, name, params]) => name === "quiz_journey_action" && params.cta_location === "testimonials_continue").length, 1);
+  const count = page.events().length;
+  page.tracking.trackJourneyAction("testimonials_continue", "offer");
+  page.tracking.trackJourneyView("PRIVATE");
+  page.tracking.trackQuizStep(22);
+  assert.equal(page.events().length, count);
+  assert.ok(page.events().every(([, , params]) => params.quiz_id === "cowboy_v5_etapas"));
+  assert.ok(!JSON.stringify(page.commands()).includes("PRIVATE"));
+  assert.equal(page.window.fbq.queue.filter(command => command[0] === "trackSingle").length, 1);
+});
+
+test("v5 testimonial APIs cannot affect v4 or bypass privacy gates", () => {
+  for (const settings of [{ pathname: "/quiz/v4-jornada/quiz/" }, { pathname: "/quiz/v5-etapas/quiz/", gpc: true }, { pathname: "/quiz/v5-etapas/quiz/", disabled: true }]) {
+    const page = fixture(settings);
+    page.tracking.initializeQuizTracking();
+    const count = page.events().length;
+    page.tracking.trackTestimonialsView();
+    page.tracking.trackJourneyView("testimonials");
+    page.tracking.trackJourneyAction("testimonials_continue", "testimonials");
+    page.tracking.trackJourneyAction("back", "testimonials");
+    page.tracking.trackQuizStep(21);
+    assert.equal(page.events().length, count);
+  }
+  const page = fixture({ pathname: "/quiz/v5-etapas/quiz/" });
+  page.tracking.initializeQuizTracking();
+  page.window["ga-disable-G-VYR2542XCN"] = true;
+  const count = page.events().length;
+  page.tracking.trackTestimonialsView();
+  page.tracking.trackJourneyAction("testimonials_continue", "testimonials");
+  assert.equal(page.events().length, count);
+});
+
 test("v4 screens emit neutral GA views with legitimate revisits, unique milestones and fixed actions", () => {
   const page = fixture({ pathname: "/quiz/v4-jornada/quiz/", search: "?utm_source=validation&confidence_impact=PRIVATE#PRIVATE" });
   page.tracking.initializeQuizTracking();

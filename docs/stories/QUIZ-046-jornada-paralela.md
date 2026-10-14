@@ -1,6 +1,6 @@
 # QUIZ-046 — Jornada paralela de resultado, apresentação e oferta
 
-Status: implementada; gates, QA final e revisão visual aprovados. GO root concedido para publicação.
+Status: publicada e verificada em produção; gates, QA final, revisão visual e smoke público aprovados. Fechamento documental mantido somente local.
 
 ## Pedido e base
 
@@ -33,7 +33,7 @@ Oferta: composição própria com retomada breve do impacto declarado, headline 
 - [x] Tracking com `quiz_id` exclusivo e IDs fixos de tela/ação, fases por visita real e resultado/kits por visibilidade real, preservando GPC/opt-out e atribuição do checkout.
 - [x] Sem cadastro obrigatório, novas operações de CRM, alteração de anúncios, orçamento ou campanhas.
 - [x] Gates, seis rotas, QA mobile/desktop, quatro respostas e regressão das versões anteriores aprovados.
-- [ ] Publicar somente após GO root/QA, via PR e merge de SHA exato, com READY, smoke público e rollback confirmado.
+- [x] Publicar somente após GO root/QA, via PR e merge de SHA exato, com READY, smoke público e rollback confirmado.
 
 ## Coordenação
 
@@ -50,6 +50,16 @@ Tracking v4 identificado por `cowboy_v4_jornada`, com `quiz_journey_view`/`quiz_
 QA funcional aprovou 19/19 E2E em 1,1 minuto, incluindo nove casos da v4 e dez regressões das versões anteriores. O CSS final usa a variável real `--font-heading` e logo `#ff858b` no fundo escuro. A revisão final também corrigiu um disparo de fase que dependia de o título ficar visível: `page_view`/`quiz_journey_view` agora acompanham a mudança real de tela, enquanto `quiz_result_view` mantém o observer de 25% no bloco do resultado e `view_item` depende dos kits. Lint/TypeScript e build/check:build passaram novamente.
 
 No último JS+CSS, os nove E2E v4 passaram novamente em 35,9 segundos, incluindo regressão explícita sem callback IO do título e rolagem imediata. As dez regressões legadas anteriormente aprovadas permanecem válidas. Smoke visual final em 375/390/1440 pixels confirmou Oswald, contraste do logo, ausência de overflow, CTA da oferta acima da dobra e rolagem/foco nos kits. Root aprovou as três telas, conteúdo/condições e plano e concedeu GO completo. Evidências locais em `test-results/quiz-046-v4-final/` e `.local/quiz-046-final-captures/`; fornecedores externos e compras interceptados durante QA.
+
+## Publicação e fechamento
+
+PR [#30](https://github.com/murillocaetano742/cowboy-site/pull/30), head `d840573264d1bf0046f5cc4615cb4e2086f0b871`, aprovado nos checks Vercel e Preview Comments e mesclado em `6c28dbe182ad1e6cfde914a5e83ac0bfb4c40d69` em 14/10/2026 às 01:13:29 UTC. O único deployment automático `dpl_HTWy1m35FLZe4xNUrbstEts7yuBx` está READY em produção, com aliases canônicos confirmados. URL imutável: `https://cowboy-site-9s0ftd16f-murillo-digital.vercel.app`. Rollback preservado: `dpl_cFswBcb2TGMiYh4tbYsrw55owjVy`.
+
+Nova entrada pública: [capa v4](https://cowboyenergiamasculina.com.br/quiz/v4-jornada/) e [questionário v4](https://cowboyenergiamasculina.com.br/quiz/v4-jornada/quiz/). Às 01:14:39 UTC, as seis rotas retornaram HTTP 200 e seus HTML coincidiram byte a byte com o deployment autenticado. Dezessete assets passaram; bundles contêm a variante `cowboy_v4_jornada`, fases e ações novas, Oswald e logo final. Homepage preservada; `/quiz?utm_source=qa_route_only` retornou 307 para a v1 com query preservada. Capa, imagens de medicamentos e poster mantiveram hashes; MP4 respondeu 206 a range de 1.024 bytes, MIME `video/mp4` e tamanho total de 30.576.839 bytes. Evidência HTTP em `.local/quiz-046-final-http.json` no workspace original, fora do Git. Consulta dos logs Vercel de erro dos últimos 15 minutos retornou zero registros.
+
+Auditor aprovou o smoke móvel no domínio canônico: 1/1 caso em 15,8 segundos. Resultado → apresentação com vídeo real 720×1280 e áudio → oferta, histórico, pausa, CTA com foco nos kits, três kits, atribuição e recarga passaram. SDKs, coleta externa e checkout foram interceptados; nenhum pedido foi criado. Evidências preservadas em `test-results/quiz-046-production/`. A verificação não constitui recebimento externo de eventos v4; as limitações Meta e homologação de Purchase continuam pendentes conforme documentação de integração.
+
+Servidor local 4416 encerrado; consulta de listeners confirmou zero. Este fechamento é documental local, sem push nem segundo deployment. O workspace original e as evidências locais permanecem preservados.
 
 ## File List
 

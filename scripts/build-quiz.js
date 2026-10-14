@@ -14,6 +14,8 @@ const PUBLIC_QUIZ_ROUTES = Object.freeze([
   'quiz/v3-editorial/quiz',
   'quiz/v4-jornada',
   'quiz/v4-jornada/quiz',
+  'quiz/v5-etapas',
+  'quiz/v5-etapas/quiz',
 ]);
 const PUBLIC_DIRECTORIES = Object.freeze(['_next/static', 'sites']);
 const PUBLIC_EXTENSIONS = new Set(['.html', '.txt', '.js', '.css', '.json', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.woff', '.woff2', '.mp4', '.vtt', '.ico']);

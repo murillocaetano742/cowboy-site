@@ -8,6 +8,7 @@ import styles from "@/components/sites/bluue/quiz-research.module.css";
 
 interface QuizResearchIntroProps {
   onNext: () => void;
+  floatingContinue?: boolean;
 }
 
 interface QuizResearchArticleProps extends QuizResearchIntroProps {
@@ -18,9 +19,9 @@ const RESEARCH_URL = "https://www.nature.com/articles/s41467-025-66723-7";
 const MEDICINE_ALERT_URL = "https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2025/anvisa-emite-alerta-sobre-uso-indiscriminado-de-medicamentos-para-disfuncao-eretil/";
 const MEDICINE_LEAFLET_URL = "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=bcd8f8ab-81a2-4891-83db-24a0b0e25895";
 
-export function QuizResearchIntro({ onNext }: QuizResearchIntroProps) {
+export function QuizResearchIntro({ onNext, floatingContinue = false }: QuizResearchIntroProps) {
   return (
-    <section className={styles.screen} data-quiz-introduction data-quiz-medicine aria-labelledby="quiz-introduction-title">
+    <section className={`${styles.screen}${floatingContinue ? ` ${styles.withFloatingContinue}` : ""}`} data-quiz-introduction data-quiz-medicine aria-labelledby="quiz-introduction-title">
       <div className={styles.introHeader}><Logo className="cb-logo-lg" /></div>
       <div className={styles.medicine}>
         <p className={styles.medicineDisclosure}>Conteúdo publicitário <span aria-hidden="true">•</span> Informação de saúde</p>
@@ -69,7 +70,7 @@ export function QuizResearchIntro({ onNext }: QuizResearchIntroProps) {
         >Consultar a bula do Cialis (em inglês; abre em nova guia)</a>
         <p className={styles.medicineNote}>Esses medicamentos podem tratar a disfunção erétil quando indicados. Não suspenda nem troque seu tratamento por conta própria.</p>
       </div>
-      <button type="button" className={`cb-btn ${styles.continueButton}`} onClick={onNext}>CONTINUAR</button>
+      {floatingContinue ? <div className={styles.continueDock}><button type="button" data-floating-continue className={`cb-btn ${styles.continueButton}`} onClick={onNext}>CONTINUAR</button></div> : <button type="button" className={`cb-btn ${styles.continueButton}`} onClick={onNext}>CONTINUAR</button>}
     </section>
   );
 }

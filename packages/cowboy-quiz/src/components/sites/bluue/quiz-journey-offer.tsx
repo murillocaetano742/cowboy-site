@@ -3,7 +3,8 @@
 /* eslint-disable @next/next/no-img-element -- Local product and customer media are shared with the published offer. */
 
 import { useEffect, useRef } from "react";
-import { plans, videos, clients } from "@/components/sites/bluue/quiz-offer-data";
+import { plans } from "@/components/sites/bluue/quiz-offer-data";
+import { QuizSocialProof } from "@/components/sites/bluue/quiz-social-proof";
 import type { KitQuantity } from "@/components/sites/bluue/data";
 import { checkoutHref, readAttribution } from "@/components/sites/bluue/checkout";
 import { handleCheckoutClick } from "@/lib/checkout-navigation";
@@ -14,11 +15,12 @@ interface QuizJourneyOfferProps {
   impactLabel: string;
   selectedPlan: KitQuantity;
   onSelectPlan: (quantity: KitQuantity) => void;
+  variant?: "v4-jornada" | "v5-etapas";
 }
 const ASSETS = "/sites/cowboy/";
 const INGREDIENTS = ["Taurina", "Arginina", "Feno-grego", "Vitamina B6", "Zinco", "Boro"] as const;
 
-export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan }: QuizJourneyOfferProps) {
+export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, variant = "v4-jornada" }: QuizJourneyOfferProps) {
   const kitsRef = useRef<HTMLDivElement>(null);
   const plan = plans.find(item => item.quantity === selectedPlan) ?? plans[0];
   const viewKits = () => {
@@ -31,13 +33,13 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan }: Qu
     if (!kits || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver((entries) => {
       if (entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.25)) {
-        trackOfferView(selectedPlan, "v4-jornada");
+        trackOfferView(selectedPlan, variant);
         observer.disconnect();
       }
     }, { threshold: 0.25 });
     observer.observe(kits);
     return () => observer.disconnect();
-  }, [selectedPlan]);
+  }, [selectedPlan, variant]);
 
   return (
     <section className={styles.offer} data-journey-screen="offer">
@@ -59,28 +61,14 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan }: Qu
         <p>Siga as orientações da embalagem. Se usa medicamentos ou tem dúvidas sobre o consumo, converse com o profissional que acompanha você.</p>
       </section>
 
-      <section className={styles.proof} data-quiz-social-proof aria-labelledby="journey-proof">
-        <h2 id="journey-proof">Quem já incluiu o COWBOY na rotina</h2>
-        <p>Relatos e imagens dos clientes. Experiências individuais não garantem o mesmo resultado para outras pessoas.</p>
-        <div className={styles.testimonials}>{videos.map((video, index) => <figure key={video.file}>
-          <video controls playsInline preload="none" poster={`${ASSETS}videos/${video.file}.jpg`} aria-label={`Vídeo de depoimento de cliente ${index + 1}`}>
-            <source src={`${ASSETS}videos/${video.file}.mp4`} type="video/mp4" />
-            <track kind="subtitles" srcLang="pt-BR" label="Português" src={`${ASSETS}videos/${video.file}.vtt`} />
-          </video>
-          <figcaption><blockquote>“{video.quote}”</blockquote><cite>{video.cite}</cite></figcaption>
-        </figure>)}</div>
-        <div className={styles.photos}>{clients.map(client => <figure key={client.image}>
-          <img src={`${ASSETS}${client.image}`} alt={client.alt} loading="lazy" width={300} height={300} />
-          <figcaption>Cliente {client.name}</figcaption>
-        </figure>)}</div>
-      </section>
+      {variant === "v4-jornada" && <QuizSocialProof />}
 
       <section className={styles.purchase} aria-labelledby="journey-kits-title">
         <h2 id="journey-kits-title">Escolha seu kit</h2>
         <p>Compare quantidades e valores. A escolha é sua.</p>
         <div ref={kitsRef} id="journey-kits" tabIndex={-1} className={styles.kits} role="group" aria-label="Kits disponíveis" data-journey-kits>
           {plans.map(item => <button type="button" key={item.quantity} aria-pressed={selectedPlan === item.quantity} className={styles.kit} onClick={() => {
-            if (selectedPlan !== item.quantity) trackKitSelection(item.quantity, "v4-jornada");
+            if (selectedPlan !== item.quantity) trackKitSelection(item.quantity, variant);
             onSelectPlan(item.quantity);
           }}>
             <img src={`${ASSETS}${item.image}`} alt="" width={140} height={140} loading="lazy" />
@@ -94,7 +82,7 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan }: Qu
           <small>{plan.freeShipping ? `No cartão, com juros. Total ${plan.installmentTotal}.` : `No cartão, com juros. Total do produto ${plan.installmentTotal}. Com frete: 12x de R$ 11,54 ou R$ 106,65 à vista.`}</small>
         </div>
         <p className={styles.trust} data-checkout-trust>{plan.freeShipping ? "Frete grátis" : "Frete R$ 26,75"} · Envio discreto · Garantia comercial de 30 dias</p>
-        <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={event => handleCheckoutClick(event, plan.quantity, "v4-jornada")} className={`${styles.primary} bluue-finish-button`} data-journey-checkout>Continuar com {plan.label}</a>
+        <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={event => handleCheckoutClick(event, plan.quantity, variant)} className={`${styles.primary} bluue-finish-button`} data-journey-checkout>Continuar com {plan.label}</a>
         <p className={styles.nextNote}>Checkout seguro Appmax. Sem assinatura ou cobrança recorrente.</p>
       </section>
 

@@ -7,7 +7,7 @@ import { Logo } from "@/components/sites/bluue/Logo";
 import { QuizResearchArticle, QuizResearchIntro } from "@/components/sites/bluue/quiz-research";
 import "@/components/sites/bluue/special.css";
 
-interface NextProps { onNext: () => void; editorial?: boolean }
+interface NextProps { onNext: () => void; editorial?: boolean; floatingContinue?: boolean }
 interface BackProps extends NextProps { onBack: () => void }
 
 const ASSETS = "/sites/cowboy/";

@@ -11,9 +11,10 @@ interface QuizVslProps {
   onViewKits?: () => void;
   active?: boolean;
   presentation?: boolean;
+  nextDestination?: "offer" | "testimonials";
 }
 
-export function QuizVsl({ variant, onViewKits, active = true, presentation = false }: QuizVslProps) {
+export function QuizVsl({ variant, onViewKits, active = true, presentation = false, nextDestination = "offer" }: QuizVslProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const autoplayAttempted = useRef(false);
   const hasPlayed = useRef(false);
@@ -89,7 +90,7 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
         onError={showError}
       >
         <source src="/videos/vsl/vsl-dr-durval-720.mp4" type="video/mp4" onError={showError} />
-        {presentation ? "Seu navegador não suporta a reprodução de vídeo. Você pode acessar os kits pelo botão." : "Seu navegador não suporta a reprodução de vídeo. Você pode escolher seu kit abaixo."}
+        {presentation ? nextDestination === "testimonials" ? "Seu navegador não suporta a reprodução de vídeo. Você pode seguir para os depoimentos pelo botão." : "Seu navegador não suporta a reprodução de vídeo. Você pode acessar os kits pelo botão." : "Seu navegador não suporta a reprodução de vídeo. Você pode escolher seu kit abaixo."}
       </video>
       {isMuted || requiresInteraction ? (
         <button type="button" className={styles.soundButton} aria-controls="quiz-vsl-video" onClick={playWithSound}>
@@ -97,9 +98,9 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
         </button>
       ) : null}
       </div>
-      {hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">{presentation ? "Não foi possível carregar o vídeo. Você pode acessar os kits pelo botão." : "Não foi possível carregar o vídeo. Você pode escolher seu kit abaixo."}</p> : null}
+      {hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">{presentation ? nextDestination === "testimonials" ? "Não foi possível carregar o vídeo. Você pode seguir para os depoimentos pelo botão." : "Não foi possível carregar o vídeo. Você pode acessar os kits pelo botão." : "Não foi possível carregar o vídeo. Você pode escolher seu kit abaixo."}</p> : null}
       {requiresInteraction && !hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">Toque no botão para iniciar o vídeo.</p> : null}
-      <p id="quiz-vsl-caption" className="text-xs text-muted-foreground text-center mt-2">O vídeo começa sem som ao aparecer na tela. Toque em “Ativar som” para ouvir. {presentation ? "Você pode acessar a oferta quando quiser." : "Os kits estão disponíveis abaixo."}</p>
+      <p id="quiz-vsl-caption" className="text-xs text-muted-foreground text-center mt-2">O vídeo começa sem som ao aparecer na tela. Toque em “Ativar som” para ouvir. {presentation ? nextDestination === "testimonials" ? "Você pode seguir para os depoimentos quando quiser." : "Você pode acessar a oferta quando quiser." : "Os kits estão disponíveis abaixo."}</p>
       {onViewKits && <button type="button" data-view-kits aria-controls={presentation ? undefined : "quiz-kits"} className={styles.kitsButton} onClick={onViewKits}>Ver kits e valores</button>}
     </section>
   );

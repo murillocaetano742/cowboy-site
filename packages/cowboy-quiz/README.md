@@ -20,6 +20,7 @@ Abra `http://localhost:3003/quiz/v1-direto/` (a página `/` também abre o quiz)
 - `/quiz/v2-vsl/`: mesmo fluxo, com a VSL existente entre o resultado e os kits; `quiz_id=cowboy_v2_vsl`.
 - `/quiz/v3-editorial/`: capa identificada como conteúdo publicitário, com acesso ao questionário em `/quiz/v3-editorial/quiz/`; ambas usam `quiz_id=cowboy_v3_editorial`.
 - `/quiz/v4-jornada/`: versão paralela com entrada em `/quiz/v4-jornada/quiz/` e `quiz_id=cowboy_v4_jornada`; entrega resultado, apresentação e oferta em três telas separadas.
+- `/quiz/v5-etapas/`: comparação com a v4, entrada em `/quiz/v5-etapas/quiz/` e `quiz_id=cowboy_v5_etapas`; etapas 18 resultado, 19 VSL, 20 depoimentos e 21 kits/garantias.
 
 A v1 continua sendo a variante padrão e não monta nem solicita a VSL. Na v2 e v3, o player usa controles nativos, `playsInline` e `preload="none"`. Ao ficar pelo menos 50% visível, tenta iniciar uma única vez, sem som. O botão “Ativar som” exige um gesto do visitante; se o navegador bloquear a reprodução, aparece “Reproduzir vídeo com som”. Rolar a página não desfaz uma pausa manual. Os kits continuam acessíveis sem assistir ao vídeo, inclusive se houver erro de mídia.
 
@@ -31,11 +32,17 @@ Na QUIZ-046, a v4 conserva 14 perguntas e 18 etapas até o resultado. Sua tercei
 
 As três telas finais da v4 compartilham a memória da mesma aplicação, sem respostas em URL, histórico, cookies ou armazenamento. Navegar entre elas mantém a sessão; recarregar não recupera o relato. A oferta permanece acessível se o vídeo falhar. Esta versão não acrescenta cadastro obrigatório, disparos de e-mail/WhatsApp, liberação por contagem regressiva ou redirecionamento de campanhas.
 
+Na QUIZ-047, a v5 reutiliza o conteúdo e o visual da v4 e separa os depoimentos da oferta. São 14 respostas e 21 etapas visuais: o questionário se conclui na etapa 18, seguido pela VSL, pelos depoimentos e pela escolha de kit com garantia. A barra e a navegação acompanham as quatro etapas finais; voltar mantém a sessão e a seleção do kit, enquanto recarregar reinicia. A VSL e os vídeos de clientes pausam ao sair de suas telas. Os relatos aparecem uma única vez, na etapa 20; não foram acrescentadas estatísticas de avaliações. A v4 conserva as três telas finais anteriores.
+
+A mesma atualização coloca um único botão Continuar fixo no rodapé da etapa 4 de v4/v5, com espaço inferior e área segura para manter o conteúdo acessível. V3 mantém seu botão anterior. O [plano de divisão](../../docs/research/quiz-047-split-plan.md) registra referência, conteúdo e limites da comparação.
+
 O MP4 `/videos/vsl/vsl-dr-durval-720.mp4` e a capa `/imagens/v5/vsl-poster-frame.webp` pertencem ao site principal e não são duplicados no pacote. Para conferir a mídia localmente, use o build/servidor integrado da raiz; o preview isolado do pacote não contém esses dois recursos.
 
 Os eventos adicionais são `vsl_start`, `vsl_progress` (25, 50 e 75) e `vsl_complete`, com `video_id=cowboy_vsl`. Os quartis medem a cobertura de trechos realmente reproduzidos (`video.played`), sem somar duas vezes o replay. Buscar o final não gera progresso artificial. A conclusão exige o evento `ended` e cobertura de pelo menos 99%, com tolerância mínima de 0,5 segundo para diferenças de temporização. Esses eventos vão somente ao GA4, são deduplicados por variante e respeitam GPC/opt-out; não enviam texto, URL do vídeo ou respostas.
 
 ## O que mudou em relação à Bluue
+
+O quadro abaixo registra a implementação original e seu resultado usado em v1/v2/v3. As diferenças posteriores de v4/v5, incluindo o autorrelato sem pontuação clínica, estão descritas acima.
 
 | Parte | Bluue | COWBOY |
 |---|---|---|
@@ -60,18 +67,20 @@ Ficaram iguais: as três perguntas iniciais, preocupação, frequência, régua 
 
 - `src/components/sites/bluue/data.ts`: perguntas, opções e o cálculo da gravidade (`caseResult`: pontos por resposta, faixas e frases do resultado). Até 3 pontos = moderada, 4 a 8 = alta, 9 ou mais = muito alta.
 - `src/components/sites/bluue/PreCheckout.tsx`: resultado, kits, preços, parcelas, banners, números de prova social (`RATING`, `REVIEWS`, `CUSTOMERS`), fotos de clientes, FAQ e garantia.
+- `src/components/sites/bluue/quiz-journey.tsx` e `quiz-journey-offer.tsx`: telas finais e oferta de v4/v5.
+- `src/components/sites/bluue/quiz-offer-data.ts`: dados compartilhados de kits, preços e mídias de clientes.
 - `src/components/sites/bluue/checkout.ts`: link do checkout e parâmetros repassados.
 - `src/components/sites/bluue/SpecialScreens.tsx`: telas animadas, depoimentos e nota de privacidade.
-- `src/components/sites/bluue/quiz-research.tsx` e `quiz-research.module.css`: informação sobre medicamentos na etapa 4 e jornal científico da etapa 10, exclusivos da v3.
-- `src/components/sites/bluue/quiz-vsl.tsx`: player da v2/v3, autoplay silencioso, gesto para som e mensagem de erro de mídia.
-- `src/components/sites/bluue/quiz-editorial.tsx`: capa da v3; `quiz-flow.module.css` contém o progresso e os ajustes exclusivos do questionário v3.
+- `src/components/sites/bluue/quiz-research.tsx` e `quiz-research.module.css`: informação sobre medicamentos na etapa 4 e jornal científico da etapa 10 de v3/v4/v5.
+- `src/components/sites/bluue/quiz-vsl.tsx`: player de v2/v3/v4/v5, autoplay silencioso, gesto para som e mensagem de erro de mídia.
+- `src/components/sites/bluue/quiz-editorial.tsx`: capas editoriais; `quiz-flow.module.css` contém o progresso e os ajustes desses questionários.
 - `src/lib/quiz-variant.ts` e `src/lib/vsl-playback.ts`: identidade das variantes e marcos de vídeo baseados na cobertura reproduzida.
 - `src/app/cowboy.css`: cores, fontes e componentes do tema COWBOY (por cima do CSS original preservado em `source.css`).
 - `public/sites/cowboy/`: imagens, fontes e `videos/` (depoimentos com capa e legenda, os mesmos do site). Originais das fotos geradas em `docs/criacao/originais/`; os pedidos feitos ao Codex em `docs/criacao/pedido-codex-*.md` (faixa etária, gravidade, sem receita).
 
 Os nomes internos (`sites/bluue`, classes `bluue-*`) foram mantidos para não mexer no que não precisava; nada disso aparece para o visitante.
 
-**Se os preços mudarem no site**, atualize `plans` em `PreCheckout.tsx` (valores à vista, parcela 12x com juros, total parcelado, frete do kit de 1).
+**Se os preços mudarem no site**, atualize `plans` em `quiz-offer-data.ts` (valores à vista, parcela 12x com juros, total parcelado, frete do kit de 1).
 
 ## Checkout
 
@@ -83,11 +92,11 @@ As respostas e o resultado ficam somente na memória da aba. A instrumentação 
 
 ## Rastreamento
 
-- GA4 `G-VYR2542XCN`: `page_view`, `quiz_start`, `quiz_step_view`, `quiz_complete`, `view_item`, `select_item` e `begin_checkout`. Parâmetros personalizados: `quiz_id` da variante e `step_index` numérico de 1 a 17 (v1/v2) ou 18 (v3). O valor comercial corresponde ao kit inteiro, com `items[].quantity=1`, evitando arredondar o preço por frasco. `item_name` e `item_variant` identificam a oferta; não foi inventado um SKU.
+- GA4 `G-VYR2542XCN`: `page_view`, `quiz_start`, `quiz_step_view`, `quiz_complete`, `view_item`, `select_item` e `begin_checkout`. Parâmetros personalizados: `quiz_id` da variante e `step_index` numérico de 1 a 17 (v1/v2), 18 (v3/v4) ou 21 (v5). O valor comercial corresponde ao kit inteiro, com `items[].quantity=1`, evitando arredondar o preço por frasco. `item_name` e `item_variant` identificam a oferta; não foi inventado um SKU.
 - Meta `1006075098894986`: `PageView`, `ViewContent` e `InitiateCheckout`, enviados manualmente com `autoConfig=false` antes da inicialização. Não há correspondência avançada configurada pelo código nem captura de cliques por texto.
 - UTMify: somente `scripts/utms/latest.js` para atribuição. O SDK de pixel UTMify, que inspeciona formulários e botões, não é carregado dentro do questionário. A integração existente do checkout/webhook continua responsável pelos eventos de compra; o quiz nunca emite `Purchase` nem `Lead`.
 
-As variantes v3 e v4 acrescentam os eventos abaixo, com parâmetros fechados por tipos e validação de allowlist em runtime:
+As variantes v3, v4 e v5 acrescentam os eventos abaixo, com parâmetros fechados por tipos e validação de allowlist em runtime:
 
 | Evento | Parâmetros adicionais e momento |
 |---|---|
@@ -105,6 +114,8 @@ As variantes v3 e v4 acrescentam os eventos abaixo, com parâmetros fechados por
 | `vsl_error`, `vsl_autoplay_blocked` | `video_id`; únicos por visita, sem mensagem livre do erro |
 
 A v4 também registra as três telas finais por `page_view` com `page_kind=result`, `presentation` ou `offer`, além de `quiz_journey_view` e `quiz_journey_action`. Os cliques usam `cta_location` com valores fechados. Essas dimensões já existem no GA4; nenhum evento recebe a resposta de impacto ou o texto do resumo. O [mapa da medição da jornada](../../docs/integracoes/quiz-046-jornada.md) descreve os momentos e os limites da verificação.
+
+A v5 acrescenta a fase `testimonials`, a transição para a oferta e a impressão real dos depoimentos. O limite de 21 etapas não amplia as 14 respostas permitidas nem cria outra conclusão: `quiz_complete` continua na etapa 18. Os eventos identificam a variante e as etapas, sem conteúdo pessoal. O [contrato da v5](../../docs/integracoes/quiz-047-etapas.md) detalha a medição e os limites de verificação.
 
 Os marcos de vídeo existentes mantêm a cobertura efetivamente reproduzida. Novos eventos editoriais e de vídeo não criam eventos adicionais no Meta. A URL, os títulos e os dados de saúde não são parâmetros das interações. A visibilidade usa `IntersectionObserver`; sem suporte, os elementos e os CTAs funcionam, mas esses eventos não são inventados.
 

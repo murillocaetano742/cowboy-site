@@ -463,7 +463,7 @@ interface QuizProps {
 }
 
 const subscribeRestart = () => () => {};
-const readRestart = () => ["result", "presentation", "offer"].includes(window.history.state?.cowboyJourney);
+const readRestart = () => ["result", "presentation", "testimonials", "offer"].includes(window.history.state?.cowboyJourney);
 const noRestart = () => false;
 function JourneyRestartNotice() {
   const restarted = useSyncExternalStore(subscribeRestart, readRestart, noRestart);
@@ -473,9 +473,14 @@ function JourneyRestartNotice() {
 export function Quiz({ variant = "v1-direto" }: QuizProps) {
   const [state, dispatch] = useReducer((current: QuizState, action: QuizAction) => quizReducer(current, action, variant), initialState);
   const { stage, introIndex, questionIndex } = state;
-  const journey = variant === "v4-jornada";
+  const [finalStep, setFinalStep] = useState(18);
+  const focusAfterContinue = useRef(false);
+  const quizRef = useRef<HTMLElement>(null);
+  const split = variant === "v5-etapas";
+  const journey = variant === "v4-jornada" || split;
   const editorial = variant === "v3-editorial" || journey;
-  const stepIndex = quizStepFor(state, variant);
+  const stepIndex = split && stage === "precheckout" ? finalStep : quizStepFor(state, variant);
+  const stepTotal = split ? 21 : 18;
   const question = questions[questionIndex];
   const next = () => dispatch({ type: "NEXT" });
   const back = () => {
@@ -490,24 +495,30 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
   };
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (focusAfterContinue.current) {
+      const title = quizRef.current?.querySelector<HTMLElement>("h1, h2");
+      if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
+      focusAfterContinue.current = false;
+    }
     // Only an ordinal crosses the analytics boundary; answer/state objects never do.
     trackQuizStep(stepIndex, variant);
-    if (stage === "precheckout") {
+    if (stage === "precheckout" && (!split || stepIndex === 18)) {
       trackQuizComplete(variant);
       if (!editorial) trackOfferView(RECOMMENDED_KIT, variant);
     }
-  }, [stage, stepIndex, variant, editorial]);
+  }, [stage, stepIndex, variant, editorial, split]);
   return (
     <main
+      ref={quizRef}
       className={`min-h-screen cb-bg${editorial ? ` ${styles.flow}` : ""}`}
       data-stage={stage}
       data-step-index={editorial ? stepIndex : undefined}
     >
       {journey && stage === "intro" && introIndex === 0 && <JourneyRestartNotice />}
-      {editorial && !(journey && stage === "precheckout") && <div className={styles.progress} data-quiz-progress>
-        <p>Etapa {stepIndex} de 18</p>
-        <div className={styles.track} role="progressbar" aria-label="Progresso do questionário" aria-valuemin={0} aria-valuemax={18} aria-valuenow={stepIndex} aria-valuetext={`Etapa ${stepIndex} de 18`}>
-          <div className={styles.fill} style={{ width: `${stepIndex / 18 * 100}%` }} />
+      {editorial && (split || !(journey && stage === "precheckout")) && <div className={styles.progress} data-quiz-progress>
+        <p>Etapa {stepIndex} de {stepTotal}</p>
+        <div className={styles.track} role="progressbar" aria-label={split ? "Progresso da jornada" : "Progresso do questionário"} aria-valuemin={0} aria-valuemax={stepTotal} aria-valuenow={stepIndex} aria-valuetext={`Etapa ${stepIndex} de ${stepTotal}`}>
+          <div className={styles.fill} style={{ width: `${stepIndex / stepTotal * 100}%` }} />
         </div>
       </div>}
       {!editorial && ["quiz", "weight", "weight_kg"].includes(stage) && (
@@ -529,7 +540,7 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
           savedAnswer={journey && introIndex === 2 ? confidenceReport(state.answers.confidence_impact)?.label : editorial ? state.answers[intro[introIndex].id] : undefined}
         />
       )}
-      {stage === "explanation" && <Explanation onNext={next} editorial={editorial} />}
+      {stage === "explanation" && <Explanation onNext={() => { focusAfterContinue.current = journey; next(); }} editorial={editorial} floatingContinue={journey} />}
       {stage === "quiz" && (
         <QuestionScreen
           key={question.id}
@@ -556,7 +567,7 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
       )}
       {stage === "testimonials" && <Testimonials onNext={next} onBack={back} editorial={editorial} />}
       {stage === "analyzing" && <Analyzing onNext={next} neutral={journey} />}
-      {stage === "precheckout" && (journey ? <QuizJourney impact={state.answers.confidence_impact} /> : <PreCheckout answers={state.answers} variant={variant} />)}
+      {stage === "precheckout" && (journey ? <QuizJourney impact={state.answers.confidence_impact} variant={split ? "v5-etapas" : "v4-jornada"} onStepChange={split ? setFinalStep : undefined} /> : <PreCheckout answers={state.answers} variant={variant} />)}
     </main>
   );
 }

@@ -17,7 +17,7 @@ function quizHref(path: string) {
 
 // Attribution is fixed for this document; hydrate native links from browser storage.
 const subscribeAttribution = () => () => {};
-interface QuizEditorialProps { variant?: "v3-editorial" | "v4-jornada" }
+interface QuizEditorialProps { variant?: "v3-editorial" | "v4-jornada" | "v5-etapas" }
 export function QuizEditorial({ variant = "v3-editorial" }: QuizEditorialProps) {
   const path = `/quiz/${variant}/quiz/`;
   const rootRef = useRef<HTMLElement>(null);
