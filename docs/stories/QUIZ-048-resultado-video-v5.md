@@ -1,6 +1,6 @@
 # QUIZ-048 — Ajuste do resultado e vídeo na v5
 
-Status: implementação, gates, QA e revisão visual aprovados. GO root/QA concedido; release em andamento.
+Status: publicada e verificada em produção; gates, QA e revisão visual aprovados. Fechamento documental somente local.
 
 ## Pedido e base
 
@@ -23,7 +23,7 @@ Permanecem oito entradas HTML públicas, com v5 em `/quiz/v5-etapas/` e `/quiz/v
 - [x] Manter 14 respostas, conclusão na 18 e progresso até 21, com voltar, foco, recarga e pausa de vídeos fora da própria etapa coerentes.
 - [x] Tracking e atribuição continuam neutros; não enviar pontuação, respostas, faixa ou dados de saúde a fornecedores, URL, histórico persistente, cookies ou storage. Respeitar GPC/opt-out.
 - [x] Aprovar lint, TypeScript, testes, build/check:build, E2E e revisão visual; oito rotas e versões anteriores sem regressão.
-- [ ] Publicar somente após GO root/QA, via PR, checks e merge de SHA exato; único deployment automático READY, smoke público e rollback preservado.
+- [x] Publicar somente após GO root/QA, via PR, checks e merge de SHA exato; único deployment automático READY, smoke público e rollback preservado.
 
 ## Coordenação e progresso
 
@@ -33,13 +33,23 @@ Root define contrato e revisa produto/documentação. Dev possui componentes/lib
 - [x] Ler instruções do pacote e criar branch/story antes do código.
 - [x] Consolidar implementação e File List.
 - [x] Validar gates, QA, revisão visual e autorização de release.
-- [ ] Publicar, verificar, encerrar servidor e manter fechamento documental local.
+- [x] Publicar, verificar, encerrar servidor e manter fechamento documental local.
 
 Fonte consolidada liberada pelo dev, mantendo variante e tracking `cowboy_v5_etapas`, eventos existentes e oito rotas. Lint de 54 arquivos JavaScript e ESLint, TypeScript e 114 testes passaram: 57 site, 21 fluxo e 36 tracking. Build/check:build aprovou 152 arquivos públicos e oito HTML. Servidor 4418 ativo para QA. Não houve mudança de SDK, handler do checkout, dependências ou infraestrutura.
 
 Revisão root solicitou tornar o CTA19 realmente ausente antes da liberação, em vez de apenas desabilitado. O delta ficou restrito à condição JSX; lint, TypeScript e build/check:build passaram novamente. QA recebeu o novo artefato para validar ausência inicial e aparecimento após término/erro.
 
 QA aprovou os 33 casos: 28 na rodada integral e cinco repetidos após ajustar o harness local para Range 206 com bytes reais do MP4 de dist. O servidor local serve vídeo chunked com HTTP 200, impedindo seek-to-end no Chromium; a limitação era do harness, sem mudança no app. Os cinco casos reexecutados validaram ended nativo e CTA ausente → presente, sem emitir conclusão de cobertura falsa. Cinco intensidades, autoplay sem rolagem, fallback, docks, teclado/zoom, histórico, 19 regressões legadas, SDK/linker/atribuição e privacidade passaram. Root aprovou fonte/documentação e capturas das etapas 18–21, incluindo o CTA19 liberado. Evidências em `test-results/quiz-048/`, `test-results/quiz-048-native-ended/` e `.local/quiz-048-final-captures/`. Coleta externa e checkout interceptados; sem compra. GO root/QA concedido para release.
+
+## Publicação e fechamento
+
+PR [#32](https://github.com/murillocaetano742/cowboy-site/pull/32), head `d2931f96d014e5edd2bed411ddb7020d23d65bfc`, passou nos checks Vercel e Preview Comments. Merge exato em `5c9d70ac47d22fcde060e6ae84372a20e4dc1c7c`, às 13:35:11 UTC de 14/10/2026. O único deployment automático de produção `dpl_EvUqwYrRF4hE6rPHeNK3somocSGi` está READY, com aliases canônicos confirmados. URL imutável: `https://cowboy-site-qfcy3u4q8-murillo-digital.vercel.app`. Rollback 047 preservado: `dpl_8CvS4JQrE8SZn2LvpdJ1w7QTffKZ`.
+
+A atualização está na mesma [capa v5](https://cowboyenergiamasculina.com.br/quiz/v5-etapas/) e [questionário v5](https://cowboyenergiamasculina.com.br/quiz/v5-etapas/quiz/). Às 13:37:31 UTC, oito rotas e 18 assets retornaram HTTP 200; os oito HTML canônicos coincidiram byte a byte com o deployment autenticado. Bundles contêm resultado autodeclarado e docks finais; imagem `gravidade.webp`, capa, imagens de medicamentos e poster correspondem aos arquivos aprovados. Homepage e `/quiz` → v1 com query preservados. MP4 retornou 206, MIME `video/mp4`, range de 1.024 bytes e total de 30.576.839 bytes. Evidência em `.local/quiz-048-final-http.json` do workspace original, fora do Git. Consulta de erros Vercel dos últimos 15 minutos retornou zero registros.
+
+Smoke público aprovado em 2/2 casos, 23,1 segundos: v5 completa com autoplay/áudio, seek/ended nativos, CTA ausente → presente, fases 18–21, três kits, histórico e recarga; regressão do CTA4 flutuante v4. O CDN respondeu também `Content-Range: bytes 0-1/30576839`, HTTP 206 e `Accept-Ranges: bytes`, confirmando a mídia real sem o workaround local. SDKs, coleta e checkout externos interceptados; nenhum pedido. Evidências preservadas em `test-results/quiz-048-production/` e `.local/quiz-048-production-range.txt`. Não se afirma recebimento externo de novos eventos; Meta/Purchase permanecem limites documentados.
+
+Servidor 4418 encerrado, zero listeners confirmados. Árvore limpa antes deste registro; fechamento mantido somente em commit local, sem push ou segundo deployment. Workspace original e evidências preservados.
 
 ## File List
 
