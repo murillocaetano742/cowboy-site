@@ -135,6 +135,41 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
     return () => window.clearInterval(timer);
   }, []);
 
+  const socialProof = (
+    <>
+      <div className="flex flex-col items-center mb-6">
+        <div className="flex gap-0.5 mb-1">{Array.from({ length: 5 }, (_, index) => <Star key={index} className="cb-star w-4 h-4" />)}</div>
+        <p className="text-xs text-muted-foreground">{RATING} de {REVIEWS} AVALIAÇÕES.</p>
+      </div>
+      <h2 className="text-lg font-extrabold text-foreground text-center mb-1"><span className="gradient-text">{CUSTOMERS}</span> já escolheram o COWBOY</h2>
+      <p className="text-xs text-muted-foreground text-center mb-4">Dois gravaram o próprio vídeo. Outros mandaram a foto com o frasco na mão.</p>
+      <div className="cb-videos w-full mb-4">
+        {videos.map((video, index) => (
+          <figure key={video.file} className="cb-video">
+            <video controls playsInline preload="none" poster={`${ASSETS}videos/${video.file}.jpg`} aria-label={`Vídeo de depoimento de cliente ${index + 1}`}>
+              <source src={`${ASSETS}videos/${video.file}.mp4`} type="video/mp4" />
+              <track kind="subtitles" srcLang="pt-BR" label="Português" src={`${ASSETS}videos/${video.file}.vtt`} />
+            </video>
+            <figcaption>
+              <blockquote>“{video.quote}”</blockquote>
+              <cite>{video.cite}</cite>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <div className="w-full mb-8 overflow-hidden">
+        <div className="flex gap-3 transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${testimonialIndex * (100 / 3 + 1.2)}%)` }}>
+          {clients.map((client) => (
+            <figure key={client.image} className="bluue-testimonial-photo flex-shrink-0">
+              <img src={`${ASSETS}${client.image}`} alt={client.alt} loading="lazy" className="cb-client-photo w-full rounded-xl" />
+              <figcaption className="cb-client-name text-center mt-1">Cliente {client.name}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="bluue-finish-enter flex flex-col items-center px-4 py-8 max-w-md mx-auto" data-build="cowboy-1">
       <section ref={resultRef} className="cb-result w-full mb-6" data-severity={result.severity} aria-labelledby="cb-result-level">
@@ -165,6 +200,8 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
       </section>
 
       {variant !== "v1-direto" ? <QuizVsl variant={variant} onViewKits={editorial ? viewKits : undefined} /> : null}
+
+      {editorial && <section className="flex flex-col items-center w-full" data-quiz-social-proof aria-label="Avaliações e relatos de clientes">{socialProof}</section>}
 
       <p className="text-sm font-bold text-foreground text-center mb-3">Selecione o seu kit</p>
 
@@ -227,36 +264,7 @@ export function PreCheckout({ answers, variant = "v1-direto" }: PreCheckoutProps
         {reassurances.map(({ icon: Icon, label }) => <div key={label} className="flex flex-col items-center text-center gap-1.5 glass-card-sm py-3 px-1"><Icon className="w-6 h-6 text-primary" /><span className="text-[10px] text-muted-foreground whitespace-pre-line leading-tight font-medium">{label}</span></div>)}
       </div>
 
-      <div className="flex flex-col items-center mb-6">
-        <div className="flex gap-0.5 mb-1">{Array.from({ length: 5 }, (_, index) => <Star key={index} className="cb-star w-4 h-4" />)}</div>
-        <p className="text-xs text-muted-foreground">{RATING} de {REVIEWS} AVALIAÇÕES.</p>
-      </div>
-      <h2 className="text-lg font-extrabold text-foreground text-center mb-1"><span className="gradient-text">{CUSTOMERS}</span> já escolheram o COWBOY</h2>
-      <p className="text-xs text-muted-foreground text-center mb-4">Dois gravaram o próprio vídeo. Outros mandaram a foto com o frasco na mão.</p>
-      <div className="cb-videos w-full mb-4">
-        {videos.map((video, index) => (
-          <figure key={video.file} className="cb-video">
-            <video controls playsInline preload="none" poster={`${ASSETS}videos/${video.file}.jpg`} aria-label={`Vídeo de depoimento de cliente ${index + 1}`}>
-              <source src={`${ASSETS}videos/${video.file}.mp4`} type="video/mp4" />
-              <track kind="subtitles" srcLang="pt-BR" label="Português" src={`${ASSETS}videos/${video.file}.vtt`} />
-            </video>
-            <figcaption>
-              <blockquote>“{video.quote}”</blockquote>
-              <cite>{video.cite}</cite>
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-      <div className="w-full mb-8 overflow-hidden">
-        <div className="flex gap-3 transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${testimonialIndex * (100 / 3 + 1.2)}%)` }}>
-          {clients.map((client) => (
-            <figure key={client.image} className="bluue-testimonial-photo flex-shrink-0">
-              <img src={`${ASSETS}${client.image}`} alt={client.alt} loading="lazy" className="cb-client-photo w-full rounded-xl" />
-              <figcaption className="cb-client-name text-center mt-1">Cliente {client.name}</figcaption>
-            </figure>
-          ))}
-        </div>
-      </div>
+      {!editorial && socialProof}
 
       <h3 className="text-lg font-extrabold text-foreground mb-3">Dúvidas <span className="gradient-text">Frequentes</span></h3>
       <div className="w-full mb-8">

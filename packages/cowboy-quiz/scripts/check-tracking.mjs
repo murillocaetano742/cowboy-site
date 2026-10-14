@@ -467,6 +467,60 @@ test("editorial cover CTA uses one bounded callback and works when the provider 
   }
 });
 
+test("research source tracking contains only fixed neutral IDs and is deduplicated", () => {
+  const page = fixture({ pathname: "/quiz/v3-editorial/quiz/" });
+  page.tracking.initializeQuizTracking();
+  const utms = page.scripts.find((script) => script.id === "cowboy-quiz-utms");
+  assert.equal(utms.attributes["data-utmify-ignore-classes"], "quiz-research-source", "UTM SDK receives the exclusion before the delayed article link is mounted");
+  const metaBefore = page.window.fbq.queue.length;
+  page.tracking.trackContentLink("research_paper", "quiz");
+  page.tracking.trackContentLink("research_paper", "quiz");
+  const events = page.events().filter(([, name]) => name === "quiz_content_link");
+  assert.equal(events.length, 1);
+  assert.deepEqual(plain(events[0][2]), {
+    send_to: "G-VYR2542XCN", quiz_id: "cowboy_v3_editorial", link_id: "research_paper", link_location: "quiz",
+  });
+  for (const [link, location] of [["research_paper", "cover"], ["research_paper", "offer"], ["privacy", "quiz"], ["SENSITIVE", "quiz"], ["https://www.nature.com/articles/s41467-025-66723-7", "quiz"], ["research_paper", { answer: "PRIVATE" }]]) {
+    page.tracking.trackContentLink(link, location);
+  }
+  assert.equal(page.events().filter(([, name]) => name === "quiz_content_link").length, 1);
+  assert.equal(page.window.fbq.queue.length, metaBefore, "Scientific source clicks do not create Meta events");
+  assert.doesNotMatch(JSON.stringify(page.commands()), /SENSITIVE|PRIVATE|nature\.com|66723|participants|genetic|erection|answer/);
+});
+
+test("research source respects both privacy gates, older variants and opt-out raised after boot", () => {
+  for (const options of [{ pathname: "/quiz/v1-direto/" }, { pathname: "/quiz/v2-vsl/" }, { pathname: "/quiz/v3-editorial/quiz/", gpc: true }, { pathname: "/quiz/v3-editorial/quiz/", disabled: true }]) {
+    const page = fixture(options);
+    page.tracking.initializeQuizTracking();
+    for (const id of ["research_paper", "medicine_alert", "medicine_leaflet"]) page.tracking.trackContentLink(id, "quiz");
+    assert.equal(page.events().filter(([, name]) => name === "quiz_content_link").length, 0);
+  }
+  const page = fixture({ pathname: "/quiz/v3-editorial/quiz/" });
+  page.tracking.initializeQuizTracking();
+  page.window.navigator.globalPrivacyControl = true;
+  for (const id of ["research_paper", "medicine_alert", "medicine_leaflet"]) page.tracking.trackContentLink(id, "quiz");
+  assert.equal(page.events().filter(([, name]) => name === "quiz_content_link").length, 0);
+});
+
+test("medicine references emit neutral fixed IDs only, once each and only in the quiz location", () => {
+  const page = fixture({ pathname: "/quiz/v3-editorial/quiz/" });
+  page.tracking.initializeQuizTracking();
+  const metaBefore = page.window.fbq.queue.length;
+  for (const id of ["medicine_alert", "medicine_leaflet"]) {
+    page.tracking.trackContentLink(id, "cover");
+    page.tracking.trackContentLink(id, "offer");
+    for (let repeat = 0; repeat < 2; repeat++) page.tracking.trackContentLink(id, "quiz");
+  }
+  const events = page.events().filter(([, name]) => name === "quiz_content_link");
+  assert.deepEqual(plain(events.map(([, , params]) => params)), ["medicine_alert", "medicine_leaflet"].map(link_id => ({
+    send_to: "G-VYR2542XCN", quiz_id: "cowboy_v3_editorial", link_id, link_location: "quiz",
+  })));
+  for (const invalid of ["tadalafila", "Cialis", "gov.br/anvisa", "nitratos", { answer: "PRIVATE" }]) page.tracking.trackContentLink(invalid, "quiz");
+  assert.equal(page.events().filter(([, name]) => name === "quiz_content_link").length, 2);
+  assert.equal(page.window.fbq.queue.length, metaBefore);
+  assert.doesNotMatch(JSON.stringify(page.commands()), /tadalafila|Cialis|gov\.br|dailymed|nitratos|PRIVATE|answer|dose|pressure/i);
+});
+
 test("new editorial APIs never leak into older variants or bypass privacy gates", () => {
   for (const options of [{ pathname: "/quiz/v1-direto/" }, { pathname: "/quiz/v2-vsl/" }, { pathname: "/quiz/v3-editorial/quiz/", gpc: true }, { pathname: "/quiz/v3-editorial/quiz/", disabled: true }]) {
     const page = fixture(options);

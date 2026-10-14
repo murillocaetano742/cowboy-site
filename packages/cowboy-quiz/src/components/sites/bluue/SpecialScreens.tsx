@@ -4,10 +4,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/sites/bluue/Logo";
+import { QuizResearchArticle, QuizResearchIntro } from "@/components/sites/bluue/quiz-research";
 import "@/components/sites/bluue/special.css";
 
-type NextProps = { onNext: () => void };
-type BackProps = NextProps & { onBack: () => void; editorial?: boolean };
+interface NextProps { onNext: () => void; editorial?: boolean }
+interface BackProps extends NextProps { onBack: () => void }
 
 const ASSETS = "/sites/cowboy/";
 const PRIVACY_URL = "https://cowboyenergiamasculina.com.br/privacidade";
@@ -48,7 +49,11 @@ const CLIENT_PHOTOS = [
   { image: "cliente-03.webp", name: "Sérgio", alt: "Homem de gorro no sofá, segurando um frasco COWBOY Energia" },
 ];
 
-export function Explanation({ onNext }: NextProps) {
+export function Explanation({ editorial = false, ...props }: NextProps) {
+  return editorial ? <QuizResearchIntro {...props} /> : <OriginalExplanation {...props} />;
+}
+
+function OriginalExplanation({ onNext }: NextProps) {
   const [percent, setPercent] = useState(0);
   useEffect(() => {
     let frame = 0;
@@ -123,7 +128,11 @@ export function Explanation({ onNext }: NextProps) {
   );
 }
 
-export function Testimonials({ onNext, onBack, editorial = false }: BackProps) {
+export function Testimonials({ editorial = false, ...props }: BackProps) {
+  return editorial ? <QuizResearchArticle {...props} /> : <OriginalTestimonials {...props} />;
+}
+
+function OriginalTestimonials({ onNext, onBack }: BackProps) {
   useDelayedNext(onNext, 6000);
   return (
     <div className="flex flex-col h-[100dvh] max-w-lg mx-auto bg-background">
@@ -152,7 +161,7 @@ export function Testimonials({ onNext, onBack, editorial = false }: BackProps) {
         <Logo className="text-[15px]" />
         <div className="w-8" />
       </div>
-      {!editorial && <div className="relative">
+      <div className="relative">
         <div className="w-full px-4 pt-3">
           <div
             className="w-full h-1.5 bg-muted/60 rounded-full overflow-hidden"
@@ -173,7 +182,7 @@ export function Testimonials({ onNext, onBack, editorial = false }: BackProps) {
             <div className="h-full w-1/3 bg-white/30 rounded-full bluue-shimmer" />
           </div>
         </div>
-      </div>}
+      </div>
       <p className="text-xs text-muted-foreground animate-pulse px-4 pt-2">
         Montando o seu perfil...
       </p>
