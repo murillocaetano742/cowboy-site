@@ -125,7 +125,7 @@ export function QuizJourney({ impact, answers, variant = "v4-jornada", onStepCha
       </section>}
 
       {hasTestimonials && <section className={styles.offer} data-journey-screen="testimonials" hidden={screen !== "testimonials"}>
-        <QuizSocialProof active={screen === "testimonials"} standalone />
+        <QuizSocialProof active={screen === "testimonials"} standalone showRating={split} />
       </section>}
       {screen === "offer" && <QuizJourneyOffer impactLabel={report.label} selectedPlan={selectedPlan} onSelectPlan={setSelectedPlan} variant={variant} />}
       {split && screen !== "offer" && <QuizJourneyDock>
