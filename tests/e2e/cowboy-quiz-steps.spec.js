@@ -3,13 +3,13 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs');
 
-const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4418';
+const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4419';
 const PUBLIC = 'https://cowboyenergiamasculina.com.br';
 const COVER = '/quiz/v5-etapas/';
 const FLOW = '/quiz/v5-etapas/quiz/';
 const QUIZ_ID = 'cowboy_v5_etapas';
 const VIDEO = '/videos/vsl/vsl-dr-durval-720.mp4';
-const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_048&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture&symptom_intensity=very_high&score=999#private_fixture';
+const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_049&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture&symptom_intensity=very_high&score=999#private_fixture';
 const INTENSITIES = [
   { answer:'Não percebo dificuldade hoje', label:'Nenhuma', gauge:6 },
   { answer:'Leve', label:'Leve', gauge:26 },
@@ -289,6 +289,58 @@ async function noOverflow(page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
 }
 
+async function checkOfferCarousel(page) {
+  const carousel=page.locator('[data-offer-carousel]');
+  await expect(carousel).toHaveCount(1);
+  const slides=carousel.locator('[data-carousel-slide]');
+  await expect(slides).toHaveCount(4);
+  const dots=carousel.getByRole('button',{name:/^Exibir imagem [1-4]$/});
+  await expect(dots).toHaveCount(4);
+  const previous=carousel.getByRole('button',{name:'Imagem anterior',exact:true});
+  const next=carousel.getByRole('button',{name:'Próxima imagem',exact:true});
+  for(let index=0;index<4;index++) {
+    await dots.nth(index).click();
+    await expect(dots.nth(index)).toHaveAttribute('aria-pressed','true');
+    await expect(slides.nth(index)).toHaveAttribute('aria-hidden','false');
+    await expect(carousel.locator('[data-carousel-slide][aria-hidden="false"]')).toHaveCount(1);
+    await expect.poll(()=>slides.nth(index).locator('img').evaluate(image=>image.complete&&image.naturalWidth>0)).toBe(true);
+  }
+  await dots.nth(0).focus();
+  await page.keyboard.press('Enter');
+  await expect(dots.nth(0)).toHaveAttribute('aria-pressed','true');
+  await next.focus();
+  await page.keyboard.press('Space');
+  await expect(dots.nth(1)).toHaveAttribute('aria-pressed','true');
+  await previous.focus();
+  await page.keyboard.press('Enter');
+  await expect(dots.nth(0)).toHaveAttribute('aria-pressed','true');
+  await expect(previous).toBeFocused();
+  const viewportControl=carousel.locator('[tabindex="0"]');
+  await viewportControl.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(dots.nth(1)).toHaveAttribute('aria-pressed','true');
+  await viewportControl.evaluate(element=>element.scrollTo({left:element.clientWidth*2,behavior:'instant'}));
+  await expect(dots.nth(2)).toHaveAttribute('aria-pressed','true');
+  await page.keyboard.press('ArrowLeft');
+  await expect(dots.nth(1)).toHaveAttribute('aria-pressed','true');
+  await page.keyboard.press('ArrowLeft');
+  await expect(dots.nth(0)).toHaveAttribute('aria-pressed','true');
+  await page.waitForTimeout(3200);
+  await expect(dots.nth(0)).toHaveAttribute('aria-pressed','true');
+  const viewport=page.viewportSize();
+  for(const size of [{width:375,height:812},{width:390,height:844},{width:1440,height:900}]) {
+    await page.setViewportSize(size);
+    await carousel.scrollIntoViewIfNeeded();
+    for(const control of await carousel.getByRole('button').all()) {
+      const box=await control.boundingBox();
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+    await noOverflow(page);
+  }
+  await page.setViewportSize(viewport);
+}
+
 async function clickCheckout(page, evidence) {
   const before = evidence.checkouts.length;
   await page.locator('[data-journey-checkout]').click();
@@ -304,7 +356,7 @@ for (const intensity of INTENSITIES) {
     await expect(page.locator('[data-editorial-cta="hero"]')).toHaveAttribute('href', /\/quiz\/v5-etapas\/quiz\//);
     await page.locator('[data-editorial-cta="hero"]').click();
     await expect(page).toHaveURL(new RegExp(FLOW));
-    expect(page.url()).toContain('utm_campaign=QUIZ_048');
+    expect(page.url()).toContain('utm_campaign=QUIZ_049');
     if (lowest) {
       const consent = page.getByRole('button', { name: 'uso das suas respostas', exact: true });
       await consent.click();
@@ -395,7 +447,11 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   await expect(proof.locator('img')).toHaveCount(6);
   await expect(proof).toContainText('Tem duas semanas que eu tô tomando. Tô top demais agora.');
   await expect(proof).toContainText('Segundo frasco já que eu estou indo.');
-  await expect(proof).not.toContainText(/1\.836|38 mil|4,8|92%/);
+  await expect(proof.locator('[data-proof-rating]')).toContainText('4,8 de 1.836 AVALIAÇÕES.');
+  await expect(proof.locator('[data-proof-rating] svg')).toHaveCount(5);
+  await expect(proof.locator('[data-journey-title]')).toHaveText(/\+38 mil homens já escolheram o COWBOY/i);
+  await expect(proof).toContainText('Dois gravaram o próprio vídeo. Outros mandaram a foto com o frasco na mão.');
+  await expect(proof).not.toContainText(/92%|134 mil/);
   await expect(page.locator('[data-journey-kits]:visible')).toHaveCount(0);
   await proof.locator('video').first().scrollIntoViewIfNeeded();
   await expect.poll(async()=>named(await events(page), 'quiz_testimonials_view').length).toBe(1);
@@ -451,7 +507,28 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   const kits = page.locator('[data-journey-kits]');
   await page.locator('[data-offer-view-kits]').click();
   await expect(kits).toBeFocused();
+  const progressBottom=await page.locator('[data-quiz-progress]').evaluate(element=>element.getBoundingClientRect().bottom);
+  expect(await page.locator('#journey-kits-title').evaluate(element=>element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(progressBottom);
+  expect(await kits.locator('button').first().evaluate(element=>element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(progressBottom);
   await expect.poll(async () => named(await events(page), 'view_item').length).toBe(1);
+  const cards=kits.locator('button');
+  await expect(cards).toHaveCount(3);
+  for(const [index,quantity] of [3,2,1].entries()) await expect(cards.nth(index)).toContainText(`${quantity} ${quantity===1?'frasco':'frascos'}`);
+  await expect(cards.nth(0)).toContainText('R$ 2,22');
+  await expect(cards.nth(0)).toContainText('R$ 39,80');
+  await expect(cards.nth(1)).toContainText('R$ 2,58');
+  await expect(cards.nth(1)).toContainText('R$ 5,00');
+  await expect(cards.nth(2)).toContainText('R$ 2,66');
+  await expect(cards.nth(2)).toContainText('Frete R$ 26,75');
+  await expect(kits).not.toContainText(/Indicado pra você|Indicado para você|R\$ 64,80|Economize R\$ 30/);
+  await expect(offer).toContainText('Economia comparada à compra da mesma quantidade de frascos avulsos a R$ 79,90 cada, sem incluir frete.');
+  const reassurances=page.locator('[data-offer-reassurances]');
+  await expect(reassurances).toContainText(/Checkout\s*Seguro/);
+  await expect(reassurances).toContainText(/Teste de\s*30 Dias/);
+  await expect(reassurances).toContainText(/Envio\s*Discreto/);
+  await expect(reassurances).toContainText(/Frete Grátis\s*2\+ Frascos/i);
+  await expect(reassurances.locator('svg')).toHaveCount(4);
+  await checkOfferCarousel(page);
   await checkDock(page,offer.locator('footer p').last());
   await page.locator('[data-offer-view-kits]').click();
   await page.screenshot({ path: testInfo.outputPath('kits-375.png') });
@@ -467,10 +544,11 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
     const kit = page.getByRole('group', { name: 'Kits disponíveis' }).locator('button').filter({ hasText: new RegExp(`${quantity} frascos?`) });
     await kit.click();
     await expect(kit).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-journey-checkout]')).toHaveText(`Quero meu kit de ${quantity} ${quantity===1?'frasco':'frascos'}`);
     await clickCheckout(page, evidence);
     const target = new URL(evidence.checkouts.at(-1));
     expect(target.searchParams.get('quantity')).toBe(String(quantity));
-    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_048');
+    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_049');
     expect(target.searchParams.get('gbraid')).toBe('braid_fixture');
   }
   const snapshot = await events(page);
@@ -529,7 +607,7 @@ test('v5 SDK real: fontes sem atribuição, erro de vídeo permite oferta, linke
   expect(session.match(/^s\d+/)?.[0]).toBe(/(?:^|; )_ga_VYR2542XCN=GS\d\.\d\.([^;]+)/.exec(cookies)?.[1]?.match(/^s\d+/)?.[0]);
   expect(destination.searchParams.get('_gl')).toBe(linker);
   expect(destination.hostname).toBe('cowboyenergia.carrinho.app');
-  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_048');
+  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_049');
   expect(destination.searchParams.get('cid')).toBe('journey_fixture');
   expect(destination.searchParams.get('gbraid')).toBe('braid_fixture');
   expect(destination.toString()).not.toMatch(/private_fixture|excluded|answers|severity|confidence_impact|symptom_intensity|very_high|score/);
@@ -586,7 +664,7 @@ for (const preference of ['GPC', 'GA opt-out']) {
     expect(snapshot.storage).toEqual({ session: {}, local: {} });
     privacy(snapshot);
     expect(evidence.requests.every(url => new URL(url).origin === new URL(BASE).origin)).toBe(true);
-    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_048');
+    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_049');
     expect(evidence.errors).toEqual([]);
   });
 }

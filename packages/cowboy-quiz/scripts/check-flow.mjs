@@ -6,6 +6,8 @@ import { checkoutHref } from "../src/components/sites/bluue/checkout.ts";
 import { CONFIDENCE_QUESTION, confidenceReport, confidenceValue } from "../src/components/sites/bluue/confidence-impact.ts";
 import { JOURNEY_SCREEN_STEPS, nextJourneyScreen, readJourneyScreen } from "../src/components/sites/bluue/quiz-journey-state.ts";
 import { INTENSITY_QUESTION, intensityReport, intensityValue, intensitySummary } from "../src/components/sites/bluue/symptom-intensity.ts";
+import { productSavings } from "../src/components/sites/bluue/quiz-product-savings.ts";
+import { plans } from "../src/components/sites/bluue/quiz-offer-data.ts";
 
 // Expected paths are transcribed from the public original handlers documented in
 // docs/research/RESEARCH.md. Tests use synthetic answers and perform no I/O.
@@ -32,6 +34,16 @@ const normalActions = [
   { type: "ANSWER", id: "fear", value: "Dela procurar outro" },
   { type: "NEXT" },
 ];
+
+test("v5 product savings compare current kit prices with individual bottles, excluding freight", () => {
+  const single = plans.find(plan => plan.quantity === 1).cashPrice;
+  assert.deepEqual(plans.map(plan => [plan.quantity, productSavings(single, plan.cashPrice, plan.quantity)]), [[3, "R$ 39,80"], [2, "R$ 5,00"], [1, null]]);
+  assert.equal(productSavings("R$ 80,00", "R$ 155,00", 2), "R$ 5,00", "Savings derive from supplied prices instead of copied legacy labels");
+  assert.equal(productSavings("R$ 79,90", "R$ 170,00", 2), null, "Do not advertise negative savings");
+  for (const quantity of [0, 4, 1.5, NaN]) assert.equal(productSavings(single, "R$ 0,00", quantity), null);
+  assert.equal(productSavings("PRIVATE", "R$ 154,80", 2), null);
+  assert.equal(productSavings(single, "PRIVATE", 3), null);
+});
 
 function editorialStates() {
   const actions = [...normalActions];

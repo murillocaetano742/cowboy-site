@@ -3,14 +3,18 @@
 /* eslint-disable @next/next/no-img-element -- Local product and customer media are shared with the published offer. */
 
 import { useEffect, useRef } from "react";
+import { Truck } from "lucide-react";
 import { plans } from "@/components/sites/bluue/quiz-offer-data";
 import { QuizSocialProof } from "@/components/sites/bluue/quiz-social-proof";
 import { QuizJourneyDock } from "@/components/sites/bluue/quiz-journey-dock";
+import { QuizProductGallery } from "@/components/sites/bluue/quiz-product-gallery";
+import { productSavings } from "@/components/sites/bluue/quiz-product-savings";
 import type { KitQuantity } from "@/components/sites/bluue/data";
 import { checkoutHref, readAttribution } from "@/components/sites/bluue/checkout";
 import { handleCheckoutClick } from "@/lib/checkout-navigation";
 import { trackContentLink, trackJourneyAction, trackKitSelection, trackOfferView } from "@/lib/quiz-tracking";
 import styles from "@/components/sites/bluue/quiz-journey.module.css";
+import commerce from "@/components/sites/bluue/quiz-commerce.module.css";
 
 interface QuizJourneyOfferProps {
   impactLabel: string;
@@ -25,7 +29,8 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, vari
   const kitsRef = useRef<HTMLDivElement>(null);
   const plan = plans.find(item => item.quantity === selectedPlan) ?? plans[0];
   const split = variant === "v5-etapas";
-  const checkout = <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={event => handleCheckoutClick(event, plan.quantity, variant)} className={`${styles.primary} bluue-finish-button`} data-journey-checkout>Continuar com {plan.label}</a>;
+  const singleCashPrice = plans.find(item => item.quantity === 1)?.cashPrice ?? "";
+  const checkout = <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={event => handleCheckoutClick(event, plan.quantity, variant)} className={`${styles.primary}${split ? ` ${commerce.checkout}` : ""} bluue-finish-button`} data-journey-checkout>{split ? `Quero meu kit de ${plan.label}` : `Continuar com ${plan.label}`}</a>;
   const viewKits = () => {
     trackJourneyAction("offer_view_kits", "offer");
     kitsRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
@@ -45,7 +50,7 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, vari
   }, [selectedPlan, variant]);
 
   return (
-    <section className={styles.offer} data-journey-screen="offer">
+    <section className={`${styles.offer}${split ? ` ${commerce.offer}` : ""}`} data-journey-screen="offer">
       <p className={styles.redline}>{split ? "Você relatou esta intensidade da dificuldade: " : "Você relatou este impacto na sua confiança: "}<strong data-journey-impact={split ? undefined : true} data-journey-intensity={split ? true : undefined}>{impactLabel}</strong>.</p>
       <div className={styles.offerHero}>
         <div>
@@ -66,21 +71,37 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, vari
 
       {variant === "v4-jornada" && <QuizSocialProof />}
 
-      <section className={styles.purchase} aria-labelledby="journey-kits-title">
-        <h2 id="journey-kits-title">Escolha seu kit</h2>
-        <p>Compare quantidades e valores. A escolha é sua.</p>
-        <div ref={kitsRef} id="journey-kits" tabIndex={-1} className={styles.kits} role="group" aria-label="Kits disponíveis" data-journey-kits>
-          {plans.map(item => <button type="button" key={item.quantity} aria-pressed={selectedPlan === item.quantity} className={styles.kit} onClick={() => {
+      <section className={`${styles.purchase}${split ? ` ${commerce.purchaseCopy}` : ""}`} aria-labelledby="journey-kits-title">
+        <h2 id="journey-kits-title" className={split ? commerce.kitsTitle : undefined}>{split ? "Selecione o seu kit" : "Escolha seu kit"}</h2>
+        {!split && <p>Compare quantidades e valores. A escolha é sua.</p>}
+        <div ref={kitsRef} id="journey-kits" tabIndex={-1} className={`${styles.kits}${split ? ` ${commerce.cards}` : ""}`} role="group" aria-label="Kits disponíveis" data-journey-kits>
+          {plans.map(item => {
+            const saving = split ? productSavings(singleCashPrice, item.cashPrice, item.quantity) : null;
+            return <button type="button" key={item.quantity} aria-pressed={selectedPlan === item.quantity} className={split ? `${commerce.card} ${selectedPlan === item.quantity ? "cb-option-selected" : "cb-option"}` : styles.kit} onClick={() => {
             if (selectedPlan !== item.quantity) trackKitSelection(item.quantity, variant);
             onSelectPlan(item.quantity);
           }}>
+            {split ? <>
+              <img src={`${ASSETS}${item.image}`} alt="" className="cb-plan-img" width={64} height={64} loading="lazy" />
+              <span className={commerce.cardContent}>
+                <span className={commerce.cardTop}><strong>{item.label}</strong>{item.quantity > 1 && <span className={`cb-badge ${item.quantity === 3 ? "cb-badge-gold" : "cb-badge-green"}`}>{item.quantity === 3 ? "Melhor preço" : "Teste completo"}</span>}</span>
+                <span className={commerce.cardMeta}>{item.meta}</span>
+                <span className={commerce.cardBottom}>
+                  <span className={commerce.cardDelivery}><span className={commerce.shipping}><Truck aria-hidden="true" />{item.freeShipping ? "Frete Grátis" : "Frete R$ 26,75"}</span>{saving && <span className={commerce.saving}>Economize {saving} nos produtos</span>}</span>
+                  <span className={commerce.dailyPrice}><span className="cb-per-day"><b>{item.perDay}</b><small>/dia</small></span><small>{item.cashPrice} à vista</small></span>
+                </span>
+              </span>
+            </> : <>
             <img src={`${ASSETS}${item.image}`} alt="" width={140} height={140} loading="lazy" />
             <span className={styles.kitInfo}><strong>{item.label}</strong><span>{item.quantity === 3 ? "Melhor preço por frasco" : `${item.quantity} ${item.quantity === 1 ? "frasco" : "frascos"} de 30 mL`}</span><b>{item.cashPrice} à vista</b><span>{item.freeShipping ? "Frete grátis" : "Frete R$ 26,75"}</span></span>
             <span className={styles.selectedMark} aria-hidden="true">{selectedPlan === item.quantity ? "✓" : ""}</span>
-          </button>)}
+            </>}
+          </button>;
+          })}
         </div>
+        {split && <p className={commerce.comparisonNote}>Economia comparada à compra da mesma quantidade de frascos avulsos a {singleCashPrice} cada, sem incluir frete.</p>}
         <div className={styles.price} aria-live="polite">
-          <p>12x de <strong>{plan.installment}</strong></p>
+          <p className={split ? commerce.installments : undefined}>12x de <strong>{plan.installment}</strong></p>
           <p>Ou {plan.cashPrice} à vista{plan.freeShipping ? " · frete grátis" : " + frete de R$ 26,75"}</p>
           <small>{plan.freeShipping ? `No cartão, com juros. Total ${plan.installmentTotal}.` : `No cartão, com juros. Total do produto ${plan.installmentTotal}. Com frete: 12x de R$ 11,54 ou R$ 106,65 à vista.`}</small>
         </div>
@@ -91,6 +112,8 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, vari
         </QuizJourneyDock> : checkout}
         <p className={styles.nextNote}>Checkout seguro Appmax. Sem assinatura ou cobrança recorrente.</p>
       </section>
+
+      {split && <QuizProductGallery />}
 
       <section className={styles.guarantee} aria-labelledby="journey-guarantee">
         <h2 id="journey-guarantee">30 dias para decidir</h2>
