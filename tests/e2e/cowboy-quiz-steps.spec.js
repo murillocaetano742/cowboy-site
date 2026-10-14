@@ -14,7 +14,7 @@ const VIDEO = '/videos/vsl/vsl-dr-durval-720.mp4';
 const VSL_FIXTURE = process.env.E2E_VSL_FIXTURE;
 const FULL_VSL = process.env.E2E_FULL_VSL === '1';
 if (VSL_FIXTURE && !fs.existsSync(VSL_FIXTURE)) throw new Error(`E2E_VSL_FIXTURE not found: ${VSL_FIXTURE}`);
-const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_050&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture&symptom_intensity=very_high&score=999#private_fixture';
+const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_051&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture&symptom_intensity=very_high&score=999#private_fixture';
 const INTENSITIES = [
   { answer:'Não percebo dificuldade hoje', label:'Nenhuma', gauge:6 },
   { answer:'Leve', label:'Leve', gauge:26 },
@@ -36,12 +36,18 @@ test.beforeEach(({ }, testInfo) => {
   if (!VSL_FIXTURE) testInfo.setTimeout(380000);
 });
 
-async function isolate(page, { google = false, failVideo = false, rejectAutoplay = false, preference, realVideo = false } = {}) {
+async function isolate(page, { google = false, failVideo = false, rejectAutoplay = false, preference, realVideo = false, deferVideo = 0, controlForeground = false } = {}) {
   const evidence = { requests: [], hits: [], checkouts: [], destination: null, errors: [], failVideo };
   page.on('pageerror', error => evidence.errors.push(error.message));
-  await page.addInitScript(({ rejectAutoplay, preference, realVideo }) => {
+  await page.addInitScript(({ rejectAutoplay, preference, realVideo, controlForeground }) => {
     if (preference === 'GPC') Object.defineProperty(navigator, 'globalPrivacyControl', { get: () => true });
     if (preference === 'GA opt-out') window['ga-disable-G-VYR2542XCN'] = true;
+    if (controlForeground) {
+      window.__qaForeground={visible:true,focused:true};
+      Object.defineProperty(document,'visibilityState',{get:()=>window.__qaForeground.visible?'visible':'hidden'});
+      Object.defineProperty(document,'hidden',{get:()=>!window.__qaForeground.visible});
+      document.hasFocus=()=>window.__qaForeground.focused;
+    }
     const nativePlay = HTMLMediaElement.prototype.play;
     window.__journeyPlayAttempts = [];
     if (realVideo) return;
@@ -53,7 +59,7 @@ async function isolate(page, { google = false, failVideo = false, rejectAutoplay
       if (rejectAutoplay && window.__journeyPlayAttempts.length === 1) return Promise.reject(new DOMException('QA autoplay block', 'NotAllowedError'));
       return nativePlay.call(this);
     };
-  }, { rejectAutoplay, preference, realVideo });
+  }, { rejectAutoplay, preference, realVideo, controlForeground });
   // All analytics, reference pages and checkout destinations are answered locally.
   // The long real-media proof excludes the MP4 from routing entirely.
   await page.route(url => !(realVideo && url.origin === new URL(BASE).origin && url.pathname === VIDEO), async route => {
@@ -73,6 +79,11 @@ async function isolate(page, { google = false, failVideo = false, rejectAutoplay
         return route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<p>Checkout isolado pela QA</p>' });
       }
       if (evidence.failVideo && url.pathname === VIDEO) return route.fulfill({ status: 404, body: 'Intentional media failure' });
+      if (deferVideo && url.pathname === VIDEO) {
+        const delay=deferVideo;
+        deferVideo=0;
+        await new Promise(resolve=>setTimeout(resolve,delay));
+      }
       if (url.pathname === VIDEO && (VSL_FIXTURE || new URL(BASE).hostname === '127.0.0.1')) {
         // The lightweight local server has no Range support. Serve the actual
         // built MP4 with production-equivalent byte ranges for native seeking.
@@ -104,7 +115,7 @@ async function events(page) {
 const named = (snapshot, event) => snapshot.google.filter(([name]) => name === event).map(([, params]) => params);
 
 function privacy(snapshot) {
-  const allowed = new Set(['send_to', 'quiz_id', 'step_index', 'page_location', 'page_referrer', 'page_title', 'currency', 'value', 'items', 'item_list_id', 'event_callback', 'event_timeout', 'video_id', 'percent', 'page_kind', 'cta_location', 'section_id', 'link_id', 'link_location', 'from_step_index', 'to_step_index', 'back_count', 'visit_count', 'interaction_count']);
+  const allowed = new Set(['send_to', 'quiz_id', 'step_index', 'page_location', 'page_referrer', 'page_title', 'currency', 'value', 'items', 'item_list_id', 'event_callback', 'event_timeout', 'video_id', 'percent', 'page_kind', 'cta_location', 'section_id', 'link_id', 'link_location', 'from_step_index', 'to_step_index', 'back_count', 'visit_count', 'interaction_count', 'active_time_ms', 'flush_reason', 'video_percent', 'position_bucket', 'watched_time_ms', 'buffer_time_ms', 'checkpoint_reason', 'pause_reason']);
   for (const [, params] of snapshot.google) {
     expect(params.quiz_id).toBe(QUIZ_ID);
     for (const key of Object.keys(params)) expect(allowed.has(key), key).toBe(true);
@@ -375,7 +386,7 @@ for (const intensity of INTENSITIES) {
     await expect(page.locator('[data-editorial-cta="hero"]')).toHaveAttribute('href', /\/quiz\/v5-etapas\/quiz\//);
     await page.locator('[data-editorial-cta="hero"]').click();
     await expect(page).toHaveURL(new RegExp(FLOW));
-    expect(page.url()).toContain('utm_campaign=QUIZ_050');
+    expect(page.url()).toContain('utm_campaign=QUIZ_051');
     if (lowest) {
       const consent = page.getByRole('button', { name: 'uso das suas respostas', exact: true });
       await consent.click();
@@ -567,7 +578,7 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
     await clickCheckout(page, evidence);
     const target = new URL(evidence.checkouts.at(-1));
     expect(target.searchParams.get('quantity')).toBe(String(quantity));
-    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_050');
+    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_051');
     expect(target.searchParams.get('gbraid')).toBe('braid_fixture');
   }
   const snapshot = await events(page);
@@ -618,7 +629,11 @@ test('v5 SDK real: erro bloqueia até recuperação, fontes limpas e linker cheg
   await finishPresentation(page);
   await openOffer(page);
   const cookies = await page.evaluate(() => document.cookie);
-  privacy(await events(page));
+  const beforeCheckout=await events(page);
+  privacy(beforeCheckout);
+  for(const event of ['quiz_step_engagement','vsl_retention','vsl_watch_checkpoint']) {
+    await expect.poll(()=>evidence.hits.some(hit=>decodeURIComponent(hit.url+'\n'+hit.body).match(new RegExp(`(?:[?&\\n])en=${event}(?:[&\\n]|$)`))),{timeout:15000}).toBe(true);
+  }
   await clickCheckout(page, evidence);
   await expect(page.getByText('Checkout isolado pela QA')).toBeVisible();
   const firstHop = new URL(evidence.checkouts[0]);
@@ -631,11 +646,18 @@ test('v5 SDK real: erro bloqueia até recuperação, fontes limpas e linker cheg
   expect(session.match(/^s\d+/)?.[0]).toBe(/(?:^|; )_ga_VYR2542XCN=GS\d\.\d\.([^;]+)/.exec(cookies)?.[1]?.match(/^s\d+/)?.[0]);
   expect(destination.searchParams.get('_gl')).toBe(linker);
   expect(destination.hostname).toBe('cowboyenergia.carrinho.app');
-  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_050');
+  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_051');
   expect(destination.searchParams.get('cid')).toBe('journey_fixture');
   expect(destination.searchParams.get('gbraid')).toBe('braid_fixture');
   expect(destination.toString()).not.toMatch(/private_fixture|excluded|answers|severity|confidence_impact|symptom_intensity|very_high|score/);
   expect(JSON.stringify(evidence.hits)).not.toMatch(/private_fixture|excluded|severity|weight_kg|question_id|confidence_impact|symptom_intensity|very_high|answers/);
+  // Inspect the actual SDK collector, not only the application's manual queue.
+  // Refreshed Google settings must suppress automatic medical-link inspection.
+  for(const hit of evidence.hits) {
+    const decoded=decodeURIComponent(hit.url+'\n'+hit.body);
+    expect(decoded).not.toMatch(/ep\.link_(?:url|classes|text)|(?:[?&\n])en=(?:click|form_start|form_submit|file_download|view_search_results)(?:[&\n]|$)|dailymed\.nlm|gov\.br\/anvisa|nature\.com\/articles|(?:[?&])(?:em|ph)=/);
+  }
+  expect(named(beforeCheckout,'vsl_watch_checkpoint').filter(event=>event.checkpoint_reason==='retry')).toHaveLength(1);
   expect(evidence.errors).toEqual([]);
   fs.writeFileSync(testInfo.outputPath('jornada-linker-isolado.json'), JSON.stringify(evidence, null, 2));
   testInfo.annotations.push({ type: 'scope', description: 'SDKs reais com coleta interceptada; não comprova processamento GA/Meta ou compra aprovada.' });
@@ -695,7 +717,7 @@ for (const preference of ['GPC', 'GA opt-out']) {
     expect(snapshot.storage).toEqual({ session: {}, local: {} });
     privacy(snapshot);
     expect(evidence.requests.every(url => new URL(url).origin === new URL(BASE).origin)).toBe(true);
-    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_050');
+    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_051');
     expect(evidence.errors).toEqual([]);
   });
 }
@@ -817,6 +839,145 @@ test('v5 trava avanço, ended artificial, taxa e histórico; controles de teclad
   await clickCheckout(page,evidence);
   privacy(await events(page));
   expect(evidence.errors).toEqual([]);
+});
+
+test('v5 métricas051: deltas foreground por capa/etapa, transição, ocultação e suspensão não duplicam tempo',async({page},testInfo)=>{
+  const evidence=await isolate(page,{controlForeground:true});
+  await page.clock.install();
+  await page.goto(BASE+COVER+PARAMS);
+  await expect(page.locator('[data-editorial-cta=hero]')).toBeVisible();
+  await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  await page.clock.runFor(31000);
+  const engagement=async()=>named(await events(page),'quiz_step_engagement');
+  const total=list=>list.reduce((sum,item)=>sum+item.active_time_ms,0);
+  let items=await engagement();
+  expect(items).toHaveLength(1);
+  expect(items[0]).toMatchObject({step_index:0,page_kind:'cover',flush_reason:'heartbeat'});
+  expect(items[0].active_time_ms).toBeGreaterThanOrEqual(29000);
+  expect(items[0].active_time_ms).toBeLessThanOrEqual(31000);
+  await page.evaluate(()=>{
+    window.__qaForeground.visible=false;
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('pagehide'));
+  });
+  items=await engagement();
+  const beforeHidden=total(items);
+  expect(items.filter(item=>item.flush_reason==='hidden')).toHaveLength(1);
+  expect(items.filter(item=>item.flush_reason==='pagehide')).toHaveLength(0);
+  await page.clock.runFor(60000);
+  expect(total(await engagement())).toBe(beforeHidden);
+  await page.evaluate(()=>{
+    window.__qaForeground.visible=true;
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('pageshow'));
+  });
+  await page.clock.runFor(5000);
+  await page.evaluate(()=>{window.__qaForeground.focused=false;window.dispatchEvent(new Event('blur'));});
+  expect(total(await engagement())-beforeHidden).toBe(5000);
+  const beforeBlur=total(await engagement());
+  await page.clock.runFor(30000);
+  expect(total(await engagement())).toBe(beforeBlur);
+  await page.evaluate(()=>{window.__qaForeground.focused=true;window.dispatchEvent(new Event('focus'));});
+  const countBeforeGap=(await engagement()).length;
+  await page.clock.fastForward(120000);
+  expect((await engagement()).length).toBe(countBeforeGap);
+  await page.clock.runFor(2000);
+  await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
+  expect(total(await engagement())-beforeBlur).toBe(2000);
+  privacy(await events(page));
+
+  await page.clock.resume();
+  await page.goto(BASE+FLOW+PARAMS);
+  await expect(page.locator('main[data-step-index]')).toHaveAttribute('data-step-index','1');
+  await page.clock.pauseAt(await page.evaluate(()=>Date.now()+100));
+  await page.clock.runFor(3000);
+  await page.locator('main button.cb-option').first().click();
+  await expect(page.locator('main[data-step-index]')).toHaveAttribute('data-step-index','2');
+  await page.clock.runFor(2000);
+  await page.getByRole('button',{name:'Voltar',exact:true}).click();
+  await expect(page.locator('main[data-step-index]')).toHaveAttribute('data-step-index','1');
+  await page.clock.runFor(1000);
+  await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
+  items=await engagement();
+  expect(items.map(item=>[item.step_index,item.flush_reason])).toEqual([[1,'transition'],[2,'transition'],[1,'pagehide']]);
+  expect(items[1].active_time_ms).toBe(2000);
+  expect(items[2].active_time_ms).toBe(1000);
+  expect(items[0].active_time_ms).toBeGreaterThanOrEqual(3000);
+  expect(items[0].active_time_ms).toBeLessThan(3500);
+  const snapshot=await events(page);
+  expect(named(snapshot,'quiz_step_view').map(item=>item.step_index)).toEqual([1,2]);
+  expect(named(snapshot,'quiz_step_revisit')).toHaveLength(1);
+  privacy(snapshot);
+  const countBeforeOptout=snapshot.google.length;
+  await page.evaluate(()=>{window['ga-disable-G-VYR2542XCN']=true;window.dispatchEvent(new Event('pageshow'));});
+  await page.clock.runFor(35000);
+  await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
+  expect((await events(page)).google.length).toBe(countBeforeOptout);
+  expect(evidence.errors).toEqual([]);
+  fs.writeFileSync(testInfo.outputPath('engagement-deltas.json'),JSON.stringify({coverHiddenTotal:beforeHidden,coverBlurTotal:beforeBlur,quiz:items,snapshot},null,2));
+});
+
+test('v5 métricas051: vídeo real mede decis, espera inicial e pausas manual/viewport sem alterar o gate',async({page},testInfo)=>{
+  const evidence=await isolate(page,{deferVideo:2500,controlForeground:true});
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(BASE+FLOW+PARAMS);
+  await finishQuiz(page,INTENSITIES[2]);
+  await openPresentation(page);
+  const video=page.locator('[data-quiz-vsl] video');
+  await expect.poll(()=>video.evaluate(element=>element.currentTime),{timeout:15000}).toBeGreaterThan(1.5);
+  await page.locator('[data-vsl-playback]').click();
+  const checkpoints=async()=>named(await events(page),'vsl_watch_checkpoint');
+  // pause is a queued native media event; clicking the control does not await it.
+  await expect.poll(async()=>(await checkpoints()).some(item=>item.checkpoint_reason==='pause'&&item.pause_reason==='manual'&&item.watched_time_ms>0)).toBe(true);
+  let points=await checkpoints();
+  expect(points.filter(item=>item.checkpoint_reason==='recovered').some(item=>item.buffer_time_ms>=1500)).toBe(true);
+  expect(points.some(item=>item.checkpoint_reason==='pause'&&item.pause_reason==='manual'&&item.watched_time_ms>0)).toBe(true);
+  const watchedBeforeHidden=points.reduce((sum,item)=>sum+item.watched_time_ms,0);
+  await page.evaluate(()=>{
+    window.__qaForeground.visible=false;
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('pagehide'));
+  });
+  const hiddenCount=(await checkpoints()).length;
+  await page.waitForTimeout(1500);
+  expect((await checkpoints()).length).toBe(hiddenCount);
+  expect((await checkpoints()).reduce((sum,item)=>sum+item.watched_time_ms,0)).toBe(watchedBeforeHidden);
+  await page.evaluate(()=>{
+    window.__qaForeground.visible=true;
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('pageshow'));
+  });
+  await page.locator('[data-vsl-playback]').click();
+  await page.waitForTimeout(1200);
+  await page.goBack();
+  await expect(page.locator('[data-journey-screen=result]')).toBeVisible();
+  await expect.poll(()=>video.evaluate(element=>element.paused)).toBe(true);
+  points=await checkpoints();
+  expect(points.some(item=>item.checkpoint_reason==='transition'&&item.pause_reason==='viewport')).toBe(true);
+  await page.goForward();
+  await expect(page.locator('[data-journey-screen=presentation]')).toBeVisible();
+  await expect(page.locator('[data-journey-next=presentation]')).toHaveCount(0);
+  await finishPresentation(page);
+  const snapshot=await events(page);
+  expect(named(snapshot,'vsl_retention').map(item=>item.video_percent)).toEqual([10,20,30,40,50,60,70,80,90]);
+  expect(named(snapshot,'vsl_progress').map(item=>item.percent)).toEqual([25,50,75]);
+  expect(named(snapshot,'vsl_complete')).toHaveLength(1);
+  points=named(snapshot,'vsl_watch_checkpoint');
+  expect(points.filter(item=>item.checkpoint_reason==='completed')).toHaveLength(1);
+  expect(points.at(-1)).toMatchObject({video_percent:100,checkpoint_reason:'completed',pause_reason:'completed'});
+  for(const item of points){
+    expect(item.position_bucket%10).toBe(0);
+    expect(item.video_percent%10).toBe(0);
+    expect(item.watched_time_ms).toBeGreaterThanOrEqual(0);
+    expect(item.buffer_time_ms).toBeGreaterThanOrEqual(0);
+  }
+  const watched=points.reduce((sum,item)=>sum+item.watched_time_ms,0);
+  const duration=await video.evaluate(element=>element.duration);
+  expect(watched).toBeGreaterThan(duration*700);
+  expect(watched).toBeLessThan(duration*1000+1000);
+  privacy(snapshot);
+  expect(evidence.errors).toEqual([]);
+  fs.writeFileSync(testInfo.outputPath('vsl-telemetria-real.json'),JSON.stringify({duration,watched,snapshot},null,2));
 });
 
 test('@full-vsl v5 original: 276 segundos reais em 1x liberam a próxima etapa apenas no término nativo',async({page},testInfo)=>{
