@@ -13,6 +13,7 @@
 .phases { display: flex; padding: 0; max-width: 1032px; margin: 0 auto; list-style: none; border-top: 1px solid #ddd4d4; }
 .phases li { flex: 1; padding: 14px 8px; text-align: center; color: #786d6d; font-size: 14px; border-bottom: 3px solid transparent; }
 .phases li[aria-current] { border-color: #bd171d; color: #941018; font-weight: 750; }
+.splitPhases li { padding-inline: 4px; font-size: 12px; }
 .result { max-width: 650px; padding: 32px 24px 56px; margin: auto; }
 .completeProgress { margin: 0 0 38px; font-size: 12px; color: #766565; }
 .completeProgress > div { margin-top: 8px; height: 5px; background: #bd171d; border-radius: 4px; }
@@ -47,6 +48,7 @@
 .composition li { font-weight: 700; font-size: 17px; }
 .composition p { max-width: 750px; color: #655757; }
 .proof { padding: 44px 0; }
+.proof > .proofHeading { font-size: clamp(28px, 3vw, 38px); line-height: 1.16; margin: 0 0 14px; }
 .proof > p { max-width: 700px; }
 .testimonials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
 .testimonials figure { margin: 0; background: #f6f3f3; border-radius: 8px; overflow: hidden; }

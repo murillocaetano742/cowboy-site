@@ -4,6 +4,7 @@ import { initialState, LAST_QUESTION, progressFor, quizReducer, quizStepFor } fr
 import { caseResult, problemDurationQuestion, questions, RECOMMENDED_KIT } from "../src/components/sites/bluue/data.ts";
 import { checkoutHref } from "../src/components/sites/bluue/checkout.ts";
 import { CONFIDENCE_QUESTION, confidenceReport, confidenceValue } from "../src/components/sites/bluue/confidence-impact.ts";
+import { JOURNEY_SCREEN_STEPS, nextJourneyScreen, readJourneyScreen } from "../src/components/sites/bluue/quiz-journey-state.ts";
 
 // Expected paths are transcribed from the public original handlers documented in
 // docs/research/RESEARCH.md. Tests use synthetic answers and perform no I/O.
@@ -100,6 +101,26 @@ test("confidence summary exactly reflects the four self-reports and never invent
     assert.equal(confidenceReport(value).score, undefined);
   }
   for (const invalid of [undefined, "", "ALTA", "PRIVATE", "Nada", { age: "70", conditions: "PRIVATE" }]) assert.equal(confidenceReport(invalid), null);
+});
+
+test("v5 changes no answers before result and splits only the final journey into four screens", () => {
+  const actions = normalActions.map((action, index) => index === 2 ? { type: "ANSWER", id: "confidence_impact", value: "none" } : action);
+  actions.splice(8, 0, { type: "ANSWER", id: "problem_duration", value: "Há mais de 1 ano" });
+  const statesFor = variant => actions.reduce((all, next) => [...all, quizReducer(all.at(-1), next, variant)], [fresh()]);
+  const v4 = statesFor("v4-jornada");
+  const v5 = statesFor("v5-etapas");
+  assert.deepEqual(v5, v4, "The self-report and the 14 remembered answers stay exactly the same");
+  assert.deepEqual(v5.map(state => quizStepFor(state, "v5-etapas")), Array.from({ length: 18 }, (_, index) => index + 1));
+  let screen = "result";
+  const screens = [screen];
+  for (let index = 0; index < 3; index++) { screen = nextJourneyScreen(screen, true); screens.push(screen); }
+  assert.deepEqual(screens, ["result", "presentation", "testimonials", "offer"]);
+  assert.deepEqual(screens.map(value => JOURNEY_SCREEN_STEPS[value]), [18, 19, 20, 21]);
+  assert.equal(nextJourneyScreen("offer", true), "offer");
+  assert.equal(nextJourneyScreen("presentation", false), "offer", "v4 never inserts testimonials");
+  assert.equal(readJourneyScreen("testimonials", false), "result");
+  assert.equal(readJourneyScreen("testimonials", true), "testimonials");
+  for (const value of [undefined, "PRIVATE", { confidence_impact: "much" }]) assert.equal(readJourneyScreen(value, true), "result");
 });
 
 function atQuestion(index) {
