@@ -12,9 +12,12 @@ interface QuizVslProps {
   active?: boolean;
   presentation?: boolean;
   nextDestination?: "offer" | "testimonials";
+  compact?: boolean;
+  onContinueReady?: () => void;
+  onPlaybackFallback?: () => void;
 }
 
-export function QuizVsl({ variant, onViewKits, active = true, presentation = false, nextDestination = "offer" }: QuizVslProps) {
+export function QuizVsl({ variant, onViewKits, active = true, presentation = false, nextDestination = "offer", compact = false, onContinueReady, onPlaybackFallback }: QuizVslProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const autoplayAttempted = useRef(false);
   const hasPlayed = useRef(false);
@@ -22,13 +25,23 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
   const [hasError, setHasError] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [requiresInteraction, setRequiresInteraction] = useState(false);
-  const showError = () => { setHasError(true); trackVslInteraction("error", variant); };
+  const showError = () => { setHasError(true); trackVslInteraction("error", variant); onContinueReady?.(); };
 
   useEffect(() => {
     const video = videoRef.current;
     if (!active) { video?.pause(); return; }
-    if (!video || typeof IntersectionObserver === "undefined") return;
+    if (!video) return;
     let isMounted = true;
+    if (onContinueReady && (typeof video.play !== "function" || typeof video.canPlayType !== "function" || !video.canPlayType("video/mp4"))) {
+      queueMicrotask(() => {
+        if (!isMounted) return;
+        setHasError(true);
+        trackVslInteraction("error", variant);
+        onContinueReady();
+      });
+      return () => { isMounted = false; };
+    }
+    if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver((entries) => {
       if (!entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.5)) return;
       trackVslInteraction("visible", variant);
@@ -46,7 +59,7 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
       isMounted = false;
       observer.disconnect();
     };
-  }, [variant, active]);
+  }, [variant, active, onContinueReady]);
 
   const playWithSound = () => {
     const video = videoRef.current;
@@ -58,9 +71,9 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
   };
 
   return (
-    <section className="w-full mb-6" data-quiz-vsl aria-labelledby={presentation ? "journey-title" : "quiz-vsl-title"}>
+    <section className={`w-full mb-6${compact ? ` ${styles.compact}` : ""}`} data-quiz-vsl aria-labelledby={presentation ? "journey-title" : "quiz-vsl-title"}>
       {!presentation && <h2 id="quiz-vsl-title" className="text-lg font-extrabold text-foreground text-center mb-2">Conheça o COWBOY</h2>}
-      <p className="text-sm text-muted-foreground text-center mb-3">Entenda como usar e conheça a proposta do COWBOY.</p>
+      {!compact && <p className="text-sm text-muted-foreground text-center mb-3">Entenda como usar e conheça a proposta do COWBOY.</p>}
       <div className={styles.frame}>
       <video
         ref={videoRef}
@@ -86,7 +99,7 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
         onPlaying={(event) => { hasPlayed.current = true; setHasError(false); setRequiresInteraction(false); recordVslPlayback("playing", event.currentTarget, variant); }}
         onPause={(event) => { if (hasPlayed.current && !event.currentTarget.ended) trackVslInteraction("pause", variant); }}
         onTimeUpdate={(event) => recordVslPlayback("timeupdate", event.currentTarget, variant)}
-        onEnded={(event) => recordVslPlayback("ended", event.currentTarget, variant)}
+        onEnded={(event) => { recordVslPlayback("ended", event.currentTarget, variant); onContinueReady?.(); }}
         onError={showError}
       >
         <source src="/videos/vsl/vsl-dr-durval-720.mp4" type="video/mp4" onError={showError} />
@@ -100,7 +113,8 @@ export function QuizVsl({ variant, onViewKits, active = true, presentation = fal
       </div>
       {hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">{presentation ? nextDestination === "testimonials" ? "Não foi possível carregar o vídeo. Você pode seguir para os depoimentos pelo botão." : "Não foi possível carregar o vídeo. Você pode acessar os kits pelo botão." : "Não foi possível carregar o vídeo. Você pode escolher seu kit abaixo."}</p> : null}
       {requiresInteraction && !hasError ? <p role="status" className="text-sm text-muted-foreground text-center mt-2">Toque no botão para iniciar o vídeo.</p> : null}
-      <p id="quiz-vsl-caption" className="text-xs text-muted-foreground text-center mt-2">O vídeo começa sem som ao aparecer na tela. Toque em “Ativar som” para ouvir. {presentation ? nextDestination === "testimonials" ? "Você pode seguir para os depoimentos quando quiser." : "Você pode acessar a oferta quando quiser." : "Os kits estão disponíveis abaixo."}</p>
+      {requiresInteraction && !hasError && onPlaybackFallback && <button type="button" className={styles.fallbackButton} data-vsl-continue-fallback onClick={onPlaybackFallback}>Não consigo reproduzir. Continuar sem o vídeo</button>}
+      <p id="quiz-vsl-caption" className="text-xs text-muted-foreground text-center mt-2">O vídeo começa sem som ao aparecer na tela. Toque em “Ativar som” para ouvir. {onContinueReady ? "Ao final, o botão leva aos depoimentos de clientes." : presentation ? nextDestination === "testimonials" ? "Você pode seguir para os depoimentos quando quiser." : "Você pode acessar a oferta quando quiser." : "Os kits estão disponíveis abaixo."}</p>
       {onViewKits && <button type="button" data-view-kits aria-controls={presentation ? undefined : "quiz-kits"} className={styles.kitsButton} onClick={onViewKits}>Ver kits e valores</button>}
     </section>
   );

@@ -221,8 +221,8 @@ const ANALYSIS_ITEMS = [
   { icon: "🔥", label: "Gravidade do seu caso" },
 ];
 
-interface AnalyzingProps extends NextProps { neutral?: boolean }
-export function Analyzing({ onNext, neutral = false }: AnalyzingProps) {
+interface AnalyzingProps extends NextProps { neutral?: boolean; intensity?: boolean }
+export function Analyzing({ onNext, neutral = false, intensity = false }: AnalyzingProps) {
   const [percent, setPercent] = useState(0);
   useDelayedNext(onNext, 6400);
   useEffect(() => {
@@ -237,7 +237,7 @@ export function Analyzing({ onNext, neutral = false }: AnalyzingProps) {
   const circumference = 2 * Math.PI * 70;
   const items = neutral ? [
     { icon: "✓", label: "Respostas concluídas" },
-    { icon: "✓", label: "Seu relato de confiança" },
+    { icon: "✓", label: intensity ? "A intensidade que você relatou" : "Seu relato de confiança" },
     { icon: "✓", label: "Resumo das suas respostas" },
     { icon: "✓", label: "Próxima etapa: apresentação" },
   ] : ANALYSIS_ITEMS;
@@ -337,8 +337,8 @@ export function Analyzing({ onNext, neutral = false }: AnalyzingProps) {
   );
 }
 
-interface ConsentModalProps { onClose: () => void; neutral?: boolean }
-export function ConsentModal({ onClose, neutral = false }: ConsentModalProps) {
+interface ConsentModalProps { onClose: () => void; neutral?: boolean; intensity?: boolean }
+export function ConsentModal({ onClose, neutral = false, intensity = false }: ConsentModalProps) {
   const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const previousFocus =
@@ -396,7 +396,7 @@ export function ConsentModal({ onClose, neutral = false }: ConsentModalProps) {
           Uso das suas respostas
         </h2>
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          <ConsentText neutral={neutral} />
+          <ConsentText neutral={neutral} intensity={intensity} />
         </div>
         <button
           type="button"
@@ -424,12 +424,12 @@ export function ConsentModal({ onClose, neutral = false }: ConsentModalProps) {
   );
 }
 
-interface ConsentTextProps { neutral?: boolean }
-function ConsentText({ neutral = false }: ConsentTextProps) {
+interface ConsentTextProps { neutral?: boolean; intensity?: boolean }
+function ConsentText({ neutral = false, intensity = false }: ConsentTextProps) {
   return (
     <div className="cb-dialog-body text-[13px] sm:text-sm leading-relaxed space-y-4">
       <p>
-        {neutral ? "As respostas deste questionário organizam seu resumo. O impacto na confiança é aquele que você declarou. Depois, você pode assistir à apresentação e comparar os kits." : "As respostas deste questionário servem para uma coisa: indicar o kit de COWBOY Energia que combina com a sua rotina."}
+        {intensity ? "As respostas deste questionário organizam seu resumo. A intensidade da dificuldade é aquela que você declarou, não uma classificação médica. Depois, você pode assistir à apresentação, conhecer depoimentos e comparar os kits." : neutral ? "As respostas deste questionário organizam seu resumo. O impacto na confiança é aquele que você declarou. Depois, você pode assistir à apresentação e comparar os kits." : "As respostas deste questionário servem para uma coisa: indicar o kit de COWBOY Energia que combina com a sua rotina."}
       </p>
       <h3>O que acontece com elas</h3>
       <p>

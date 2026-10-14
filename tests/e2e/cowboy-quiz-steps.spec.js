@@ -3,13 +3,20 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs');
 
-const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4417';
+const BASE = process.env.E2E_BASE || 'http://127.0.0.1:4418';
 const PUBLIC = 'https://cowboyenergiamasculina.com.br';
 const COVER = '/quiz/v5-etapas/';
 const FLOW = '/quiz/v5-etapas/quiz/';
 const QUIZ_ID = 'cowboy_v5_etapas';
 const VIDEO = '/videos/vsl/vsl-dr-durval-720.mp4';
-const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_047&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture#private_fixture';
+const PARAMS = '?utm_source=validation&utm_medium=qa&utm_campaign=QUIZ_048&cid=journey_fixture&gbraid=braid_fixture&email=excluded%40example.test&answers=private_fixture&severity=private_fixture&symptom_intensity=very_high&score=999#private_fixture';
+const INTENSITIES = [
+  { answer:'Não percebo dificuldade hoje', label:'Nenhuma', gauge:6 },
+  { answer:'Leve', label:'Leve', gauge:26 },
+  { answer:'Moderada', label:'Moderada', gauge:48 },
+  { answer:'Alta', label:'Alta', gauge:70 },
+  { answer:'Muito alta', label:'Muito alta', gauge:94 },
+];
 const GOOGLE_FIXTURE = process.env.GOOGLE_TAG_FIXTURE;
 const UTM_FIXTURE = process.env.UTM_TAG_FIXTURE;
 const SOURCES = [
@@ -56,6 +63,17 @@ async function isolate(page, { google = false, failVideo = false, rejectAutoplay
         return route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<p>Checkout isolado pela QA</p>' });
       }
       if (failVideo && url.pathname === VIDEO) return route.fulfill({ status: 404, body: 'Intentional media failure' });
+      if (url.pathname === VIDEO && new URL(BASE).hostname === '127.0.0.1') {
+        // The lightweight local server has no Range support. Serve the actual
+        // built MP4 with production-equivalent byte ranges for native seeking.
+        const media = fs.readFileSync(`dist${VIDEO}`);
+        const range = /^bytes=(\d+)-(\d*)$/.exec(request.headers().range || '');
+        const start = range ? Number(range[1]) : 0;
+        const end = range?.[2] ? Math.min(Number(range[2]), media.length - 1) : media.length - 1;
+        return route.fulfill({ status: range ? 206 : 200, contentType: 'video/mp4',
+          headers: { 'accept-ranges': 'bytes', 'content-length': String(end - start + 1), ...(range ? { 'content-range': `bytes ${start}-${end}/${media.length}` } : {}) },
+          body: media.subarray(start, end + 1) });
+      }
       if (url.origin === new URL(BASE).origin) return route.continue();
       return route.fulfill({ response: await route.fetch({ url: BASE + url.pathname + url.search }) });
     }
@@ -81,7 +99,7 @@ function privacy(snapshot) {
     expect(params.quiz_id).toBe(QUIZ_ID);
     for (const key of Object.keys(params)) expect(allowed.has(key), key).toBe(true);
   }
-  expect(JSON.stringify(snapshot)).not.toMatch(/private_fixture|excluded|severity|weight_kg|question_id|confidence_impact|intro_performance|answers|diabetes|infarto|gravidade|tadala|cialis|nitrato|Bastante|Muito|Um pouco|Nada/);
+  expect(JSON.stringify(snapshot)).not.toMatch(/private_fixture|excluded|severity|weight_kg|question_id|confidence_impact|symptom_intensity|very_high|moderate|intro_performance|answers|diabetes|infarto|gravidade|tadala|cialis|nitrato|Bastante|Muito|Um pouco|Nada|Nenhuma|Leve|Moderada|Alta/);
   // Existing UTMify attribution may persist campaign identifiers; never answers.
   expect(snapshot.meta.filter(command => command[0] === 'trackSingle').map(command => command[2])).not.toContain('Purchase');
 }
@@ -105,7 +123,7 @@ async function checkSource(page, [selector, url], open) {
   await page.context().unroute(match, offline);
 }
 
-async function finishQuiz(page, impact = 'Nada', { inspectSources = false, resultViewport, floating = false } = {}) {
+async function finishQuiz(page, intensity = INTENSITIES[0], { inspectSources = false, resultViewport, floating = false } = {}) {
   const main = page.locator('main[data-step-index]');
   for (let step = 1; step <= 18; step += 1) {
     await expect(main).toHaveAttribute('data-step-index', String(step));
@@ -115,8 +133,8 @@ async function finishQuiz(page, impact = 'Nada', { inspectSources = false, resul
     if (step < 18) expect((await main.locator('img').evaluateAll(images => images.map(image => image.getAttribute('src')))).join(' ')).not.toMatch(/\/(?:kit-\d|cliente-\d|sem-receita|caixa-discreta|depoimento)[^/]*\./i);
     if (step === 18) break;
     if (step === 3) {
-      await expect(main.locator('h2')).toHaveText('Quanto isso afeta sua confiança hoje?');
-      await main.getByRole('button', { name: impact, exact: true }).click();
+      await expect(main.locator('h2')).toHaveText('Como você avalia a intensidade dessa dificuldade hoje?');
+      await main.getByRole('button', { name: intensity.answer, exact: true }).click();
     } else if (step === 4 || step === 10) {
       if (step === 4 && floating) await checkFloating(page);
       if (inspectSources) {
@@ -132,12 +150,12 @@ async function finishQuiz(page, impact = 'Nada', { inspectSources = false, resul
     }
     else {
       const options = main.locator('button.cb-option, button.cb-option-selected');
-      // Health/age answers must never inflate the visitor's declared impact.
+      // Health/age answers must never inflate the visitor's declared intensity.
       await ([5, 12, 14].includes(step) ? options.last() : options.first()).click();
     }
   }
   await expect(page.locator('[data-journey-screen="result"]')).toBeVisible();
-  await expect(page.locator('[data-journey-impact]')).toContainText(impact);
+  await expect(page.locator('[data-journey-intensity]')).toHaveText(new RegExp(`^${intensity.label}$`,'i'));
 }
 
 async function openPresentation(page) {
@@ -149,13 +167,38 @@ async function openPresentation(page) {
 }
 
 async function openTestimonials(page) {
-  await expect(page.locator('[data-journey-next="presentation"]')).toHaveText('Ver depoimentos');
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveText('Escolher meu kit');
+  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
   await page.locator('[data-journey-next="presentation"]').click();
   await expect(page.locator('[data-journey-screen="testimonials"]')).toBeVisible();
   await expect(page.locator('[data-journey-screen="presentation"]')).not.toBeVisible();
   await expect(page.locator('[data-journey-screen="offer"]')).not.toBeVisible();
   await expect(page.locator('[data-journey-screen="testimonials"] [data-journey-title]')).toBeFocused();
   await checkStep(page, 20);
+}
+
+async function finishPresentation(page) {
+  const video=page.locator('[data-quiz-vsl] video');
+  await expect.poll(()=>video.evaluate(element=>Number.isFinite(element.duration)&&element.duration>0),{timeout:15000}).toBe(true);
+  await video.evaluate(async element=>{element.currentTime=element.duration-2;await element.play();});
+  await expect.poll(()=>video.evaluate(element=>element.ended),{timeout:5000}).toBe(true);
+  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
+  // Reaching ended by seeking may unlock the UI, but is not watched completion.
+  expect(named(await events(page),'vsl_complete')).toHaveLength(0);
+}
+
+async function assertEntryPlayback(page) {
+  const video=page.locator('[data-quiz-vsl] video');
+  await expect.poll(()=>video.evaluate(element=>element.currentTime),{timeout:15000}).toBeGreaterThan(.25);
+  expect(await page.evaluate(()=>scrollY)).toBe(0);
+  expect(await video.evaluate(element=>element.muted&&element.playsInline)).toBe(true);
+  expect(await page.evaluate(()=>window.__journeyPlayAttempts[0].visibility)).toBeGreaterThanOrEqual(.5);
+  const box=await video.boundingBox();
+  const dockTop=await page.locator('[data-journey-dock]').evaluate(element=>element.getBoundingClientRect().top);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y+box.height).toBeLessThanOrEqual(dockTop+1);
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+  await noOverflow(page);
 }
 
 async function openOffer(page) {
@@ -209,6 +252,39 @@ async function checkFloating(page) {
   await page.setViewportSize(original);
 }
 
+async function checkDock(page, lastContent) {
+  const dock=page.locator('[data-journey-dock]');
+  await expect(dock).toHaveCount(1);
+  const action=dock.locator('button,a');
+  await expect(action).toHaveCount(1);
+  const original=page.viewportSize();
+  for(const size of [{width:375,height:667},{width:390,height:844},{width:1440,height:900},{width:1280,height:900}]) {
+    await page.setViewportSize(size);
+    await page.evaluate(async zoom=>{
+      document.documentElement.style.zoom=zoom;
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      scrollTo(0,0);
+    },size.width===1280?'2':'1');
+    const box=await action.boundingBox();
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y+box.height).toBeLessThanOrEqual(size.height);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    if(await action.isEnabled()) {
+      await action.focus();
+      await expect(action).toBeFocused();
+    }
+    if(lastContent) {
+      await lastContent.scrollIntoViewIfNeeded();
+      await page.evaluate(()=>scrollTo(0,document.documentElement.scrollHeight));
+      const bottom=await lastContent.evaluate(element=>element.getBoundingClientRect().bottom);
+      expect(bottom).toBeLessThanOrEqual(await dock.evaluate(element=>element.getBoundingClientRect().top));
+    }
+    await noOverflow(page);
+  }
+  await page.evaluate(()=>{document.documentElement.style.zoom='1';});
+  await page.setViewportSize(original);
+}
+
 async function noOverflow(page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
 }
@@ -219,39 +295,48 @@ async function clickCheckout(page, evidence) {
   await expect.poll(() => evidence.checkouts.length, { timeout: 3000 }).toBe(before + 1);
 }
 
-for (const impact of ['Nada', 'Um pouco', 'Bastante', 'Muito']) {
-  test(`v5 resultado respeita autorrelato ${impact} sem produto ou gravidade inferida`, async ({ page }, testInfo) => {
-    await page.setViewportSize({ width: impact === 'Nada' ? 375 : 390, height: 844 });
+for (const intensity of INTENSITIES) {
+  test(`v5 resultado respeita intensidade ${intensity.label} com imagem e gauge, sem produto ou gravidade inferida`, async ({ page }, testInfo) => {
+    const lowest=intensity.gauge===6;
+    await page.setViewportSize({ width: lowest ? 375 : 390, height: 844 });
     const evidence = await isolate(page);
     await page.goto(BASE + COVER + PARAMS);
     await expect(page.locator('[data-editorial-cta="hero"]')).toHaveAttribute('href', /\/quiz\/v5-etapas\/quiz\//);
     await page.locator('[data-editorial-cta="hero"]').click();
     await expect(page).toHaveURL(new RegExp(FLOW));
-    expect(page.url()).toContain('utm_campaign=QUIZ_047');
-    if (impact === 'Nada') {
+    expect(page.url()).toContain('utm_campaign=QUIZ_048');
+    if (lowest) {
       const consent = page.getByRole('button', { name: 'uso das suas respostas', exact: true });
       await consent.click();
-      await expect(page.getByRole('dialog')).toContainText('O impacto na confiança é aquele que você declarou.');
+      await expect(page.getByRole('dialog')).toContainText('A intensidade da dificuldade é aquela que você declarou, não uma classificação médica.');
       await expect(page.getByRole('dialog')).toContainText('As perguntas não calculam diagnóstico, gravidade clínica ou recomendação individual de kit.');
       await expect(page.getByRole('dialog')).not.toContainText('servem para medir a gravidade do seu caso');
       await page.keyboard.press('Escape');
       await expect(consent).toBeFocused();
     }
-    await finishQuiz(page, impact, { resultViewport: impact === 'Nada' ? { width: 375, height: 300 } : undefined, floating:impact==='Nada' });
+    await finishQuiz(page, intensity, { resultViewport: lowest ? { width: 375, height: 300 } : undefined, floating:lowest });
     const result = page.locator('[data-journey-screen="result"]');
-    await expect(result).toContainText('Seu resultado está pronto.');
-    await expect(result).toContainText('Este resumo reflete suas respostas e não é um diagnóstico médico.');
-    await expect(result).not.toContainText(/Gravidade|MODERADA|MUITO ALTA|R\$|Protocolo|Indicado para/);
+    await expect(result).toContainText('Intensidade que você relatou');
+    await expect(result).toContainText('É a sua percepção, não um diagnóstico médico.');
+    await expect(result).not.toContainText(/Gravidade do seu caso|R\$|Protocolo|Indicado para|Pesa no seu caso|Seu maior medo/);
+    const illustration=result.locator('img[src="/sites/cowboy/gravidade.webp"]');
+    await expect(illustration).toHaveCount(1);
+    await expect.poll(()=>illustration.evaluate(element=>element.complete&&element.naturalWidth>0)).toBe(true);
+    expect(await result.locator('.cb-gauge-marker').evaluate(element=>element.style.left)).toBe(`${intensity.gauge}%`);
+    const points=await result.locator('.cb-result-points li').allTextContents();
+    expect(points.length).toBeGreaterThan(0);
+    expect(points.every(text=>text.startsWith('Você informou '))).toBe(true);
     await expect(result.locator('img[src*="kit-"], img[src*="cliente-"]')).toHaveCount(0);
     await expect(page.locator('[data-journey-screen="presentation"]:visible, [data-journey-screen="offer"]:visible')).toHaveCount(0);
     expect(evidence.requests.some(url => new URL(url).pathname === VIDEO)).toBe(false);
-    if (impact === 'Nada') {
+    if (lowest) {
       const report = page.locator('[data-journey-report]');
       expect(await report.evaluate(element => element.getBoundingClientRect().top >= innerHeight)).toBe(true);
       expect(named(await events(page), 'quiz_result_view')).toHaveLength(0);
       await page.setViewportSize({ width: 375, height: 812 });
       await report.scrollIntoViewIfNeeded();
       await expect.poll(async () => named(await events(page), 'quiz_result_view').length).toBe(1);
+      await checkDock(page,result.locator('p').last());
     }
     expect((await page.evaluate(() => history.state)).cowboyJourney).toBe('result');
     await noOverflow(page);
@@ -280,14 +365,12 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   });
   const evidence = await isolate(page);
   await page.goto(BASE + FLOW + PARAMS);
-  await finishQuiz(page, 'Bastante');
+  await finishQuiz(page, INTENSITIES[4]);
+  await page.locator('[data-journey-report]').scrollIntoViewIfNeeded();
+  await expect.poll(async()=>named(await events(page),'quiz_result_view').length).toBe(1);
   await openPresentation(page);
   const video = page.locator('[data-quiz-vsl] video');
-  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
-  await video.scrollIntoViewIfNeeded();
-  await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 15000 }).toBeGreaterThan(0.25);
-  expect(await video.evaluate(element => element.muted)).toBe(true);
-  expect(await page.evaluate(() => window.__journeyPlayAttempts[0].visibility)).toBeGreaterThanOrEqual(0.5);
+  await assertEntryPlayback(page);
   await page.screenshot({ path: testInfo.outputPath('apresentacao-muted-375.png') });
   await page.getByRole('button', { name: 'Ativar som', exact: true }).click();
   await expect.poll(() => video.evaluate(element => element.muted)).toBe(false);
@@ -297,6 +380,8 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   expect(playback.height).toBe(1280);
   expect(playback.audioDecodedBytes).toBeGreaterThan(0);
   expect(playback.videoDecodedBytes).toBeGreaterThan(0);
+  await finishPresentation(page);
+  await checkDock(page,page.locator('#quiz-vsl-caption'));
   await page.setViewportSize({width:375,height:300});
   await openTestimonials(page);
   await expect.poll(()=>video.evaluate(element=>element.paused)).toBe(true);
@@ -321,14 +406,17 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   await expect.poll(()=>proof.locator('video').evaluateAll(videos=>videos.every(video=>video.currentTime>.25)),{timeout:15000}).toBe(true);
   const proofTimes=await proof.locator('video').evaluateAll(videos=>videos.map(video=>video.currentTime));
   await page.screenshot({path:testInfo.outputPath('depoimentos-375.png'),fullPage:true});
+  await checkDock(page,proof.locator('figcaption').last());
   await openOffer(page);
   await expect.poll(()=>page.evaluate(()=>window.__proofReferences.every(video=>video.paused))).toBe(true);
   const offer = page.locator('[data-journey-screen="offer"]');
   await expect(offer).toContainText('Teste o COWBOY por 30 dias. Decida pela sua experiência.');
   await expect(offer).not.toContainText(/Gravidade|Indicado para o seu caso|Protocolo completo/);
-  await expect(page.locator('[data-journey-impact]')).toContainText('Bastante');
+  await expect(page.locator('[data-journey-intensity]')).toHaveText(/Muito alta/i);
   await expect(video).not.toBeVisible();
   expect(await video.evaluate(element => element.paused)).toBe(true);
+  await expect(page.locator('[data-journey-checkout]')).toHaveCount(1);
+  await expect(page.locator('[data-journey-dock] [data-journey-checkout]')).toHaveCount(1);
   await noOverflow(page);
   await page.screenshot({ path: testInfo.outputPath('oferta-topo-375.png') });
   await page.waitForTimeout(150);
@@ -347,12 +435,13 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   expect(await video.evaluate(element => element.paused)).toBe(true);
   expect(await video.evaluate(element => element.currentTime)).toBeCloseTo(pausedAt, 1);
   expect(await page.evaluate(() => window.__journeyPlayAttempts.length)).toBe(attempts);
+  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
   await page.goBack();
   await expect(page.locator('[data-journey-screen="result"]')).toBeVisible();
   await checkStep(page,18);
   await page.locator('[data-journey-next="result"]').scrollIntoViewIfNeeded();
   await expect.poll(async () => named(await events(page), 'page_view').filter(params => params.page_kind === 'result').length).toBe(2);
-  await expect(page.locator('[data-journey-impact]')).toContainText('Bastante');
+  await expect(page.locator('[data-journey-intensity]')).toHaveText(/Muito alta/i);
   await page.goForward();
   await expect(page.locator('[data-journey-screen="presentation"]')).toBeVisible();
   await video.scrollIntoViewIfNeeded();
@@ -363,6 +452,8 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   await page.locator('[data-offer-view-kits]').click();
   await expect(kits).toBeFocused();
   await expect.poll(async () => named(await events(page), 'view_item').length).toBe(1);
+  await checkDock(page,offer.locator('footer p').last());
+  await page.locator('[data-offer-view-kits]').click();
   await page.screenshot({ path: testInfo.outputPath('kits-375.png') });
   const two = page.getByRole('group',{name:'Kits disponíveis'}).locator('button').filter({hasText:'2 frascos'});
   await two.click();
@@ -379,7 +470,7 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
     await clickCheckout(page, evidence);
     const target = new URL(evidence.checkouts.at(-1));
     expect(target.searchParams.get('quantity')).toBe(String(quantity));
-    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_047');
+    expect(target.searchParams.get('utm_campaign')).toBe('QUIZ_048');
     expect(target.searchParams.get('gbraid')).toBe('braid_fixture');
   }
   const snapshot = await events(page);
@@ -388,6 +479,7 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   expect(named(snapshot, 'quiz_result_view')).toHaveLength(1);
   expect(named(snapshot, 'view_item')).toHaveLength(1);
   expect(named(snapshot, 'vsl_start')).toHaveLength(1);
+  expect(named(snapshot, 'vsl_complete')).toHaveLength(0);
   expect(named(snapshot, 'begin_checkout').map(params => params.value)).toEqual([79.9,154.8,199.9]);
   expect([...new Set(named(snapshot,'select_item').map(params=>params.value))].sort((a,b)=>a-b)).toEqual([79.9,154.8,199.9]);
   expect(named(snapshot,'quiz_answer')).toHaveLength(14);
@@ -405,7 +497,7 @@ test('v5 mobile: quatro telas, vídeos reais pausam fora da etapa, histórico e 
   await page.reload();
   await expect(page.locator('main[data-step-index]')).toHaveAttribute('data-step-index', '1');
   await expect(page.getByText('Esta sessão foi reiniciada. Responda novamente para ver seu resumo.', { exact: true })).toBeVisible();
-  await expect(page.locator('[data-journey-impact]')).toHaveCount(0);
+  await expect(page.locator('[data-journey-intensity]')).toHaveCount(0);
   await expect(page.locator('[data-journey-screen="offer"]:visible')).toHaveCount(0);
   privacy(await events(page));
 });
@@ -416,10 +508,9 @@ test('v5 SDK real: fontes sem atribuição, erro de vídeo permite oferta, linke
   const evidence = await isolate(page, { google: true, failVideo: true });
   await page.goto(PUBLIC + FLOW + PARAMS);
   await expect.poll(() => evidence.hits.length, { timeout: 15000 }).toBeGreaterThan(0);
-  await finishQuiz(page, 'Nada', { inspectSources: true });
+  await finishQuiz(page, INTENSITIES[0], { inspectSources: true });
   expect(named(await events(page), 'quiz_content_link').map(({ link_id, link_location }) => [link_id, link_location])).toEqual(SOURCES.map(([, , id]) => [id, 'quiz']));
   await openPresentation(page);
-  await page.locator('[data-quiz-vsl] video').scrollIntoViewIfNeeded();
   await expect(page.locator('[data-quiz-vsl] [role="status"]')).toContainText('Não foi possível carregar o vídeo');
   expect(named(await events(page), 'vsl_error')).toHaveLength(1);
   expect(named(await events(page), 'vsl_start')).toHaveLength(0);
@@ -438,28 +529,30 @@ test('v5 SDK real: fontes sem atribuição, erro de vídeo permite oferta, linke
   expect(session.match(/^s\d+/)?.[0]).toBe(/(?:^|; )_ga_VYR2542XCN=GS\d\.\d\.([^;]+)/.exec(cookies)?.[1]?.match(/^s\d+/)?.[0]);
   expect(destination.searchParams.get('_gl')).toBe(linker);
   expect(destination.hostname).toBe('cowboyenergia.carrinho.app');
-  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_047');
+  expect(destination.searchParams.get('utm_campaign')).toBe('QUIZ_048');
   expect(destination.searchParams.get('cid')).toBe('journey_fixture');
   expect(destination.searchParams.get('gbraid')).toBe('braid_fixture');
-  expect(destination.toString()).not.toMatch(/private_fixture|excluded|answers|severity|confidence_impact/);
-  expect(JSON.stringify(evidence.hits)).not.toMatch(/private_fixture|excluded|severity|weight_kg|question_id|confidence_impact|answers/);
+  expect(destination.toString()).not.toMatch(/private_fixture|excluded|answers|severity|confidence_impact|symptom_intensity|very_high|score/);
+  expect(JSON.stringify(evidence.hits)).not.toMatch(/private_fixture|excluded|severity|weight_kg|question_id|confidence_impact|symptom_intensity|very_high|answers/);
   expect(evidence.errors).toEqual([]);
   fs.writeFileSync(testInfo.outputPath('jornada-linker-isolado.json'), JSON.stringify(evidence, null, 2));
   testInfo.annotations.push({ type: 'scope', description: 'SDKs reais com coleta interceptada; não comprova processamento GA/Meta ou compra aprovada.' });
 });
 
-test('v5 autoplay bloqueado: oferta imediata e retorno pausado sem reprodução ou conclusão inventada', async ({ page }) => {
+test('v5 autoplay bloqueado: alternativa explícita segue sem vídeo e retorno pausado permite reprodução manual', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const evidence = await isolate(page, { rejectAutoplay: true });
   await page.goto(BASE + FLOW + PARAMS);
-  await finishQuiz(page, 'Um pouco');
+  await finishQuiz(page, INTENSITIES[1]);
   await openPresentation(page);
   const video = page.locator('[data-quiz-vsl] video');
-  await video.scrollIntoViewIfNeeded();
   await expect(page.getByRole('button', { name: 'Reproduzir vídeo com som', exact: true })).toBeVisible();
+  await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
   expect(named(await events(page), 'vsl_autoplay_blocked')).toHaveLength(1);
   for (const event of ['vsl_start', 'vsl_progress', 'vsl_complete']) expect(named(await events(page), event)).toHaveLength(0);
   expect(evidence.requests.some(url => new URL(url).pathname === VIDEO)).toBe(false);
+  await page.locator('[data-vsl-continue-fallback]').click();
+  await expect(page.locator('[data-journey-screen="testimonials"]')).toBeVisible();
   await openOffer(page);
   await clickCheckout(page, evidence);
   await page.locator('[data-journey-back]').click();
@@ -468,6 +561,7 @@ test('v5 autoplay bloqueado: oferta imediata e retorno pausado sem reprodução 
   await expect(page.locator('[data-journey-screen="presentation"]')).toBeVisible();
   expect(await video.evaluate(element => element.paused)).toBe(true);
   expect(await page.evaluate(() => window.__journeyPlayAttempts.length)).toBe(1);
+  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
   await page.getByRole('button', { name: 'Reproduzir vídeo com som', exact: true }).click();
   await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 15000 }).toBeGreaterThan(0.25);
   expect(await video.evaluate(element => element.muted)).toBe(false);
@@ -481,8 +575,9 @@ for (const preference of ['GPC', 'GA opt-out']) {
     const evidence = await isolate(page, { preference });
     await page.goto(BASE + COVER + PARAMS);
     await page.locator('[data-editorial-cta="hero"]').click();
-    await finishQuiz(page, 'Muito');
+    await finishQuiz(page, INTENSITIES[4]);
     await openPresentation(page);
+    await finishPresentation(page);
     await openOffer(page);
     await clickCheckout(page, evidence);
     const snapshot = await events(page);
@@ -491,10 +586,64 @@ for (const preference of ['GPC', 'GA opt-out']) {
     expect(snapshot.storage).toEqual({ session: {}, local: {} });
     privacy(snapshot);
     expect(evidence.requests.every(url => new URL(url).origin === new URL(BASE).origin)).toBe(true);
-    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_047');
+    expect(new URL(evidence.checkouts[0]).searchParams.get('utm_campaign')).toBe('QUIZ_048');
     expect(evidence.errors).toEqual([]);
   });
 }
+
+for(const size of [{width:375,height:667},{width:390,height:844}]) {
+  test(`v5 VSL inicia sem rolagem em${size.width}x${size.height}, CTA aparece após ended sem inventar conclusão`,async({page},testInfo)=>{
+    await page.setViewportSize(size);
+    const evidence=await isolate(page);
+    await page.goto(BASE+FLOW+PARAMS);
+    await finishQuiz(page,INTENSITIES[2]);
+    await openPresentation(page);
+    await assertEntryPlayback(page);
+    const video=page.locator('[data-quiz-vsl] video');
+    await page.screenshot({path:testInfo.outputPath('vsl-entrada-sem-scroll.png')});
+    await video.evaluate(element=>element.pause());
+    const pausedAt=await video.evaluate(element=>element.currentTime);
+    await page.evaluate(()=>{scrollTo(0,document.documentElement.scrollHeight);scrollTo(0,0);});
+    await page.waitForTimeout(300);
+    expect(await video.evaluate(element=>element.paused)).toBe(true);
+    expect(await video.evaluate(element=>element.currentTime)).toBeCloseTo(pausedAt,1);
+    await expect(page.locator('[data-journey-next="presentation"]')).toHaveCount(0);
+    await finishPresentation(page);
+    await expect.poll(async()=>{
+      const videoBottom=await video.evaluate(element=>element.getBoundingClientRect().bottom);
+      const dockTop=await page.locator('[data-journey-dock]').evaluate(element=>element.getBoundingClientRect().top);
+      return videoBottom-dockTop;
+    }).toBeLessThanOrEqual(1);
+    await page.screenshot({path:testInfo.outputPath('vsl-cta-liberado.png')});
+    await openTestimonials(page);
+    await page.locator('[data-journey-back]').click();
+    await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
+    expect(await video.evaluate(element=>element.paused)).toBe(true);
+    expect(named(await events(page),'vsl_complete')).toHaveLength(0);
+    privacy(await events(page));
+    expect(evidence.errors).toEqual([]);
+  });
+}
+
+test('v5 MP4 sem suporte libera continuidade com aviso, sem reprodução ou conclusão fictícia',async({page})=>{
+  await page.setViewportSize({width:375,height:667});
+  const evidence=await isolate(page);
+  await page.addInitScript(()=>{
+    const native=HTMLMediaElement.prototype.canPlayType;
+    HTMLMediaElement.prototype.canPlayType=function(type){return type==='video/mp4'?'':native.call(this,type);};
+  });
+  await page.goto(BASE+FLOW+PARAMS);
+  await finishQuiz(page,INTENSITIES[1]);
+  await openPresentation(page);
+  await expect(page.locator('[data-quiz-vsl] [role="status"]')).toContainText('Não foi possível carregar o vídeo');
+  await expect(page.locator('[data-journey-next="presentation"]')).toBeEnabled();
+  expect(evidence.requests.some(url=>new URL(url).pathname===VIDEO)).toBe(false);
+  for(const event of ['vsl_start','vsl_progress','vsl_complete']) expect(named(await events(page),event)).toHaveLength(0);
+  await openOffer(page);
+  await clickCheckout(page,evidence);
+  privacy(await events(page));
+  expect(evidence.errors).toEqual([]);
+});
 
 test('v4 etapa 4: Continuar único flutua sem encobrir nota, aceita teclado e mantém progresso legado', async ({page},testInfo)=>{
   const evidence=await isolate(page);

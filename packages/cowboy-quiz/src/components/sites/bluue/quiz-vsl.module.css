@@ -48,3 +48,22 @@
   cursor: pointer;
 }
 .kitsButton:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+
+.compact .player {
+  height: max(220px, calc(100svh - 212px - var(--journey-dock-height, 120px) - env(safe-area-inset-bottom, 0px)));
+  max-height: 640px;
+  object-fit: contain;
+}
+.fallbackButton {
+  padding: 10px 14px;
+  min-height: 44px;
+  border: 1px solid #a79a9a;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.fallbackButton:focus-visible { outline: 3px solid #ff858b; outline-offset: 4px; }
