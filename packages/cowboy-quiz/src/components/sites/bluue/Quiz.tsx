@@ -169,8 +169,8 @@ function IntroScreen({
             >
               uso das suas respostas
             </button>{" "}
-            pela COWBOY Energia. Elas ficam só neste aparelho e servem para
-            indicar o kit certo pra você.
+            pela COWBOY Energia. Elas ficam só neste aparelho e servem para{" "}
+            {editorial ? "organizar um resumo. Ao final, você verá esse resumo e uma oferta." : "indicar o kit certo pra você."}
           </p>
         </>
       )}
@@ -509,7 +509,7 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
           savedAnswer={editorial ? state.answers[intro[introIndex].id] : undefined}
         />
       )}
-      {stage === "explanation" && <Explanation onNext={next} />}
+      {stage === "explanation" && <Explanation onNext={next} editorial={editorial} />}
       {stage === "quiz" && (
         <QuestionScreen
           key={question.id}

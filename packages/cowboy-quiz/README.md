@@ -24,6 +24,8 @@ A v1 continua sendo a variante padrão e não monta nem solicita a VSL. Na v2 e 
 
 Na v3, são 14 perguntas em 18 etapas. A pergunta `problem_duration`, depois da frequência, registra há quanto tempo a dificuldade é percebida, somente em memória, sem alterar a pontuação ou as frases de gravidade. O progresso único indica a etapa atual de 1 a 18 em todas as telas; avança no fluxo e recua ao voltar. As escolhas anteriores e o peso ajustado reaparecem ao voltar. “Ver kits e valores” junto à VSL rola e move o foco para os kits. Frete do kit selecionado, envio discreto e garantia existente ficam próximos ao checkout. As versões v1 e v2 conservam suas 13 perguntas e 17 etapas.
 
+Na atualização QUIZ-045 da v3, a etapa 4 apresenta imagens de identificação de tadalafila/Cialis e informação sobre riscos do uso sem orientação, com notícia real da Anvisa e bula vinculadas. A etapa 10 é um jornal digital com fonte científica identificada. Ambas aguardam o clique em Continuar, sem autoavanço. Os frascos do COWBOY e a apresentação comercial ficam na etapa 18; o bloco existente de prova social aparece uma única vez, depois da VSL e antes dos kits. Logo, identificação publicitária e consentimento permanecem. A [base editorial, imagens e seus limites](../../docs/research/quiz-045-source.md) estão documentados. V1/v2 conservam suas telas e ordem anteriores, incluindo a caixa e o avanço automático de seis segundos.
+
 O MP4 `/videos/vsl/vsl-dr-durval-720.mp4` e a capa `/imagens/v5/vsl-poster-frame.webp` pertencem ao site principal e não são duplicados no pacote. Para conferir a mídia localmente, use o build/servidor integrado da raiz; o preview isolado do pacote não contém esses dois recursos.
 
 Os eventos adicionais são `vsl_start`, `vsl_progress` (25, 50 e 75) e `vsl_complete`, com `video_id=cowboy_vsl`. Os quartis medem a cobertura de trechos realmente reproduzidos (`video.played`), sem somar duas vezes o replay. Buscar o final não gera progresso artificial. A conclusão exige o evento `ended` e cobertura de pelo menos 99%, com tolerância mínima de 0,5 segundo para diferenças de temporização. Esses eventos vão somente ao GA4, são deduplicados por variante e respeitam GPC/opt-out; não enviam texto, URL do vídeo ou respostas.
@@ -32,7 +34,7 @@ Os eventos adicionais são `vsl_start`, `vsl_progress` (25, 50 e 75) e `vsl_comp
 
 | Parte | Bluue | COWBOY |
 |---|---|---|
-| Visual | Azul e branco, Montserrat/Geist | Branco com dourado em todas as telas, Oswald + Manrope, logotipo em texto |
+| Visual | Azul e branco, Montserrat/Geist | Branco com dourado na v1/v2 e vermelho na v3, Oswald + Manrope, logotipo em texto |
 | Faixa etária | 18-29 / 30-39 / 40-49 / 50+ (fotos da Bluue) | Até 39 / 40-49 / 50-59 / 60+ (fotos novas geradas pelo Codex, gpt-6-astra) |
 | Tela "89% dos clientes" | Número da Bluue, passa sozinha | 92% dos clientes COWBOY (número informado pelo proprietário em 05/10/2026), com 6 fotos de clientes segurando o frasco e botão Continuar (não passa sozinha) |
 | Tela "Seguro / Discreto / Frete grátis" | Depoimentos da Bluue | "Sem receita / Discreto / 30 dias de teste" com imagem gerada: mãos abrindo caixa parda lisa com o frasco real dentro (rótulo colado do PNG verdadeiro) |
@@ -55,6 +57,7 @@ Ficaram iguais: as três perguntas iniciais, preocupação, frequência, régua 
 - `src/components/sites/bluue/PreCheckout.tsx`: resultado, kits, preços, parcelas, banners, números de prova social (`RATING`, `REVIEWS`, `CUSTOMERS`), fotos de clientes, FAQ e garantia.
 - `src/components/sites/bluue/checkout.ts`: link do checkout e parâmetros repassados.
 - `src/components/sites/bluue/SpecialScreens.tsx`: telas animadas, depoimentos e nota de privacidade.
+- `src/components/sites/bluue/quiz-research.tsx` e `quiz-research.module.css`: informação sobre medicamentos na etapa 4 e jornal científico da etapa 10, exclusivos da v3.
 - `src/components/sites/bluue/quiz-vsl.tsx`: player da v2/v3, autoplay silencioso, gesto para som e mensagem de erro de mídia.
 - `src/components/sites/bluue/quiz-editorial.tsx`: capa da v3; `quiz-flow.module.css` contém o progresso e os ajustes exclusivos do questionário v3.
 - `src/lib/quiz-variant.ts` e `src/lib/vsl-playback.ts`: identidade das variantes e marcos de vídeo baseados na cobertura reproduzida.
@@ -86,7 +89,7 @@ Somente a v3 acrescenta os eventos abaixo, com parâmetros fechados por tipos e 
 | `page_view`, `landing_view` | `page_kind=cover` ou `quiz`; navegação nativa entre as duas páginas |
 | `quiz_cover_cta` | `cta_location=hero` ou `footer`; callback de 700 ms e fallback independente de 800 ms |
 | `quiz_cover_section_view` | `section_id=intro`, `how_it_works` ou `footer`; seção realmente visível |
-| `quiz_content_link` | `link_id=privacy` ou `terms`, `link_location=cover` ou `offer` |
+| `quiz_content_link` | `link_id=privacy` ou `terms` com `link_location=cover` ou `offer`; fontes usam exclusivamente `link_id=research_paper`, `medicine_alert` ou `medicine_leaflet` com `link_location=quiz` |
 | `quiz_answer` | `step_index` somente; uma ocorrência por etapa respondida, sem valor ou texto da resposta |
 | `quiz_back` | `from_step_index`, `to_step_index`, `back_count`; clique válido para voltar |
 | `quiz_step_revisit` | `step_index`, `visit_count`; retorno a uma etapa já vista, separado da primeira visualização |

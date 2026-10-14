@@ -13,6 +13,9 @@ const UTM_FIXTURE = process.env.UTM_TAG_FIXTURE;
 const COVER = '/quiz/v3-editorial/';
 const FLOW = '/quiz/v3-editorial/quiz/';
 const QUIZ_ID = 'cowboy_v3_editorial';
+const RESEARCH_URL = 'https://www.nature.com/articles/s41467-025-66723-7';
+const MEDICINE_ALERT_URL = 'https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2025/anvisa-emite-alerta-sobre-uso-indiscriminado-de-medicamentos-para-disfuncao-eretil/';
+const MEDICINE_LEAFLET_URL = 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=bcd8f8ab-81a2-4891-83db-24a0b0e25895';
 
 test.describe.configure({ mode: 'parallel' });
 test.use({ channel: process.env.E2E_CHANNEL || undefined, reducedMotion: 'reduce' });
@@ -51,7 +54,26 @@ async function isolate(page, { google = false, failVideo = false } = {}) {
   return evidence;
 }
 
-async function finishQuiz(page, { restoreWeight = false } = {}) {
+async function checkSource(page, source, url, { open = false } = {}) {
+  await expect(source).toHaveAttribute('href', url);
+  await expect(source).toHaveAttribute('target', '_blank');
+  await expect(source).toHaveAttribute('rel', /noopener/);
+  await expect(source).toHaveAttribute('rel', /noreferrer/);
+  if (!open) return;
+  const matchSource = target => target.href === url;
+  const offlineSource = route => route.fulfill({ status: 200, contentType: 'text/html', body: '<p>Official source isolated by QA.</p>' });
+  await page.context().route(matchSource, offlineSource);
+  await source.focus();
+  await expect(source).toBeFocused();
+  const opened = page.waitForEvent('popup');
+  await page.keyboard.press('Enter');
+  const popup = await opened;
+  await expect(popup).toHaveURL(url);
+  await popup.close();
+  await page.context().unroute(matchSource, offlineSource);
+}
+
+async function finishQuiz(page, { restoreWeight = false, inspectResearch = false } = {}) {
   const main = page.locator('main[data-stage]');
   const progress = page.locator('main[data-step-index]');
   const questions = {
@@ -79,6 +101,54 @@ async function finishQuiz(page, { restoreWeight = false } = {}) {
     await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(step));
     const stage = await main.getAttribute('data-stage');
     trace.push({ step, stage });
+    if (step < 18) {
+      const images = await main.locator('img').evaluateAll(elements => elements.map(element => element.getAttribute('src') || ''));
+      expect(images.join(' ')).not.toMatch(/\/(?:kit-\d|cliente-\d|sem-receita|caixa-discreta|depoimento)[^/]*\./i);
+    }
+    if (step === 4) {
+      const introduction = page.locator('[data-quiz-introduction][data-quiz-medicine]');
+      await expect(introduction).toBeVisible();
+      await expect(introduction.locator('img')).toHaveCount(2);
+      expect(await introduction.locator('img').evaluateAll(images => images.map(image => image.getAttribute('src').split('/').at(-1)).sort())).toEqual(['cialis-reference.webp', 'tadalafila-ems-reference.webp']);
+      for (const image of await introduction.locator('img').all()) {
+        await expect(image).toHaveAttribute('alt', /\S+/);
+        await expect.poll(() => image.evaluate(element => element.complete && element.naturalWidth > 0)).toBe(true);
+      }
+      await expect(introduction).not.toContainText('92%');
+      await expect(introduction.locator('h2').first()).toHaveText('Tadala não é brincadeira.');
+      await expect(introduction).toContainText('Esses medicamentos podem tratar a disfunção erétil quando indicados.');
+      await expect(introduction).toContainText('Não suspenda nem troque seu tratamento por conta própria.');
+      await expect(introduction.locator('time')).toHaveAttribute('datetime', '2025-09-05');
+      if (inspectResearch) {
+        await page.waitForTimeout(6500);
+        await expect(progress).toHaveAttribute('data-step-index', '4');
+      }
+      await checkSource(page, introduction.locator('[data-medicine-alert]'), MEDICINE_ALERT_URL, { open: inspectResearch });
+      await checkSource(page, introduction.locator('[data-medicine-leaflet]'), MEDICINE_LEAFLET_URL, { open: inspectResearch });
+      await expect(progress).toHaveAttribute('data-step-index', '4');
+    }
+    if (step === 10) {
+      const research = page.locator('[data-quiz-research]');
+      await expect(research).toBeVisible();
+      await expect(research.locator('img')).toHaveCount(0);
+      await expect(research.getByRole('article')).toHaveAttribute('aria-labelledby', 'quiz-research-title');
+      await expect(research).toContainText('Conteúdo publicitário');
+      await expect(research).toContainText('Divulgação científica');
+      await expect(research).toContainText('1.038.509 participantes');
+      await expect(research.locator('time')).toHaveAttribute('datetime', '2025-11-24');
+      await expect(research).toContainText('não testou suplementos nem comprovou tratamento, cura ou duração da relação');
+      const source = research.locator('[data-research-source]');
+      if (inspectResearch) {
+        // The previous product screen advanced after six seconds; reading must not.
+        await page.waitForTimeout(6500);
+        await expect(progress).toHaveAttribute('data-step-index', '10');
+      }
+      await checkSource(page, source, RESEARCH_URL, { open: inspectResearch });
+      if (inspectResearch) {
+        await expect(progress).toHaveAttribute('data-step-index', '10');
+        expect((await events(page)).google.filter(([event]) => event === 'quiz_content_link').map(([, params]) => [params.link_id, params.link_location])).toEqual([['medicine_alert', 'quiz'], ['medicine_leaflet', 'quiz'], ['research_paper', 'quiz']]);
+      }
+    }
     if (questions[step]) await expect(main.locator('h2').first()).toHaveText(questions[step]);
     if (restoreWeight && step === 6) {
       for (let increment = 0; increment < 5; increment += 1) await page.getByRole('slider').press('ArrowRight');
@@ -101,6 +171,19 @@ async function finishQuiz(page, { restoreWeight = false } = {}) {
     }
   }
   await expect(main).toHaveAttribute('data-stage', 'precheckout');
+  const social = page.locator('[data-quiz-social-proof]');
+  await expect(social).toHaveCount(1);
+  await expect(social.locator('video')).toHaveCount(2);
+  await expect(social.locator('img')).toHaveCount(6);
+  await expect(social).not.toContainText('92%');
+  expect(await page.evaluate(() => {
+    const video = document.querySelector('[data-quiz-vsl]');
+    const proof = document.querySelector('[data-quiz-social-proof]');
+    const kits = document.querySelector('#quiz-kits');
+    return Boolean((video.compareDocumentPosition(proof) & Node.DOCUMENT_POSITION_FOLLOWING) && (proof.compareDocumentPosition(kits) & Node.DOCUMENT_POSITION_FOLLOWING));
+  })).toBe(true);
+  await expect(main.locator('video[aria-label^="Vídeo de depoimento"]')).toHaveCount(2);
+  await expect(main.locator('img[src*="/cliente-"]')).toHaveCount(6);
   expect(Object.keys(questions)).toHaveLength(14);
   return trace;
 }
@@ -156,7 +239,7 @@ function checkPrivacy(result, quizId) {
     expect(params.quiz_id).toBe(quizId);
     for (const key of Object.keys(params)) expect(allowed.has(key), key).toBe(true);
   }
-  expect(JSON.stringify(result)).not.toMatch(/private_fixture|excluded|severity|weight|question_id|problem_duration|answers|diabetes|infarto|gravidade|ereções|sexo/i);
+  expect(JSON.stringify(result)).not.toMatch(/private_fixture|excluded|severity|weight|question_id|problem_duration|answers|diabetes|infarto|gravidade|ereções|sexo|tadala|cialis|nitrato/i);
   expect(result.meta.filter(command => command[0] === 'trackSingle').map(command => command[2])).not.toContain('Purchase');
 }
 
@@ -225,6 +308,7 @@ test('capa editorial mobile 375: autoria publicitária, CTAs reais e atribuiçã
 });
 
 test('v3 mobile 375: 14 respostas, 18 etapas, voltar, VSL real e oferta visível com três kits', async ({ page }, testInfo) => {
+  test.setTimeout(45000);
   await page.setViewportSize({ width: 375, height: 812 });
   const evidence = await isolate(page);
   await observePlayAttempts(page);
@@ -236,7 +320,7 @@ test('v3 mobile 375: 14 respostas, 18 etapas, voltar, VSL real e oferta visível
   await page.getByRole('button', { name: 'Voltar', exact: true }).click();
   await expect(progress).toHaveAttribute('data-step-index', '1');
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
-  const trace = await finishQuiz(page, { restoreWeight: true });
+  const trace = await finishQuiz(page, { restoreWeight: true, inspectResearch: true });
   await checkScreen(page);
   await expect.poll(async () => (await events(page)).google.filter(([name]) => name === 'quiz_result_view').length).toBe(1);
   const resultBeforeScroll = await events(page);
@@ -295,6 +379,17 @@ test('v3 mobile 375: 14 respostas, 18 etapas, voltar, VSL real e oferta visível
       if (percent > 99) element.dispatchEvent(new Event('ended'));
     }, percent);
   }
+  // Seeing testimonials alone must not count as seeing the purchasable kits.
+  await page.locator('[data-quiz-social-proof]').evaluate(element => {
+    const proofTop = element.getBoundingClientRect().top + scrollY;
+    const kitsTop = document.querySelector('#quiz-kits').getBoundingClientRect().top + scrollY;
+    scrollTo(0, Math.min(proofTop - 64, kitsTop - innerHeight - 10));
+  });
+  await expect.poll(() => page.locator('[data-quiz-social-proof]').evaluate(element => Math.max(0, Math.min(innerHeight, element.getBoundingClientRect().bottom) - Math.max(0, element.getBoundingClientRect().top)))).toBeGreaterThan(0);
+  expect(await page.locator('#quiz-kits').evaluate(element => element.getBoundingClientRect().top >= innerHeight)).toBe(true);
+  await page.waitForTimeout(150);
+  expect(named(await events(page), 'view_item')).toHaveLength(0);
+  await page.screenshot({ path: testInfo.outputPath('editorial-social-proof-375.png') });
   await page.locator('[data-view-kits]').click();
   await expect(page.locator('#quiz-kits')).toBeFocused();
   await expect.poll(async () => named(await events(page), 'view_item').length).toBe(1);
@@ -311,6 +406,7 @@ test('v3 mobile 375: 14 respostas, 18 etapas, voltar, VSL real e oferta visível
   }
   const result = await events(page);
   expect(named(result, 'quiz_view_kits')).toHaveLength(1);
+  expect(named(result, 'quiz_content_link').map(({ link_id, link_location }) => [link_id, link_location])).toEqual([['medicine_alert', 'quiz'], ['medicine_leaflet', 'quiz'], ['research_paper', 'quiz']]);
   expect(named(result, 'view_item')).toHaveLength(1);
   expect(named(result, 'vsl_progress').map(params => params.percent)).toEqual([25, 50, 75]);
   expect(named(result, 'vsl_complete')).toHaveLength(1);
@@ -326,12 +422,13 @@ test('v3 mobile 375: 14 respostas, 18 etapas, voltar, VSL real e oferta visível
 
 
 test('v3 mobile 390: erro de vídeo não impede kits, SDK Google conserva linker e GPC suprime scripts', async ({ page, context }, testInfo) => {
+  test.setTimeout(45000);
   test.skip(!GOOGLE_FIXTURE, 'Requer GOOGLE_TAG_FIXTURE local para conferir o linker real sem coleta externa.');
   await page.setViewportSize({ width: 390, height: 844 });
   const evidence = await isolate(page, { google: true, failVideo: true });
   await page.goto(PUBLIC + FLOW + PARAMS);
   await expect.poll(() => evidence.hits.length, { timeout: 15000 }).toBeGreaterThan(0);
-  await finishQuiz(page);
+  await finishQuiz(page, { inspectResearch: true });
   await checkScreen(page);
   const video = page.locator('[data-quiz-vsl] video');
   await video.scrollIntoViewIfNeeded();
@@ -431,6 +528,12 @@ for (const preference of ['GPC', 'GA opt-out']) {
     await expect(page.locator('main[data-stage]')).toHaveAttribute('data-stage', 'intro');
     await page.locator('main button.cb-option').first().click();
     await expect(page.locator('main[data-step-index]')).toHaveAttribute('data-step-index', '2');
+    for (const step of [3, 4]) {
+      await page.locator('main button.cb-option').first().click();
+      await expect(page.locator('main[data-step-index]')).toHaveAttribute('data-step-index', String(step));
+    }
+    await checkSource(page, page.locator('[data-medicine-alert]'), MEDICINE_ALERT_URL, { open: true });
+    await checkSource(page, page.locator('[data-medicine-leaflet]'), MEDICINE_LEAFLET_URL, { open: true });
     expect(await events(page)).toEqual({ google: [], meta: [], storage: {} });
     expect(evidence.requests.every(url => new URL(url).origin === new URL(BASE).origin)).toBe(true);
     expect(evidence.errors).toEqual([]);

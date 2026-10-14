@@ -154,6 +154,8 @@ export function initializeQuizTracking() {
   loadScript("cowboy-quiz-utms", "https://cdn.utmify.com.br/scripts/utms/latest.js", {
     "data-utmify-prevent-xcod-sck": "",
     "data-utmify-prevent-subids": "",
+    // The independent scientific source must not receive campaign identifiers.
+    "data-utmify-ignore-classes": "quiz-research-source",
   });
 }
 
@@ -269,8 +271,8 @@ export function trackViewKits(variant = currentVariant()) {
 
 export type CoverCtaLocation = "hero" | "footer";
 export type CoverSection = "intro" | "how_it_works" | "footer";
-export type ContentLink = "privacy" | "terms";
-export type ContentLinkLocation = "cover" | "offer";
+export type ContentLink = "privacy" | "terms" | "research_paper" | "medicine_alert" | "medicine_leaflet";
+export type ContentLinkLocation = "cover" | "offer" | "quiz";
 
 /** Native cover links receive the same bounded delivery opportunity as checkout. */
 export function trackCoverCta(location: CoverCtaLocation, onReady?: () => void) {
@@ -299,7 +301,10 @@ export function trackCoverSection(section: CoverSection) {
 }
 
 export function trackContentLink(link: ContentLink, location: ContentLinkLocation) {
-  if (!editorialState(currentVariant()) || !["privacy", "terms"].includes(link) || !["cover", "offer"].includes(location)) return;
+  if (!editorialState(currentVariant())) return;
+  const allowed = ["research_paper", "medicine_alert", "medicine_leaflet"].includes(link) ? location === "quiz"
+    : ["privacy", "terms"].includes(link) && ["cover", "offer"].includes(location);
+  if (!allowed) return;
   once(`content-link:${location}:${link}`, () => sendGoogle("quiz_content_link", { link_id: link, link_location: location }));
 }
 

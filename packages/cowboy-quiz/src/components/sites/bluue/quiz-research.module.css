@@ -1,0 +1,46 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 560px);
+  min-height: calc(100dvh - 64px);
+  margin: 0 auto;
+  padding: 22px 20px 28px;
+  background: #fff;
+  color: #171717;
+}
+.introHeader { display: flex; justify-content: center; padding: 10px 0; }
+.medicine { margin: 14px 0 24px; font-size: 15px; line-height: 1.65; }
+.medicineDisclosure { margin: 0 0 22px; padding: 10px 0; border-top: 5px solid #171717; border-bottom: 1px solid #171717; color: var(--primary); font-size: 15px; font-weight: 700; line-height: 1.5; }
+.medicineTitle { margin: 0 0 12px; font-family: var(--font-heading); font-size: clamp(38px, 10vw, 50px); font-weight: 700; line-height: 1.05; letter-spacing: -.025em; text-transform: uppercase; text-wrap: balance; }
+.medicineLead { margin: 0 0 22px; font-size: 19px; font-weight: 700; line-height: 1.45; color: var(--primary); }
+.medicineProducts { margin: 0 0 26px; }
+.medicineImages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.medicineImages img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+.medicineProducts figcaption { margin-top: 12px; color: #555; font-size: 15px; line-height: 1.6; }
+.medicineNews { margin: 0 0 24px; padding: 18px; border: 2px solid #171717; border-top-width: 6px; }
+.medicineKicker { display: inline-block; margin: 0 0 10px; padding: 3px 7px; background: #171717; color: #fff; font-family: var(--font-heading); font-size: 15px; font-weight: 600; letter-spacing: .04em; }
+.medicineMetadata { margin: 0 0 18px; color: #555; font-size: 15px; }
+.medicineNews blockquote { margin: 0 0 18px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(25px, 6.4vw, 32px); font-weight: 700; line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.medicineNews > p:not(.medicineKicker):not(.medicineMetadata) { margin: 0 0 18px; font-size: 15px; line-height: 1.65; }
+.medicineSource { display: inline-block; color: var(--primary); font-size: 15px; font-weight: 700; line-height: 1.65; text-decoration: underline; text-underline-offset: 3px; }
+.medicineRisks { display: grid; gap: 18px; margin: 0 0 20px; }
+.medicineRisks > div { padding-left: 14px; border-left: 3px solid var(--primary); }
+.medicineRisks h3 { margin: 0 0 6px; font-family: var(--font-heading); font-size: 23px; font-weight: 600; line-height: 1.2; letter-spacing: 0; }
+.medicineRisks p { margin: 0; font-size: 15px; line-height: 1.65; }
+.medicineNote { margin: 24px 0 0; padding: 16px; background: var(--secondary); color: #333; font-size: 15px; line-height: 1.65; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.backButton { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 0; background: transparent; border: 0; color: #444; font: inherit; font-size: 14px; }
+.backButton span { font-size: 20px; }
+.article { flex: 1; margin-bottom: 26px; border-top: 5px solid #171717; }
+.disclosure { margin: 0; padding: 10px 0; border-bottom: 1px solid #171717; color: var(--primary); font-size: 11px; font-weight: 800; line-height: 1.6; }
+.metadata { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 5px 16px; margin: 14px 0 18px; color: #555; font-size: 11px; line-height: 1.6; }
+.metadata span { font-weight: 700; }
+.headline { margin: 0 0 20px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(29px, 6.9vw, 38px); font-weight: 700; line-height: 1.12; letter-spacing: -.03em; text-transform: none; text-wrap: balance; }
+.summary { margin: 0 0 22px; font-size: 16px; line-height: 1.65; }
+.summary strong { font-weight: 800; }
+.limit { margin: 0 0 18px; padding: 13px 0 13px 14px; border-left: 3px solid var(--primary); background: var(--secondary); font-size: 13px; line-height: 1.6; color: #444; }
+.source { display: inline-block; color: var(--primary); font-size: 13px; font-weight: 700; line-height: 1.6; text-decoration: underline; text-underline-offset: 3px; }
+.newTab { font-size: 11px; font-weight: 500; white-space: nowrap; }
+.continueButton { width: 100%; min-height: 54px; padding: 14px 20px; border: 0; border-radius: 12px; font-size: 16px; font-weight: 700; }
+.source:focus-visible, .medicineSource:focus-visible, .backButton:focus-visible, .continueButton:focus-visible { outline: 3px solid var(--ring); outline-offset: 4px; }
+@media (min-width: 700px) { .screen { padding: 28px 30px 36px; } .article { margin-top: 10px; } }
