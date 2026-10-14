@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { confidenceReport } from "@/components/sites/bluue/confidence-impact";
+import { intensityReport } from "@/components/sites/bluue/symptom-intensity";
 import { Logo } from "@/components/sites/bluue/Logo";
+import { QuizIntensityResult } from "@/components/sites/bluue/quiz-intensity-result";
+import { QuizJourneyDock } from "@/components/sites/bluue/quiz-journey-dock";
 import { QuizVsl } from "@/components/sites/bluue/quiz-vsl";
 import { QuizJourneyOffer } from "@/components/sites/bluue/quiz-journey-offer";
 import { QuizSocialProof } from "@/components/sites/bluue/quiz-social-proof";
@@ -13,6 +16,7 @@ import styles from "@/components/sites/bluue/quiz-journey.module.css";
 
 interface QuizJourneyProps {
   impact: string | undefined;
+  answers?: Readonly<Record<string, string>>;
   variant?: "v4-jornada" | "v5-etapas";
   onStepChange?: (step: number) => void;
 }
@@ -22,14 +26,17 @@ const PHASES = [
   { id: "offer", label: "Oferta" },
 ] as const;
 
-export function QuizJourney({ impact, variant = "v4-jornada", onStepChange }: QuizJourneyProps) {
+export function QuizJourney({ impact, answers, variant = "v4-jornada", onStepChange }: QuizJourneyProps) {
   const split = variant === "v5-etapas";
-  const report = confidenceReport(impact);
+  const report = split ? intensityReport(answers?.symptom_intensity) : confidenceReport(impact);
+  const confidence = confidenceReport(impact);
   const [screen, setScreen] = useState<JourneyScreen>("result");
   const [hasVideo, setHasVideo] = useState(false);
   const [hasTestimonials, setHasTestimonials] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<KitQuantity>(RECOMMENDED_KIT);
+  const [presentationReady, setPresentationReady] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const releasePresentation = useCallback(() => setPresentationReady(true), []);
 
   useEffect(() => {
     // Only fixed navigation identifiers enter history; personal state stays in Quiz.
@@ -86,7 +93,7 @@ export function QuizJourney({ impact, variant = "v4-jornada", onStepChange }: Qu
   const phases = split ? [PHASES[0], PHASES[1], { id: "testimonials", label: "Depoimentos" }, PHASES[2]] : PHASES;
 
   return (
-    <div ref={rootRef} className={`${styles.journey} ${screen === "presentation" ? styles.dark : ""}`} data-journey>
+    <div ref={rootRef} className={`${styles.journey}${split ? ` ${styles.splitJourney}` : ""} ${screen === "presentation" ? styles.dark : ""}`} data-journey>
       <header className={styles.header}>
         {screen === "result" ? <span className={styles.completed}>Questionário concluído</span> : <button type="button" onClick={back} data-journey-back className={styles.back}>Voltar</button>}
         <Logo />
@@ -96,30 +103,35 @@ export function QuizJourney({ impact, variant = "v4-jornada", onStepChange }: Qu
       </ol>
 
       {screen === "result" && <section className={styles.result} data-journey-screen="result">
+        {split && answers ? <QuizIntensityResult answers={answers} /> : <>
         {!split && <div className={styles.completeProgress} data-quiz-progress><span>Etapa 18 de 18</span><div role="progressbar" aria-label="Progresso do questionário" aria-valuemin={0} aria-valuemax={18} aria-valuenow={18} aria-valuetext="Etapa 18 de 18"><span /></div></div>}
         <h1 id="journey-title" tabIndex={-1} data-journey-title>Seu resultado está pronto.</h1>
         <div className={styles.report} data-journey-report>
           <p>Impacto na sua confiança:</p>
           <strong data-journey-impact>{report.label}</strong>
-          <p>{report.support}</p>
+          <p>{confidence?.support}</p>
         </div>
         <p className={styles.note}>Este resumo reflete suas respostas e não é um diagnóstico médico.</p>
         <button type="button" className={styles.primary} data-journey-next="result" onClick={forward}>Assistir à apresentação</button>
         <p className={styles.nextNote}>Na próxima tela, conheça a proposta da COWBOY antes de decidir.</p>
+        </>}
       </section>}
 
       {hasVideo && <section className={styles.presentation} data-journey-screen="presentation" hidden={screen !== "presentation"}>
-        <h1 id={screen === "presentation" ? "journey-title" : undefined} tabIndex={-1} data-journey-title>Conheça a proposta. Decida no seu tempo.</h1>
-        <p>Você contou como isso afeta sua confiança. Agora, assista à apresentação do COWBOY e conheça a oferta.</p>
-        <button type="button" className={styles.primary} data-journey-next="presentation" onClick={forward}>{split ? "Ver depoimentos" : "Ver kits e valores"}</button>
-        <div className={styles.video}><QuizVsl variant={variant} active={screen === "presentation"} presentation nextDestination={split ? "testimonials" : "offer"} /></div>
+        <h1 id={screen === "presentation" ? "journey-title" : undefined} tabIndex={-1} data-journey-title>{split ? "Apresentação do COWBOY" : "Conheça a proposta. Decida no seu tempo."}</h1>
+        {!split && <><p>Você contou como isso afeta sua confiança. Agora, assista à apresentação do COWBOY e conheça a oferta.</p>
+        <button type="button" className={styles.primary} data-journey-next="presentation" onClick={forward}>Ver kits e valores</button></>}
+        <div className={styles.video}><QuizVsl variant={variant} active={screen === "presentation"} presentation nextDestination={split ? "testimonials" : "offer"} compact={split} onContinueReady={split ? releasePresentation : undefined} onPlaybackFallback={split ? () => { releasePresentation(); forward(); } : undefined} /></div>
       </section>}
 
       {hasTestimonials && <section className={styles.offer} data-journey-screen="testimonials" hidden={screen !== "testimonials"}>
         <QuizSocialProof active={screen === "testimonials"} standalone />
-        <button type="button" className={styles.primary} data-journey-next="testimonials" onClick={forward}>Escolher meu kit</button>
       </section>}
       {screen === "offer" && <QuizJourneyOffer impactLabel={report.label} selectedPlan={selectedPlan} onSelectPlan={setSelectedPlan} variant={variant} />}
+      {split && screen !== "offer" && <QuizJourneyDock>
+        {screen === "presentation" && <p className={styles.dockHint} aria-live="polite">{presentationReady ? "Próximo: depoimentos de clientes" : "Ao final do vídeo, siga para os depoimentos de clientes."}</p>}
+        {(screen !== "presentation" || presentationReady) && <button type="button" className={styles.primary} data-journey-next={screen} onClick={forward}>{screen === "result" ? "Assistir à apresentação" : "Escolher meu kit"}</button>}
+      </QuizJourneyDock>}
     </div>
   );
 }

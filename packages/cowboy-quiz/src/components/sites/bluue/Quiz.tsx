@@ -15,6 +15,7 @@ import {
 } from "@/components/sites/bluue/SpecialScreens";
 import { PreCheckout } from "@/components/sites/bluue/PreCheckout";
 import { CONFIDENCE_QUESTION, confidenceReport, confidenceValue } from "@/components/sites/bluue/confidence-impact";
+import { INTENSITY_QUESTION, intensityReport, intensityValue } from "@/components/sites/bluue/symptom-intensity";
 import { QuizJourney } from "@/components/sites/bluue/quiz-journey";
 import { Logo } from "@/components/sites/bluue/Logo";
 import styles from "@/components/sites/bluue/quiz-flow.module.css";
@@ -98,6 +99,7 @@ function IntroScreen({
   editorial = false,
   savedAnswer,
   journey = false,
+  split = false,
 }: {
   index: number;
   onAnswer: (answer: string) => void;
@@ -105,9 +107,10 @@ function IntroScreen({
   editorial?: boolean;
   savedAnswer?: string;
   journey?: boolean;
+  split?: boolean;
 }) {
   const [consentOpen, setConsentOpen] = useState(false);
-  const data = journey && index === 2 ? CONFIDENCE_QUESTION : intro[index];
+  const data = journey && index === 2 ? split ? INTENSITY_QUESTION : CONFIDENCE_QUESTION : intro[index];
   return (
     <div className="flex flex-col items-center px-4 py-6 pt-8 max-w-lg mx-auto min-h-[100dvh]">
       <Logo className="cb-logo-lg mb-4 flex-shrink-0" />
@@ -178,7 +181,7 @@ function IntroScreen({
           </p>
         </>
       )}
-      {consentOpen && <ConsentModal onClose={() => setConsentOpen(false)} neutral={journey} />}
+      {consentOpen && <ConsentModal onClose={() => setConsentOpen(false)} neutral={journey} intensity={split} />}
     </div>
   );
 }
@@ -530,14 +533,15 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
           index={introIndex}
           onAnswer={(value) => {
             if (journey && introIndex === 2) {
-              const impact = confidenceValue(value);
-              if (impact) answer(CONFIDENCE_QUESTION.id, impact);
+              const selfReport = split ? intensityValue(value) : confidenceValue(value);
+              if (selfReport) answer(split ? INTENSITY_QUESTION.id : CONFIDENCE_QUESTION.id, selfReport);
             } else answer(intro[introIndex].id, value);
           }}
           onBack={back}
           editorial={editorial}
           journey={journey}
-          savedAnswer={journey && introIndex === 2 ? confidenceReport(state.answers.confidence_impact)?.label : editorial ? state.answers[intro[introIndex].id] : undefined}
+          split={split}
+          savedAnswer={journey && introIndex === 2 ? split ? intensityReport(state.answers.symptom_intensity)?.option : confidenceReport(state.answers.confidence_impact)?.label : editorial ? state.answers[intro[introIndex].id] : undefined}
         />
       )}
       {stage === "explanation" && <Explanation onNext={() => { focusAfterContinue.current = journey; next(); }} editorial={editorial} floatingContinue={journey} />}
@@ -566,8 +570,8 @@ export function Quiz({ variant = "v1-direto" }: QuizProps) {
         />
       )}
       {stage === "testimonials" && <Testimonials onNext={next} onBack={back} editorial={editorial} />}
-      {stage === "analyzing" && <Analyzing onNext={next} neutral={journey} />}
-      {stage === "precheckout" && (journey ? <QuizJourney impact={state.answers.confidence_impact} variant={split ? "v5-etapas" : "v4-jornada"} onStepChange={split ? setFinalStep : undefined} /> : <PreCheckout answers={state.answers} variant={variant} />)}
+      {stage === "analyzing" && <Analyzing onNext={next} neutral={journey} intensity={split} />}
+      {stage === "precheckout" && (journey ? <QuizJourney impact={state.answers.confidence_impact} answers={split ? state.answers : undefined} variant={split ? "v5-etapas" : "v4-jornada"} onStepChange={split ? setFinalStep : undefined} /> : <PreCheckout answers={state.answers} variant={variant} />)}
     </main>
   );
 }

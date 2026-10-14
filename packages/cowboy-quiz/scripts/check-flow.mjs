@@ -5,6 +5,7 @@ import { caseResult, problemDurationQuestion, questions, RECOMMENDED_KIT } from 
 import { checkoutHref } from "../src/components/sites/bluue/checkout.ts";
 import { CONFIDENCE_QUESTION, confidenceReport, confidenceValue } from "../src/components/sites/bluue/confidence-impact.ts";
 import { JOURNEY_SCREEN_STEPS, nextJourneyScreen, readJourneyScreen } from "../src/components/sites/bluue/quiz-journey-state.ts";
+import { INTENSITY_QUESTION, intensityReport, intensityValue, intensitySummary } from "../src/components/sites/bluue/symptom-intensity.ts";
 
 // Expected paths are transcribed from the public original handlers documented in
 // docs/research/RESEARCH.md. Tests use synthetic answers and perform no I/O.
@@ -103,13 +104,15 @@ test("confidence summary exactly reflects the four self-reports and never invent
   for (const invalid of [undefined, "", "ALTA", "PRIVATE", "Nada", { age: "70", conditions: "PRIVATE" }]) assert.equal(confidenceReport(invalid), null);
 });
 
-test("v5 changes no answers before result and splits only the final journey into four screens", () => {
-  const actions = normalActions.map((action, index) => index === 2 ? { type: "ANSWER", id: "confidence_impact", value: "none" } : action);
+test("v5 replaces only Q3 with direct intensity and keeps 14 answers before its four final screens", () => {
+  const actions = normalActions.map((action, index) => index === 2 ? { type: "ANSWER", id: "symptom_intensity", value: "none" } : action);
   actions.splice(8, 0, { type: "ANSWER", id: "problem_duration", value: "Há mais de 1 ano" });
-  const statesFor = variant => actions.reduce((all, next) => [...all, quizReducer(all.at(-1), next, variant)], [fresh()]);
-  const v4 = statesFor("v4-jornada");
-  const v5 = statesFor("v5-etapas");
-  assert.deepEqual(v5, v4, "The self-report and the 14 remembered answers stay exactly the same");
+  const v5 = actions.reduce((all, next) => [...all, quizReducer(all.at(-1), next, "v5-etapas")], [fresh()]);
+  assert.equal(Object.keys(v5.at(-1).answers).length, 14);
+  assert.equal(v5.at(-1).answers.symptom_intensity, "none");
+  assert.equal(v5.at(-1).answers.confidence_impact, undefined);
+  const restored = quizReducer(v5[3], { type: "BACK" }, "v5-etapas");
+  assert.equal(restored.answers.symptom_intensity, "none");
   assert.deepEqual(v5.map(state => quizStepFor(state, "v5-etapas")), Array.from({ length: 18 }, (_, index) => index + 1));
   let screen = "result";
   const screens = [screen];
@@ -121,6 +124,45 @@ test("v5 changes no answers before result and splits only the final journey into
   assert.equal(readJourneyScreen("testimonials", false), "result");
   assert.equal(readJourneyScreen("testimonials", true), "testimonials");
   for (const value of [undefined, "PRIVATE", { confidence_impact: "much" }]) assert.equal(readJourneyScreen(value, true), "result");
+});
+
+test("v5 intensity faithfully reflects five self-reports without assigning a score or medical weight", () => {
+  assert.equal(INTENSITY_QUESTION.id, "symptom_intensity");
+  assert.equal(INTENSITY_QUESTION.question, "Como você avalia a intensidade dessa dificuldade hoje?");
+  const expected = [
+    ["none", "Não percebo dificuldade hoje", "Nenhuma", 6],
+    ["light", "Leve", "Leve", 26], ["moderate", "Moderada", "Moderada", 48],
+    ["high", "Alta", "Alta", 70], ["very_high", "Muito alta", "Muito alta", 94],
+  ];
+  for (const [value, option, label, gauge] of expected) {
+    const report = intensityReport(value);
+    assert.equal(intensityValue(option), value);
+    assert.equal(report.label, label);
+    assert.equal(report.gauge, gauge);
+    assert.equal(report.score, undefined);
+    assert.equal(report.severity, undefined);
+    const extraAnswers = { symptom_intensity: value, age: "60+", conditions: "Diabetes", duration: "Sim", weight: "Sim" };
+    assert.deepEqual(intensityReport(extraAnswers.symptom_intensity), report, "Health context never weights this direct self-report");
+  }
+  for (const invalid of [undefined, "", "PRIVATE", "Alta", "much", "toString", { symptom_intensity: "high" }]) assert.equal(intensityReport(invalid), null);
+  assert.equal(intensityValue("PRIVATE"), undefined);
+  assert.equal(confidenceReport("none").label, "Nada", "v4 keeps its own question and wording");
+});
+
+test("v5 factual list quotes only recognized choices and never interprets risk or recommends a kit", () => {
+  const answers = Object.freeze({
+    concern: "Ereção não mantida", frequency: "Às vezes", intro_performance: "Boa, mas sei que posso mais", noticed: "Estou sem parceira agora",
+    age: "60+", conditions: "Diabetes", fear: "PRIVATE", weight_kg: "PRIVATE", symptom_intensity: "none",
+  });
+  assert.deepEqual(intensitySummary(answers), [
+    "Você informou sua principal preocupação: “Ereção não mantida”.",
+    "Você informou a frequência: “Às vezes”.",
+    "Você informou sua percepção do desempenho: “Boa, mas sei que posso mais”.",
+    "Você informou sobre a percepção da parceira: “Estou sem parceira agora”.",
+  ]);
+  assert.deepEqual(intensitySummary({ concern: "<script>PRIVATE</script>", frequency: "PRIVATE", intro_performance: "PRIVATE", noticed: "PRIVATE" }), []);
+  assert.deepEqual(intensitySummary({}), []);
+  assert.doesNotMatch(intensitySummary(answers).join(" "), /PRIVATE|Pesa no seu caso|diagnóstico|kit|diabetes|score/i);
 });
 
 function atQuestion(index) {

@@ -36,6 +36,8 @@ Na QUIZ-047, a v5 reutiliza o conteúdo e o visual da v4 e separa os depoimentos
 
 A mesma atualização coloca um único botão Continuar fixo no rodapé da etapa 4 de v4/v5, com espaço inferior e área segura para manter o conteúdo acessível. V3 mantém seu botão anterior. O [plano de divisão](../../docs/research/quiz-047-split-plan.md) registra referência, conteúdo e limites da comparação.
 
+Na QUIZ-048, a v5 recupera a imagem, o medidor e a lista do resultado antigo. A terceira pergunta registra diretamente a intensidade percebida (nenhuma, leve, moderada, alta ou muito alta), e a etapa 18 repete essa escolha com a identificação de autorrelato, sem usar `caseResult` ou atribuir gravidade clínica. A v4 conserva sua pergunta sobre confiança. A etapa 19 compacta o cabeçalho para mostrar o vídeo imediatamente, com a mesma tentativa de autoplay silencioso por visibilidade. Seu botão “Escolher meu kit” aparece ao terminar o vídeo e leva aos depoimentos; falha de mídia oferece continuidade com aviso. Buscar o final pode liberar o botão sem registrar cobertura assistida. Há um botão flutuante nas etapas 18–21; o último é o checkout real do kit selecionado, com preço e frete. O [plano do ajuste](../../docs/research/quiz-048-result-video-plan.md) documenta o contrato.
+
 O MP4 `/videos/vsl/vsl-dr-durval-720.mp4` e a capa `/imagens/v5/vsl-poster-frame.webp` pertencem ao site principal e não são duplicados no pacote. Para conferir a mídia localmente, use o build/servidor integrado da raiz; o preview isolado do pacote não contém esses dois recursos.
 
 Os eventos adicionais são `vsl_start`, `vsl_progress` (25, 50 e 75) e `vsl_complete`, com `video_id=cowboy_vsl`. Os quartis medem a cobertura de trechos realmente reproduzidos (`video.played`), sem somar duas vezes o replay. Buscar o final não gera progresso artificial. A conclusão exige o evento `ended` e cobertura de pelo menos 99%, com tolerância mínima de 0,5 segundo para diferenças de temporização. Esses eventos vão somente ao GA4, são deduplicados por variante e respeitam GPC/opt-out; não enviam texto, URL do vídeo ou respostas.
@@ -68,6 +70,7 @@ Ficaram iguais: as três perguntas iniciais, preocupação, frequência, régua 
 - `src/components/sites/bluue/data.ts`: perguntas, opções e o cálculo da gravidade (`caseResult`: pontos por resposta, faixas e frases do resultado). Até 3 pontos = moderada, 4 a 8 = alta, 9 ou mais = muito alta.
 - `src/components/sites/bluue/PreCheckout.tsx`: resultado, kits, preços, parcelas, banners, números de prova social (`RATING`, `REVIEWS`, `CUSTOMERS`), fotos de clientes, FAQ e garantia.
 - `src/components/sites/bluue/quiz-journey.tsx` e `quiz-journey-offer.tsx`: telas finais e oferta de v4/v5.
+- `src/components/sites/bluue/symptom-intensity.ts`, `quiz-intensity-result.tsx` e `quiz-journey-dock.tsx`: autorrelato da v5, resultado visual e rodapé flutuante das etapas finais.
 - `src/components/sites/bluue/quiz-offer-data.ts`: dados compartilhados de kits, preços e mídias de clientes.
 - `src/components/sites/bluue/checkout.ts`: link do checkout e parâmetros repassados.
 - `src/components/sites/bluue/SpecialScreens.tsx`: telas animadas, depoimentos e nota de privacidade.
@@ -116,6 +119,8 @@ As variantes v3, v4 e v5 acrescentam os eventos abaixo, com parâmetros fechados
 A v4 também registra as três telas finais por `page_view` com `page_kind=result`, `presentation` ou `offer`, além de `quiz_journey_view` e `quiz_journey_action`. Os cliques usam `cta_location` com valores fechados. Essas dimensões já existem no GA4; nenhum evento recebe a resposta de impacto ou o texto do resumo. O [mapa da medição da jornada](../../docs/integracoes/quiz-046-jornada.md) descreve os momentos e os limites da verificação.
 
 A v5 acrescenta a fase `testimonials`, a transição para a oferta e a impressão real dos depoimentos. O limite de 21 etapas não amplia as 14 respostas permitidas nem cria outra conclusão: `quiz_complete` continua na etapa 18. Os eventos identificam a variante e as etapas, sem conteúdo pessoal. O [contrato da v5](../../docs/integracoes/quiz-047-etapas.md) detalha a medição e os limites de verificação.
+
+O [complemento QUIZ-048](../../docs/integracoes/quiz-048-resultado-video.md) distingue a liberação local do botão após o vídeo da cobertura necessária para `vsl_complete`. A intensidade e o resumo do resultado permanecem fora de eventos e armazenamento.
 
 Os marcos de vídeo existentes mantêm a cobertura efetivamente reproduzida. Novos eventos editoriais e de vídeo não criam eventos adicionais no Meta. A URL, os títulos e os dados de saúde não são parâmetros das interações. A visibilidade usa `IntersectionObserver`; sem suporte, os elementos e os CTAs funcionam, mas esses eventos não são inventados.
 

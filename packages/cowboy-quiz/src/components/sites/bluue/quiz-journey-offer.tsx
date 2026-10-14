@@ -5,6 +5,7 @@
 import { useEffect, useRef } from "react";
 import { plans } from "@/components/sites/bluue/quiz-offer-data";
 import { QuizSocialProof } from "@/components/sites/bluue/quiz-social-proof";
+import { QuizJourneyDock } from "@/components/sites/bluue/quiz-journey-dock";
 import type { KitQuantity } from "@/components/sites/bluue/data";
 import { checkoutHref, readAttribution } from "@/components/sites/bluue/checkout";
 import { handleCheckoutClick } from "@/lib/checkout-navigation";
@@ -23,6 +24,8 @@ const INGREDIENTS = ["Taurina", "Arginina", "Feno-grego", "Vitamina B6", "Zinco"
 export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, variant = "v4-jornada" }: QuizJourneyOfferProps) {
   const kitsRef = useRef<HTMLDivElement>(null);
   const plan = plans.find(item => item.quantity === selectedPlan) ?? plans[0];
+  const split = variant === "v5-etapas";
+  const checkout = <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={event => handleCheckoutClick(event, plan.quantity, variant)} className={`${styles.primary} bluue-finish-button`} data-journey-checkout>Continuar com {plan.label}</a>;
   const viewKits = () => {
     trackJourneyAction("offer_view_kits", "offer");
     kitsRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
@@ -43,7 +46,7 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, vari
 
   return (
     <section className={styles.offer} data-journey-screen="offer">
-      <p className={styles.redline}>Você relatou este impacto na sua confiança: <strong data-journey-impact>{impactLabel}</strong>.</p>
+      <p className={styles.redline}>{split ? "Você relatou esta intensidade da dificuldade: " : "Você relatou este impacto na sua confiança: "}<strong data-journey-impact={split ? undefined : true} data-journey-intensity={split ? true : undefined}>{impactLabel}</strong>.</p>
       <div className={styles.offerHero}>
         <div>
           <h1 id="journey-title" tabIndex={-1} data-journey-title>Teste o COWBOY por 30 dias. Decida pela sua experiência.</h1>
@@ -82,7 +85,10 @@ export function QuizJourneyOffer({ impactLabel, selectedPlan, onSelectPlan, vari
           <small>{plan.freeShipping ? `No cartão, com juros. Total ${plan.installmentTotal}.` : `No cartão, com juros. Total do produto ${plan.installmentTotal}. Com frete: 12x de R$ 11,54 ou R$ 106,65 à vista.`}</small>
         </div>
         <p className={styles.trust} data-checkout-trust>{plan.freeShipping ? "Frete grátis" : "Frete R$ 26,75"} · Envio discreto · Garantia comercial de 30 dias</p>
-        <a href={checkoutHref(plan.quantity, "", readAttribution())} onClick={event => handleCheckoutClick(event, plan.quantity, variant)} className={`${styles.primary} bluue-finish-button`} data-journey-checkout>Continuar com {plan.label}</a>
+        {split ? <QuizJourneyDock>
+          <p className={styles.dockSummary} data-checkout-summary><strong>{plan.label} · {plan.cashPrice} à vista</strong><span>{plan.freeShipping ? "Frete grátis" : "Frete R$ 26,75 · total R$ 106,65 à vista"}</span></p>
+          {checkout}
+        </QuizJourneyDock> : checkout}
         <p className={styles.nextNote}>Checkout seguro Appmax. Sem assinatura ou cobrança recorrente.</p>
       </section>
 
